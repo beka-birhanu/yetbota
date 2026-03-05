@@ -1,0 +1,49 @@
+app:
+  name: Yet Bota - Moderation Service
+  version: 0.0.1
+cors:
+  hosts:
+    - localhost:3000
+    - localhost:3001
+    - localhost:3002
+debug: ${debug}
+grpc:
+  port: ${grpcPort}
+  keepalive:
+    time: ${grpcKeepaliveTime}
+    timeout: ${grpcKeepaliveTimeout}
+    min_time: ${grpcKeepaliveMinTime}
+    permit_without_stream: ${grpcKeepalivePermitWithoutStream}
+rest:
+  idle_timeout: ${restIdleTimeout}
+  port: ${restPort}
+  read_timeout: ${restReadTimeout}
+  write_timeout: ${restWriteTimeout}
+jwt:
+  algorithm: HS256
+  access_token:
+    expiration: ${jwtAccessTokenExpiration}
+    secret: ${jwtAccessTokenSecret}
+  refresh_token:
+    expiration: ${jwtRefreshTokenExpiration}
+    secret: ${jwtRefreshTokenSecret}
+database:
+  master:
+    addr: ${dbAddr}
+    db: ${dbName}
+    host: ${dbHost}
+    password: ${dbPassword}
+    port: ${dbPort}
+    user: ${dbUser}
+    dbms: ${dbms}
+redis:
+  address: ${redisAddress}
+  password: ${redisPassword}
+  poolTimeout: ${redisPoolTimeout}
+  idleTimeout: ${redisIdleTimeout}
+  readTimeout: ${redisReadTimeout}
+  writeTimeout: ${redisWriteTimeout}
+otp:
+  ttl: ${otpTTL}
+  lockRequestTime: ${otpLockRequestTime}
+  lockInvalidTime: ${otpLockInvalidTime}

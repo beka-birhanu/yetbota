@@ -10,14 +10,14 @@ import (
 )
 
 func AllowAccess(ctxSess *ctxRP.Context) error {
-	if _, ok := constants.AllowedAccessMap[ctxSess.UserSession.RoleID]; ok {
+	if _, ok := constants.AllowedAccessMap[ctxSess.UserSession.Role]; ok {
 		return nil
 	}
 	return nil
 }
 
-func AllowAdminOrCSAAccess(ctxSess *ctxRP.Context) error {
-	_, ok := constants.AllowedCSAAccessMap[ctxSess.UserSession.RoleID]
+func AllowAdminAccess(ctxSess *ctxRP.Context) error {
+	_, ok := constants.AllowedAdminAccessMap[ctxSess.UserSession.Role]
 	if !ok {
 		return &toddlerr.Error{
 			PublicStatusCode:  status.Forbidden,
@@ -28,11 +28,11 @@ func AllowAdminOrCSAAccess(ctxSess *ctxRP.Context) error {
 			},
 			ServiceMessage: fmt.Sprintf(
 				"trying access by non-allowed role: %s user id %s",
-				ctxSess.UserSession.RoleID, ctxSess.UserSession.UserID,
+				ctxSess.UserSession.Role, ctxSess.UserSession.UserID,
 			),
 			ServiceMetaData: map[string]string{
 				"user_id": ctxSess.UserSession.UserID,
-				"role_id": ctxSess.UserSession.RoleID,
+				"role_id": ctxSess.UserSession.Role,
 			},
 		}
 	}

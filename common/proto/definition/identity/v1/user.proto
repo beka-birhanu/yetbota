@@ -1,0 +1,277 @@
+syntax = "proto3";
+
+package identity.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/userpb/v1";
+
+// =====================
+// Core Models
+// =====================
+
+enum Badge {
+  BADGE_UNSPECIFIED = 0;
+}
+
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_USER = 1;
+  ROLE_ADMIN = 2;
+}
+
+message PublicUser {
+  string id = 1;
+  string username = 2;
+  bool mobile_verified = 3;
+  int32 rating = 4;
+  repeated Badge badges = 5;
+  int32 contributions = 6;
+  int32 followers = 7;
+  int32 following = 8;
+  string profile_url = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message PrivateUser {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string username = 4;
+  string mobile = 5;
+  int32 rating = 6;
+  repeated Badge badges = 7;
+  int32 contributions = 8;
+  int32 followers = 9;
+  int32 following = 10;
+  string status = 11;
+  Role role = 12;
+  string profile_url = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+
+// =====================
+// List Messages
+// =====================
+
+message ListRequest {
+  ListOptions options = 1;
+  PaginationRequest pagination = 2;
+  SortOption sort = 3;
+}
+
+message ListOptions {
+  string first_name = 1;
+  string surname = 2;
+  string username = 3;
+  string mobile = 4;
+  string status = 5;
+  Role role = 6;
+}
+
+message PaginationRequest {
+  int32 limit = 1;
+  int32 page = 2;
+}
+
+enum SortField {
+  SORT_FIELD_UNSPECIFIED = 0;
+  SORT_FIELD_RATING = 1;
+  SORT_FIELD_FOLLOWERS = 2;
+  SORT_FIELD_FOLLOWING = 3;
+  SORT_FIELD_CONTRIBUTIONS = 4;
+  SORT_FIELD_CREATED_AT = 5;
+}
+
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASC = 1;
+  SORT_DIRECTION_DESC = 2;
+}
+
+message SortOption {
+  SortField field = 1;
+  SortDirection direction = 2;
+}
+
+message PaginationInfo {
+  int64 total = 1;
+  int32 limit = 2;
+  int32 current_page = 3;
+}
+
+message UserList {
+  repeated PrivateUser users = 1;
+  PaginationInfo pagination = 2;
+}
+
+message ListResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  UserList data = 4;
+}
+
+// =====================
+// Read Messages
+// =====================
+
+message ReadRequest {
+  string id = 1;
+}
+
+message UserReadData {
+  PrivateUser user = 1;
+  string profile_url = 3;
+}
+
+message ReadResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  UserReadData data = 4;
+}
+
+// =====================
+// Public Read Messages
+// =====================
+
+message ReadPublicRequest {
+  string id = 1;
+}
+
+message ReadPublicResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  PublicUser data = 4;
+}
+
+// =====================
+// Update Messages
+// =====================
+
+message UpdateRequest {
+  string id = 1;
+  string status = 2;
+  Role role = 3;
+}
+
+message UpdateResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  PrivateUser data = 4;
+}
+
+// =====================
+// Update Self Messages (user cannot edit role)
+// =====================
+
+message UpdateSelfRequest {
+  string first_name = 1;
+  string last_name = 2;
+  string username = 3;
+}
+
+message UpdateSelfResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  PrivateUser data = 4;
+}
+
+// =====================
+// Register Messages
+// =====================
+
+message RegisterRequest {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string username = 4;
+  string mobile = 5;
+  string password = 6;
+  string random = 7; // The random used to generate the otp
+}
+
+message RegisterResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  PrivateUser data = 4;
+}
+
+// =====================
+// Delete Messages
+// =====================
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// =====================
+// Delete Self Messages
+// =====================
+
+message DeleteSelfRequest {}
+
+message DeleteSelfResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// =====================
+// Upload Profile Photo Messages
+// =====================
+
+message UploadProfileRequest {
+  bytes image = 1;
+}
+
+message UploadProfileResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  string data = 4; // The url of the uploaded image
+}
+
+// =====================
+// Check mobile Messages
+// =====================
+
+message CheckMobileRequest {
+  string mobile = 1;
+}
+
+message CheckMobileResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  bool data = 4;
+}
+
+// =====================
+// Service Definition
+// =====================
+
+service UserService {
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Read(ReadRequest) returns (ReadResponse);
+  rpc ReadPublic(ReadPublicRequest) returns (ReadPublicResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+  rpc UpdateSelf(UpdateSelfRequest) returns (UpdateSelfResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc DeleteSelf(DeleteSelfRequest) returns (DeleteSelfResponse);
+  rpc UploadProfile(UploadProfileRequest) returns (UploadProfileResponse);
+  rpc CheckMobile(CheckMobileRequest) returns (CheckMobileResponse);
+}

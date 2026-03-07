@@ -1,5 +1,5 @@
 app:
-  name: Yet Bota - Content Service
+  name: Yet Bota - Identity Service
   version: 0.0.1
 cors:
   hosts:
@@ -8,17 +8,17 @@ cors:
     - localhost:3002
 debug: ${debug}
 grpc:
-  port: ${grpcPort}
+  port: 6969
   keepalive:
-    time: ${grpcKeepaliveTime}
-    timeout: ${grpcKeepaliveTimeout}
-    min_time: ${grpcKeepaliveMinTime}
-    permit_without_stream: ${grpcKeepalivePermitWithoutStream}
+    time: 20
+    timeout: 20
+    min_time: 10
+    permit_without_stream: true
 rest:
-  idle_timeout: ${restIdleTimeout}
-  port: ${restPort}
-  read_timeout: ${restReadTimeout}
-  write_timeout: ${restWriteTimeout}
+  idle_timeout: 60
+  port: 6699
+  read_timeout: 15
+  write_timeout: 15
 jwt:
   algorithm: HS256
   access_token:
@@ -28,14 +28,11 @@ jwt:
     expiration: ${jwtRefreshTokenExpiration}
     secret: ${jwtRefreshTokenSecret}
 database:
-  master:
-    addr: ${dbAddr}
-    db: ${dbName}
-    host: ${dbHost}
-    password: ${dbPassword}
-    port: ${dbPort}
-    user: ${dbUser}
-    dbms: ${dbms}
+  db: ${postgresDB}
+  host: ${postgresHost}
+  password: ${postgresPassword}
+  port: ${postgresPort}
+  user: ${postgresUser}
 redis:
   address: ${redisAddress}
   password: ${redisPassword}
@@ -47,3 +44,7 @@ otp:
   ttl: ${otpTTL}
   lockRequestTime: ${otpLockRequestTime}
   lockInvalidTime: ${otpLockInvalidTime}
+aws:
+  s3:
+    region: us-east-1
+    bucket: profiles

@@ -1,8 +1,8 @@
 build:
-	@go build -o ./bin/identity-service ./main.go
+	@go build -o ./bin/identity-service ./cmd/main.go
 
 test:
 	go test -v ./...
 
 run: build
-	@./bin/identity-service
+	@set -a && [ -f .env ] && . ./.env; set +a; ./bin/identity-service

@@ -18,22 +18,22 @@ import (
 )
 
 type gcsBlob struct {
-	connection        *storageg.Client
+	client            *storageg.Client
 	defaultBucketName string
 }
 
-type Config struct {
+type GcsConfig struct {
 	DefaultBucketName string `validate:"required"`
 }
 
-func (c *Config) Validate() error {
+func (c *GcsConfig) Validate() error {
 	if err := validator.Validate.Struct(c); err != nil {
 		return toddlerr.FromValidationErrors(err)
 	}
 	return nil
 }
 
-func NewGCSBlob(c *Config) (blob.Bucket, error) {
+func NewGCSBlob(c *GcsConfig) (blob.Bucket, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func NewGCSBlob(c *Config) (blob.Bucket, error) {
 	}
 
 	return &gcsBlob{
-		connection:        client,
+		client:            client,
 		defaultBucketName: c.DefaultBucketName,
 	}, nil
 }
@@ -55,7 +55,7 @@ func (c *gcsBlob) UploadFile(ctx context.Context, in *blob.UploadRequest) (*blob
 		in.BucketName = c.defaultBucketName
 	}
 
-	bucket := c.connection.Bucket(in.BucketName)
+	bucket := c.client.Bucket(in.BucketName)
 	if _, err := bucket.Attrs(ctx); err != nil {
 		return nil, &toddlerr.Error{
 			PublicStatusCode:  status.ServerError,
@@ -122,7 +122,7 @@ func (c *gcsBlob) UploadFile(ctx context.Context, in *blob.UploadRequest) (*blob
 }
 
 func (c *gcsBlob) SignURL(ctx context.Context, in *blob.SignURLRequest) (*blob.SignURLResponse, error) {
-	url, err := c.connection.Bucket(in.BucketName).SignedURL(in.FileName, &storageg.SignedURLOptions{
+	url, err := c.client.Bucket(in.BucketName).SignedURL(in.FileName, &storageg.SignedURLOptions{
 		Scheme:  storageg.SigningSchemeV4,
 		Method:  "GET",
 		Expires: time.Now().Add(constants.URLExpiration * time.Minute),
@@ -146,7 +146,7 @@ func (c *gcsBlob) RemoveFile(ctx context.Context, in *blob.DeleteRequest) error 
 		in.BucketName = c.defaultBucketName
 	}
 
-	obj := c.connection.Bucket(in.BucketName).Object(in.FileName)
+	obj := c.client.Bucket(in.BucketName).Object(in.FileName)
 	if err := obj.Delete(ctx); err != nil {
 		return &toddlerr.Error{
 			PublicStatusCode:  status.ServerError,

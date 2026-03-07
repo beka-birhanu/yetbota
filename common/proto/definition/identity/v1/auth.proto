@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+package identity.v1;
+
+import "google/protobuf/duration.proto";
+
+option go_package = "/authpb/v1";
+
+// =====================
+// Login / Token
+// =====================
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+  string site = 3;
+}
+
+message LoginResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  TokenData data = 4;
+}
+
+message TokenData {
+  string access_token = 1;
+  google.protobuf.Duration access_token_ttl = 2;
+  string refresh_token = 3;
+  google.protobuf.Duration refresh_token_ttl = 4;
+}
+
+// =====================
+// Refresh
+// =====================
+
+message RefreshRequest {
+  string refresh_token = 1;
+  string username = 2;
+}
+
+message RefreshResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  TokenData data = 4;
+}
+
+// =====================
+// Logout
+// =====================
+
+message LogoutRequest {
+  string refresh_token = 1;
+  string username = 2;
+}
+
+message LogoutResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// =====================
+// OTP / Password
+// =====================
+
+message GenerateMobileOTPRequest {
+  string mobile = 1;
+  string random = 2; // random code sent by the client side
+}
+
+message GenerateMobileOTPResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  OTPData data = 4;
+}
+
+message OTPData {
+  int32 otp_req_count = 1;
+  int32 max_otp_req = 2;
+  int32 otp_err_count = 3;
+  int32 max_otp_err = 4;
+}
+
+message ValidateOTPRequest {
+  string otp = 1;
+  string mobile = 2;
+  string random = 3; // the random code sent by the client side on generate the otp.
+}
+
+message ValidateOTPResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  OTPData data = 4;
+}
+
+message ChangePasswordRequest {
+  string current_password = 1; // The user's current password
+  string new_password = 2; // The new password (min 8 characters)
+}
+
+message ChangePasswordResponse {
+  string code = 1; // Response code ("00" for success)
+  bool success = 2; // Success flag
+  string message = 3; // Response message
+}
+
+message ChangeMobileRequest {
+  string new_mobile = 1; // The new mobile number
+  string random = 2; // The random code from GenerateMobileOTP/ValidateOTP flow
+}
+
+message ChangeMobileResponse {
+  string code = 1; // Response code ("00" for success)
+  bool success = 2; // Success flag
+  string message = 3; // Response message
+}
+
+message NewPasswordRequest {
+  string password = 1;
+  string random = 2; // the random code sent by the client side on generate the otp.
+  string username = 3;
+}
+
+message NewPasswordResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// =====================
+// Authorization
+// =====================
+
+message AuthorizationRequest {
+  string resource = 1;
+  string action = 2;
+}
+
+message AuthorizationResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// =====================
+// Service Definition
+// =====================
+
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc GenerateMobileOTP(GenerateMobileOTPRequest) returns (GenerateMobileOTPResponse);
+  rpc ValidateOTP(ValidateOTPRequest) returns (ValidateOTPResponse);
+  rpc NewPassword(NewPasswordRequest) returns (NewPasswordResponse);
+  rpc Authorization(AuthorizationRequest) returns (AuthorizationResponse);
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc ChangeMobile(ChangeMobileRequest) returns (ChangeMobileResponse);
+}

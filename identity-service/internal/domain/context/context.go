@@ -3,12 +3,14 @@ package context
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	Map "github.com/orcaman/concurrent-map"
 	"github.com/spf13/cast"
 
-	Logger "github.com/beka-birhanu/yetbota/identity-service/drivers/logger"
+	toddlerr "github.com/beka-birhanu/toddler/error"
+	"github.com/beka-birhanu/yetbota/identity-service/drivers/logger"
 	"github.com/beka-birhanu/yetbota/identity-service/internal/domain/auth"
 )
 
@@ -21,7 +23,7 @@ const (
 
 type Context struct {
 	Map                       Map.ConcurrentMap
-	Logger                    Logger.Logger
+	Logger                    logger.Logger
 	RequestTime               time.Time
 	UserSession               auth.UserSession
 	XCorrelationID            string
@@ -34,10 +36,10 @@ type Context struct {
 	GrpcAuthToken             string
 }
 
-func New(logger Logger.Logger) *Context {
+func New() *Context {
 	return &Context{
 		RequestTime: time.Now(),
-		Logger:      logger,
+		Logger:      logger.NewLogger(),
 		Map:         Map.New(),
 		Header:      map[string]any{},
 		Request:     struct{}{},
@@ -114,6 +116,17 @@ func (s *Context) SetGrpcAuthToken(grpcAuthToken string) *Context {
 	return s
 }
 
+func (s *Context) SetLogger(logger logger.Logger) *Context {
+	s.Logger = logger
+	return s
+}
+
+func (s *Context) SetError(err toddlerr.Error) *Context {
+	s.ErrorMessage = err.Error()
+	s.SetResponseCode(fmt.Sprintf("public: %d, service: %d", err.PublicStatusCode, err.ServiceStatusCode))
+	return s
+}
+
 func (s *Context) Get(key string) (data any, err error) {
 	data, ok := s.Map.Get(key)
 	if !ok {
@@ -139,7 +152,7 @@ func (s *Context) Lv3(startProcessTime time.Time, message ...any) {
 	stop := time.Now()
 
 	msg := formatLogs(message...)
-	msg = append(msg, Logger.ToField("_process_time", stop.Sub(startProcessTime).Nanoseconds()/1000000))
+	msg = append(msg, logger.ToField("_process_time", stop.Sub(startProcessTime).Nanoseconds()/1000000))
 
 	s.Logger.Info(s.toContextLogger("Lv3"), "", msg...)
 }
@@ -149,25 +162,21 @@ func (s *Context) Lv4(message ...any) {
 	rt := stop.Sub(s.RequestTime).Nanoseconds() / 1000000
 
 	msg := formatLogs(message...)
-	msg = append(msg, Logger.ToField("_response_time", rt))
+	msg = append(msg, logger.ToField("_response_time", rt))
 
 	s.Logger.Info(s.toContextLogger("Lv4"), "", msg...)
 }
 
-func (s *Context) Error(message string, field ...any) {
-	s.Logger.Error(s.toContextLogger("Error"), message, formatLogs(field...)...)
-}
-
-func formatLogs(message ...any) (logRecord []Logger.Field) {
+func formatLogs(message ...any) (logRecord []logger.Field) {
 	for index, msg := range message {
-		logRecord = append(logRecord, Logger.ToField("_message_"+cast.ToString(index), msg))
+		logRecord = append(logRecord, logger.ToField("_message_"+cast.ToString(index), msg))
 	}
 
 	return
 }
 
 func (s *Context) toContextLogger(tag string) (ctx context.Context) {
-	ctxVal := Logger.Context{
+	ctxVal := logger.Context{
 		ServiceName:    s.AppName,
 		ServiceVersion: s.AppVersion,
 		ServicePort:    s.Port,
@@ -179,10 +188,10 @@ func (s *Context) toContextLogger(tag string) (ctx context.Context) {
 		Error:          s.ErrorMessage,
 	}
 	if tag == "Lv4" {
-		ctxVal.Request = Logger.ToField("req", s.Request)
-		// ctxVal.Response = Logger.ToField("resp", s.Response)
+		ctxVal.Request = logger.ToField("req", s.Request)
+		ctxVal.Response = logger.ToField("resp", s.Response)
 	}
 
-	ctx = Logger.InjectCtx(context.Background(), ctxVal)
+	ctx = logger.InjectCtx(context.Background(), ctxVal)
 	return
 }

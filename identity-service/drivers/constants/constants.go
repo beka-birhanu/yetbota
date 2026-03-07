@@ -1,5 +1,7 @@
 package constants
 
+import "github.com/beka-birhanu/yetbota/identity-service/drivers/dbmodels"
+
 const (
 	MAXOTP         int32 = 2
 	MaxNotMatchOtp int32 = 3
@@ -7,6 +9,7 @@ const (
 
 const (
 	DefaultPaginationLength = 15
+	DefaultPhoneRegion      = "ETH"
 )
 
 const (
@@ -22,3 +25,22 @@ const (
 )
 
 var SkipAuth = map[string]struct{}{}
+
+var AllowedAccessMap = map[string]struct{}{
+	dbmodels.RolesADMIN: {},
+	dbmodels.RolesUSER:  {},
+}
+
+var AllowedAdminAccessMap = map[string]struct{}{
+	dbmodels.RolesADMIN: {},
+}
+
+var SkipAuthGrpc = map[string]struct{}{
+	"/identity.v1.AuthService/Login":             {},
+	"/identity.v1.AuthService/GenerateMobileOTP": {},
+	"/identity.v1.AuthService/ValidateOTP":       {},
+	"/identity.v1.AuthService/NewPassword":       {},
+	"/identity.v1.UserService/Register":          {},
+	"/identity.v1.UserService/CheckMobile":       {},
+	"/identity.v1.UserService/ReadPublic":        {},
+}

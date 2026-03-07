@@ -21,10 +21,10 @@ type SessionDetails struct {
 
 type UserSession struct {
 	SessionID string
-	Email     string
+	Username  string
 	Exp       float64
 	UserID    string
-	RoleID    string
+	Role      string
 }
 
 type TokenType string
@@ -40,9 +40,9 @@ type TokenInfo struct {
 }
 
 type SessionInfo struct {
-	Email      string        `validate:"required"`
+	Username   string        `validate:"required"`
 	UserID     string        `validate:"required,uuid"`
-	RoleID     string        `validate:"required,uuid"`
+	Role       string        `validate:"required"`
 	RefreshTTL time.Duration `validate:"required"`
 	AccessTTL  time.Duration `validate:"required"`
 }

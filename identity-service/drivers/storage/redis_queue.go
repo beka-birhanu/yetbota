@@ -10,7 +10,6 @@ import (
 
 	toddlerError "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
-	"github.com/beka-birhanu/yetbota/identity-service/drivers/logger"
 	domain "github.com/beka-birhanu/yetbota/identity-service/internal/domain/storage"
 	"github.com/go-redis/redis/v8"
 )
@@ -64,10 +63,7 @@ func (n *queue[T]) Dequeue(ctx context.Context, topic string) ([]T, error) {
 			resp = append(resp, data)
 
 			// Delete message after processing
-			_, err := n.rdb.XDel(ctx, topicKey, message.ID).Result()
-			if err != nil {
-				logger.LogError(err)
-			}
+			_, _ = n.rdb.XDel(ctx, topicKey, message.ID).Result()
 		}
 	}
 

@@ -10,6 +10,16 @@ type Configs struct {
 	Redis    *Redis    `yaml:"redis" mapstructure:"redis" validate:"required"`
 	Otp      *Otp      `yaml:"otp" mapstructure:"otp" validate:"required"`
 	Jwt      *Jwt      `yaml:"jwt" mapstructure:"jwt" validate:"required"`
+	AWS      *AWS      `yaml:"aws" mapstructure:"aws" validate:"required"`
+}
+
+type AWS struct {
+	S3 *AWSS3 `yaml:"s3" mapstructure:"s3" validate:"required"`
+}
+
+type AWSS3 struct {
+	Region   string `yaml:"region" mapstructure:"region" validate:"required"`
+	Bucket   string `yaml:"bucket" mapstructure:"bucket" validate:"required"`
 }
 
 type App struct {
@@ -50,7 +60,7 @@ type Postgres struct {
 
 type Redis struct {
 	Address      string `yaml:"address" mapstructure:"address" validate:"required"`
-	Password     string `yaml:"password" mapstructure:"password" validate:"required"`
+	Password     string `yaml:"password" mapstructure:"password"`
 	PoolTimeout  string `yaml:"poolTimeout" mapstructure:"poolTimeout" validate:"required"`
 	IdleTimeout  string `yaml:"idleTimeout" mapstructure:"idleTimeout" validate:"required"`
 	ReadTimeout  string `yaml:"readTimeout" mapstructure:"readTimeout" validate:"required"`

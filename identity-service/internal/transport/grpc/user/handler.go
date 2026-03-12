@@ -25,6 +25,8 @@ type Handler struct {
 	deleteSelf    gkgrpc.Handler
 	uploadProfile gkgrpc.Handler
 	checkMobile   gkgrpc.Handler
+	follow        gkgrpc.Handler
+	unfollow      gkgrpc.Handler
 }
 
 type Config struct {
@@ -72,6 +74,12 @@ func NewHandler(c *Config) (*Handler, error) {
 		),
 		checkMobile: gkgrpc.NewServer(
 			c.E.UserCheckMobile, decodeCheckMobileReq, encodeCheckMobileRes,
+		),
+		follow: gkgrpc.NewServer(
+			c.E.UserFollow, decodeFollowReq, encodeFollowRes,
+		),
+		unfollow: gkgrpc.NewServer(
+			c.E.UserUnfollow, decodeUnfollowReq, encodeUnfollowRes,
 		),
 	}, nil
 }
@@ -195,4 +203,26 @@ func (h *Handler) CheckMobile(ctx context.Context, req *pb.CheckMobileRequest) (
 		return nil, err
 	}
 	return resp.(*pb.CheckMobileResponse), nil
+}
+
+func (h *Handler) Follow(ctx context.Context, req *pb.FollowRequest) (*pb.FollowResponse, error) {
+	if err := deadlineExceeded(ctx); err != nil {
+		return nil, err
+	}
+	_, resp, err := h.follow.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*pb.FollowResponse), nil
+}
+
+func (h *Handler) Unfollow(ctx context.Context, req *pb.UnfollowRequest) (*pb.UnfollowResponse, error) {
+	if err := deadlineExceeded(ctx); err != nil {
+		return nil, err
+	}
+	_, resp, err := h.unfollow.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*pb.UnfollowResponse), nil
 }

@@ -11,6 +11,7 @@ type Configs struct {
 	Otp      *Otp      `yaml:"otp" mapstructure:"otp" validate:"required"`
 	Jwt      *Jwt      `yaml:"jwt" mapstructure:"jwt" validate:"required"`
 	AWS      *AWS      `yaml:"aws" mapstructure:"aws" validate:"required"`
+	Neo4j    *Neo4j    `yaml:"neo4j" mapstructure:"neo4j" validate:"required"`
 }
 
 type AWS struct {
@@ -82,4 +83,10 @@ type Jwt struct {
 type JwtToken struct {
 	Expiration int    `yaml:"expiration" mapstructure:"expiration" validate:"required"`
 	Secret     string `yaml:"secret" mapstructure:"secret" validate:"required"`
+}
+
+type Neo4j struct {
+	URI      string `yaml:"uri" mapstructure:"uri" validate:"required"`
+	Username string `yaml:"username" mapstructure:"username" validate:"required"`
+	Password string `yaml:"password" mapstructure:"password" validate:"required"`
 }

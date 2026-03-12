@@ -30,7 +30,7 @@ type LoginResponse struct {
 // Refresh
 
 type RefreshRequest struct {
-	RefreshToken string `validate:"required"`
+	RefreshToken string `validate:"required" mask:"true"`
 	Username     string `validate:"required"`
 }
 
@@ -51,7 +51,7 @@ type RefreshResponse struct {
 // Logout
 
 type LogoutRequest struct {
-	RefreshToken string `validate:"required"`
+	RefreshToken string `validate:"required" mask:"true"`
 	Username     string `validate:"required"`
 }
 

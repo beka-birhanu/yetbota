@@ -24,6 +24,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.10.9
+	github.com/neo4j/neo4j-go-driver/v5 v5.28.4
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/nyaruka/phonenumbers v1.6.11
 	github.com/oklog/ulid v1.3.1

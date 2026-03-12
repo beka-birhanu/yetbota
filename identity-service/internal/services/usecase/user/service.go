@@ -7,6 +7,7 @@ import (
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/validator"
 	domainAuth "github.com/beka-birhanu/yetbota/identity-service/internal/domain/auth"
 	ctxRP "github.com/beka-birhanu/yetbota/identity-service/internal/domain/context"
+	domainFollow "github.com/beka-birhanu/yetbota/identity-service/internal/domain/follow"
 	domainPhoto "github.com/beka-birhanu/yetbota/identity-service/internal/domain/photo"
 	domainStorage "github.com/beka-birhanu/yetbota/identity-service/internal/domain/storage"
 	domainUser "github.com/beka-birhanu/yetbota/identity-service/internal/domain/user"
@@ -23,15 +24,18 @@ type Service interface {
 	DeleteSelf(ctx context.Context, ctxSess *ctxRP.Context, req *DeleteSelfRequest) (*DeleteSelfResponse, error)
 	UploadProfile(ctx context.Context, ctxSess *ctxRP.Context, req *UploadProfileRequest) (*UploadProfileResponse, error)
 	CheckMobile(ctx context.Context, ctxSess *ctxRP.Context, req *CheckMobileRequest) (*CheckMobileResponse, error)
+	Follow(ctx context.Context, ctxSess *ctxRP.Context, req *FollowRequest) (*FollowResponse, error)
+	Unfollow(ctx context.Context, ctxSess *ctxRP.Context, req *UnfollowRequest) (*UnfollowResponse, error)
 }
 
 type Config struct {
-	UserRepo   domainUser.Repository  `validate:"required"`
-	PhotoRepo  domainPhoto.Repository `validate:"required"`
-	OtpStore   domainAuth.OtpStore    `validate:"required"`
-	Hasher     domainAuth.Hasher      `validate:"required"`
-	Bucket     domainStorage.Bucket   `validate:"required"`
-	BucketName string                 `validate:"required"`
+	UserRepo   domainUser.Repository   `validate:"required"`
+	PhotoRepo  domainPhoto.Repository  `validate:"required"`
+	FollowRepo domainFollow.Repository `validate:"required"`
+	OtpStore   domainAuth.OtpStore     `validate:"required"`
+	Hasher     domainAuth.Hasher       `validate:"required"`
+	Bucket     domainStorage.Bucket    `validate:"required"`
+	BucketName string                  `validate:"required"`
 }
 
 func (c *Config) Validate() error {
@@ -44,6 +48,7 @@ func (c *Config) Validate() error {
 type svc struct {
 	userRepo   domainUser.Repository
 	photoRepo  domainPhoto.Repository
+	followRepo domainFollow.Repository
 	otpStore   domainAuth.OtpStore
 	hasher     domainAuth.Hasher
 	bucket     domainStorage.Bucket
@@ -57,6 +62,7 @@ func NewService(cfg *Config) (Service, error) {
 	return &svc{
 		userRepo:   cfg.UserRepo,
 		photoRepo:  cfg.PhotoRepo,
+		followRepo: cfg.FollowRepo,
 		otpStore:   cfg.OtpStore,
 		hasher:     cfg.Hasher,
 		bucket:     cfg.Bucket,

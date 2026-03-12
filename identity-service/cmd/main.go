@@ -13,12 +13,14 @@ import (
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/dbmigrations"
 	jwtDriver "github.com/beka-birhanu/yetbota/identity-service/drivers/jwt"
 	logger "github.com/beka-birhanu/yetbota/identity-service/drivers/logger"
+	neo4jDriver "github.com/beka-birhanu/yetbota/identity-service/drivers/neo4j"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/postgres"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/storage"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/utils"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/validator"
 	"github.com/beka-birhanu/yetbota/identity-service/internal/services/endpoint"
 	repoAuth "github.com/beka-birhanu/yetbota/identity-service/internal/services/repository/auth"
+	repoFollow "github.com/beka-birhanu/yetbota/identity-service/internal/services/repository/follow"
 	repoPhoto "github.com/beka-birhanu/yetbota/identity-service/internal/services/repository/photo"
 	repoUser "github.com/beka-birhanu/yetbota/identity-service/internal/services/repository/user"
 	usecaseAuth "github.com/beka-birhanu/yetbota/identity-service/internal/services/usecase/auth"
@@ -152,6 +154,25 @@ func main() {
 		panic(fmt.Errorf("error creating photo repo: %v", err))
 	}
 
+	// Neo4j
+	neo4jDrv, err := neo4jDriver.NewDriver(&neo4jDriver.Config{
+		URI:      cfg.Neo4j.URI,
+		Username: cfg.Neo4j.Username,
+		Password: cfg.Neo4j.Password,
+	})
+	if err != nil {
+		panic(fmt.Errorf("error creating neo4j driver: %v", err))
+	}
+	defer func() {
+		_ = neo4jDrv.Close(ctx)
+	}()
+
+	// Follow repo
+	followRepo, err := repoFollow.NewRepo(&repoFollow.Config{Driver: neo4jDrv})
+	if err != nil {
+		panic(fmt.Errorf("error creating follow repo: %v", err))
+	}
+
 	// Auth usecase
 	authService, err := usecaseAuth.NewService(&usecaseAuth.Config{
 		UserRepo:       userRepo,
@@ -172,6 +193,7 @@ func main() {
 	userService, err := usecaseUser.NewService(&usecaseUser.Config{
 		UserRepo:   userRepo,
 		PhotoRepo:  photoRepo,
+		FollowRepo: followRepo,
 		OtpStore:   otpStore,
 		Hasher:     hasher,
 		Bucket:     bucket,

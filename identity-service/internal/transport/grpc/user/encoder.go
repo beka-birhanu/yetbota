@@ -267,3 +267,53 @@ func encodeCheckMobileRes(_ context.Context, resp any) (any, error) {
 		Message: "something went wrong",
 	}, nil
 }
+
+func encodeFollowRes(_ context.Context, resp any) (any, error) {
+	if errResp, ok := resp.(*toddlerr.Error); ok {
+		return &pb.FollowResponse{
+			Code:    fmt.Sprintf("%d", errResp.PublicStatusCode),
+			Success: false,
+			Message: errResp.PublicMessage,
+		}, nil
+	}
+
+	_, ok := resp.(*userSvc.FollowResponse)
+	if ok {
+		return &pb.FollowResponse{
+			Code:    "00",
+			Success: true,
+			Message: "Follow Successful",
+		}, nil
+	}
+
+	return &pb.FollowResponse{
+		Code:    fmt.Sprintf("%d", status.ServerError),
+		Success: false,
+		Message: "something went wrong",
+	}, nil
+}
+
+func encodeUnfollowRes(_ context.Context, resp any) (any, error) {
+	if errResp, ok := resp.(*toddlerr.Error); ok {
+		return &pb.UnfollowResponse{
+			Code:    fmt.Sprintf("%d", errResp.PublicStatusCode),
+			Success: false,
+			Message: errResp.PublicMessage,
+		}, nil
+	}
+
+	_, ok := resp.(*userSvc.UnfollowResponse)
+	if ok {
+		return &pb.UnfollowResponse{
+			Code:    "00",
+			Success: true,
+			Message: "Unfollow Successful",
+		}, nil
+	}
+
+	return &pb.UnfollowResponse{
+		Code:    fmt.Sprintf("%d", status.ServerError),
+		Success: false,
+		Message: "something went wrong",
+	}, nil
+}

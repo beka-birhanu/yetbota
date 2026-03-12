@@ -375,6 +375,126 @@ func (s *svc) UploadProfile(ctx context.Context, ctxSess *ctxRP.Context, req *Up
 	}, nil
 }
 
+func (s *svc) Follow(ctx context.Context, ctxSess *ctxRP.Context, req *FollowRequest) (*FollowResponse, error) {
+	if err := req.Validate(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err := utils.AllowAccess(ctxSess); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	followerID := ctxSess.UserSession.UserID
+	if followerID == req.FolloweeID {
+		err := &toddlerr.Error{
+			PublicStatusCode:  status.BadRequest,
+			ServiceStatusCode: status.BadRequest,
+			PublicMessage:     "Cannot follow yourself",
+			ServiceMessage:    "user attempted to follow themselves",
+		}
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err := s.followRepo.Follow(ctx, followerID, req.FolloweeID); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	var follower, followee *dbmodels.User
+	eg, egCtx := errgroup.WithContext(ctx)
+	eg.Go(func() error {
+		var err error
+		follower, err = s.userRepo.Read(egCtx, followerID, nil)
+		return err
+	})
+	eg.Go(func() error {
+		var err error
+		followee, err = s.userRepo.Read(egCtx, req.FolloweeID, nil)
+		return err
+	})
+	if err := eg.Wait(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	follower.Following++
+	followee.Followers++
+
+	eg2, eg2Ctx := errgroup.WithContext(ctx)
+	eg2.Go(func() error {
+		return s.userRepo.Update(eg2Ctx, nil, follower, boil.Whitelist(dbmodels.UserColumns.Following))
+	})
+	eg2.Go(func() error {
+		return s.userRepo.Update(eg2Ctx, nil, followee, boil.Whitelist(dbmodels.UserColumns.Followers))
+	})
+	if err := eg2.Wait(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	return &FollowResponse{}, nil
+}
+
+func (s *svc) Unfollow(ctx context.Context, ctxSess *ctxRP.Context, req *UnfollowRequest) (*UnfollowResponse, error) {
+	if err := req.Validate(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err := utils.AllowAccess(ctxSess); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	followerID := ctxSess.UserSession.UserID
+
+	if err := s.followRepo.Unfollow(ctx, followerID, req.FolloweeID); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	var follower, followee *dbmodels.User
+	eg, egCtx := errgroup.WithContext(ctx)
+	eg.Go(func() error {
+		var err error
+		follower, err = s.userRepo.Read(egCtx, followerID, nil)
+		return err
+	})
+	eg.Go(func() error {
+		var err error
+		followee, err = s.userRepo.Read(egCtx, req.FolloweeID, nil)
+		return err
+	})
+	if err := eg.Wait(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if follower.Following > 0 {
+		follower.Following--
+	}
+	if followee.Followers > 0 {
+		followee.Followers--
+	}
+
+	eg2, eg2Ctx := errgroup.WithContext(ctx)
+	eg2.Go(func() error {
+		return s.userRepo.Update(eg2Ctx, nil, follower, boil.Whitelist(dbmodels.UserColumns.Following))
+	})
+	eg2.Go(func() error {
+		return s.userRepo.Update(eg2Ctx, nil, followee, boil.Whitelist(dbmodels.UserColumns.Followers))
+	})
+	if err := eg2.Wait(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	return &UnfollowResponse{}, nil
+}
+
 func (s *svc) CheckMobile(ctx context.Context, ctxSess *ctxRP.Context, req *CheckMobileRequest) (*CheckMobileResponse, error) {
 	if err := req.Validate(); err != nil {
 		ctxSess.SetErrorMessage(err.Error())

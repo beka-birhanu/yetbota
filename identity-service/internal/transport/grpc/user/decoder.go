@@ -116,3 +116,17 @@ func decodeCheckMobileReq(_ context.Context, req any) (any, error) {
 		Mobile: in.GetMobile(),
 	}, nil
 }
+
+func decodeFollowReq(_ context.Context, req any) (any, error) {
+	in := req.(*pb.FollowRequest)
+	return &userSvc.FollowRequest{
+		FolloweeID: in.GetFolloweeId(),
+	}, nil
+}
+
+func decodeUnfollowReq(_ context.Context, req any) (any, error) {
+	in := req.(*pb.UnfollowRequest)
+	return &userSvc.UnfollowRequest{
+		FolloweeID: in.GetFolloweeId(),
+	}, nil
+}

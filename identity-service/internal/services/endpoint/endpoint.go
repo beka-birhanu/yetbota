@@ -32,6 +32,8 @@ type Endpoints struct {
 	UserDeleteSelf    endpoint.Endpoint
 	UserUploadProfile endpoint.Endpoint
 	UserCheckMobile   endpoint.Endpoint
+	UserFollow        endpoint.Endpoint
+	UserUnfollow      endpoint.Endpoint
 }
 
 type Config struct {
@@ -72,5 +74,7 @@ func NewEndpoints(c *Config) (*Endpoints, error) {
 		UserDeleteSelf:    makeUserDeleteSelfEndpoint(c.UserService),
 		UserUploadProfile: makeUserUploadProfileEndpoint(c.UserService),
 		UserCheckMobile:   makeUserCheckMobileEndpoint(c.UserService),
+		UserFollow:        makeUserFollowEndpoint(c.UserService),
+		UserUnfollow:      makeUserUnfollowEndpoint(c.UserService),
 	}, nil
 }

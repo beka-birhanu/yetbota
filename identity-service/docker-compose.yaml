@@ -34,8 +34,21 @@ services:
       POSTGRES_PASSWORD: ${postgresPassword}
       POSTGRES_DB: ${postgresDB}
 
+  neo4j:
+    image: neo4j:5
+    container_name: yetbota-neo4j
+    ports:
+      - "${neo4jHttpPort}:7474"
+      - "${neo4jBoltPort}:7687"
+    environment:
+      NEO4J_AUTH: ${neo4jUsername}/${neo4jPassword}
+    volumes:
+      - neo4j_data:/data
+
 volumes:
   db_data:
     driver: local
   redis_data:
+    driver: local
+  neo4j_data:
     driver: local

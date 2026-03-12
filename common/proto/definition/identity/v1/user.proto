@@ -260,6 +260,34 @@ message CheckMobileResponse {
 }
 
 // =====================
+// Follow Messages
+// =====================
+
+message FollowRequest {
+  string followee_id = 1;
+}
+
+message FollowResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// =====================
+// Unfollow Messages
+// =====================
+
+message UnfollowRequest {
+  string followee_id = 1;
+}
+
+message UnfollowResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// =====================
 // Service Definition
 // =====================
 
@@ -274,4 +302,6 @@ service UserService {
   rpc DeleteSelf(DeleteSelfRequest) returns (DeleteSelfResponse);
   rpc UploadProfile(UploadProfileRequest) returns (UploadProfileResponse);
   rpc CheckMobile(CheckMobileRequest) returns (CheckMobileResponse);
+  rpc Follow(FollowRequest) returns (FollowResponse);
+  rpc Unfollow(UnfollowRequest) returns (UnfollowResponse);
 }

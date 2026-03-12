@@ -169,7 +169,7 @@ type DeleteSelfResponse struct{}
 // UploadProfile
 
 type UploadProfileRequest struct {
-	Image []byte `validate:"required"`
+	Image []byte `validate:"required" mask:"true"`
 }
 
 func (r *UploadProfileRequest) Validate() error {
@@ -204,6 +204,36 @@ func (r *CheckMobileRequest) Validate() error {
 type CheckMobileResponse struct {
 	Exists bool
 }
+
+// Follow
+
+type FollowRequest struct {
+	FolloweeID string `validate:"required"`
+}
+
+func (r *FollowRequest) Validate() error {
+	if err := validator.Validate.Struct(r); err != nil {
+		return toddlerr.FromValidationErrors(err)
+	}
+	return nil
+}
+
+type FollowResponse struct{}
+
+// Unfollow
+
+type UnfollowRequest struct {
+	FolloweeID string `validate:"required"`
+}
+
+func (r *UnfollowRequest) Validate() error {
+	if err := validator.Validate.Struct(r); err != nil {
+		return toddlerr.FromValidationErrors(err)
+	}
+	return nil
+}
+
+type UnfollowResponse struct{}
 
 // AddDevice
 

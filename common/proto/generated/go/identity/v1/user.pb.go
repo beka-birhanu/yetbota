@@ -114,6 +114,58 @@ func (Role) EnumDescriptor() ([]byte, []int) {
 	return file_identity_v1_user_proto_rawDescGZIP(), []int{1}
 }
 
+type PhotoResolution int32
+
+const (
+	PhotoResolution_PHOTO_RESOLUTION_UNSPECIFIED PhotoResolution = 0
+	PhotoResolution_PHOTO_RESOLUTION_ORIGINAL    PhotoResolution = 1
+	PhotoResolution_PHOTO_RESOLUTION_MOBILE      PhotoResolution = 2
+	PhotoResolution_PHOTO_RESOLUTION_WEB         PhotoResolution = 3
+)
+
+// Enum value maps for PhotoResolution.
+var (
+	PhotoResolution_name = map[int32]string{
+		0: "PHOTO_RESOLUTION_UNSPECIFIED",
+		1: "PHOTO_RESOLUTION_ORIGINAL",
+		2: "PHOTO_RESOLUTION_MOBILE",
+		3: "PHOTO_RESOLUTION_WEB",
+	}
+	PhotoResolution_value = map[string]int32{
+		"PHOTO_RESOLUTION_UNSPECIFIED": 0,
+		"PHOTO_RESOLUTION_ORIGINAL":    1,
+		"PHOTO_RESOLUTION_MOBILE":      2,
+		"PHOTO_RESOLUTION_WEB":         3,
+	}
+)
+
+func (x PhotoResolution) Enum() *PhotoResolution {
+	p := new(PhotoResolution)
+	*p = x
+	return p
+}
+
+func (x PhotoResolution) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PhotoResolution) Descriptor() protoreflect.EnumDescriptor {
+	return file_identity_v1_user_proto_enumTypes[2].Descriptor()
+}
+
+func (PhotoResolution) Type() protoreflect.EnumType {
+	return &file_identity_v1_user_proto_enumTypes[2]
+}
+
+func (x PhotoResolution) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PhotoResolution.Descriptor instead.
+func (PhotoResolution) EnumDescriptor() ([]byte, []int) {
+	return file_identity_v1_user_proto_rawDescGZIP(), []int{2}
+}
+
 type SortField int32
 
 const (
@@ -156,11 +208,11 @@ func (x SortField) String() string {
 }
 
 func (SortField) Descriptor() protoreflect.EnumDescriptor {
-	return file_identity_v1_user_proto_enumTypes[2].Descriptor()
+	return file_identity_v1_user_proto_enumTypes[3].Descriptor()
 }
 
 func (SortField) Type() protoreflect.EnumType {
-	return &file_identity_v1_user_proto_enumTypes[2]
+	return &file_identity_v1_user_proto_enumTypes[3]
 }
 
 func (x SortField) Number() protoreflect.EnumNumber {
@@ -169,7 +221,7 @@ func (x SortField) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SortField.Descriptor instead.
 func (SortField) EnumDescriptor() ([]byte, []int) {
-	return file_identity_v1_user_proto_rawDescGZIP(), []int{2}
+	return file_identity_v1_user_proto_rawDescGZIP(), []int{3}
 }
 
 type SortDirection int32
@@ -205,11 +257,11 @@ func (x SortDirection) String() string {
 }
 
 func (SortDirection) Descriptor() protoreflect.EnumDescriptor {
-	return file_identity_v1_user_proto_enumTypes[3].Descriptor()
+	return file_identity_v1_user_proto_enumTypes[4].Descriptor()
 }
 
 func (SortDirection) Type() protoreflect.EnumType {
-	return &file_identity_v1_user_proto_enumTypes[3]
+	return &file_identity_v1_user_proto_enumTypes[4]
 }
 
 func (x SortDirection) Number() protoreflect.EnumNumber {
@@ -218,7 +270,7 @@ func (x SortDirection) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SortDirection.Descriptor instead.
 func (SortDirection) EnumDescriptor() ([]byte, []int) {
-	return file_identity_v1_user_proto_rawDescGZIP(), []int{3}
+	return file_identity_v1_user_proto_rawDescGZIP(), []int{4}
 }
 
 type PublicUser struct {
@@ -498,6 +550,7 @@ type ListRequest struct {
 	Options       *ListOptions           `protobuf:"bytes,1,opt,name=options,proto3" json:"options,omitempty"`
 	Pagination    *PaginationRequest     `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	Sort          *SortOption            `protobuf:"bytes,3,opt,name=sort,proto3" json:"sort,omitempty"`
+	Resolution    PhotoResolution        `protobuf:"varint,4,opt,name=resolution,proto3,enum=identity.v1.PhotoResolution" json:"resolution,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -551,6 +604,13 @@ func (x *ListRequest) GetSort() *SortOption {
 		return x.Sort
 	}
 	return nil
+}
+
+func (x *ListRequest) GetResolution() PhotoResolution {
+	if x != nil {
+		return x.Resolution
+	}
+	return PhotoResolution_PHOTO_RESOLUTION_UNSPECIFIED
 }
 
 type ListOptions struct {
@@ -924,6 +984,7 @@ func (x *ListResponse) GetData() *UserList {
 type ReadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Resolution    PhotoResolution        `protobuf:"varint,2,opt,name=resolution,proto3,enum=identity.v1.PhotoResolution" json:"resolution,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -963,6 +1024,13 @@ func (x *ReadRequest) GetId() string {
 		return x.Id
 	}
 	return ""
+}
+
+func (x *ReadRequest) GetResolution() PhotoResolution {
+	if x != nil {
+		return x.Resolution
+	}
+	return PhotoResolution_PHOTO_RESOLUTION_UNSPECIFIED
 }
 
 type UserReadData struct {
@@ -1088,6 +1156,7 @@ func (x *ReadResponse) GetData() *UserReadData {
 type ReadPublicRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Resolution    PhotoResolution        `protobuf:"varint,2,opt,name=resolution,proto3,enum=identity.v1.PhotoResolution" json:"resolution,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1127,6 +1196,13 @@ func (x *ReadPublicRequest) GetId() string {
 		return x.Id
 	}
 	return ""
+}
+
+func (x *ReadPublicRequest) GetResolution() PhotoResolution {
+	if x != nil {
+		return x.Resolution
+	}
+	return PhotoResolution_PHOTO_RESOLUTION_UNSPECIFIED
 }
 
 type ReadPublicResponse struct {
@@ -2285,13 +2361,16 @@ const file_identity_v1_user_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xae\x01\n" +
+	"updated_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xec\x01\n" +
 	"\vListRequest\x122\n" +
 	"\aoptions\x18\x01 \x01(\v2\x18.identity.v1.ListOptionsR\aoptions\x12>\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1e.identity.v1.PaginationRequestR\n" +
 	"pagination\x12+\n" +
-	"\x04sort\x18\x03 \x01(\v2\x17.identity.v1.SortOptionR\x04sort\"\xb9\x01\n" +
+	"\x04sort\x18\x03 \x01(\v2\x17.identity.v1.SortOptionR\x04sort\x12<\n" +
+	"\n" +
+	"resolution\x18\x04 \x01(\x0e2\x1c.identity.v1.PhotoResolutionR\n" +
+	"resolution\"\xb9\x01\n" +
 	"\vListOptions\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x18\n" +
@@ -2320,9 +2399,12 @@ const file_identity_v1_user_proto_rawDesc = "" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12)\n" +
-	"\x04data\x18\x04 \x01(\v2\x15.identity.v1.UserListR\x04data\"\x1d\n" +
+	"\x04data\x18\x04 \x01(\v2\x15.identity.v1.UserListR\x04data\"[\n" +
 	"\vReadRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"]\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
+	"\n" +
+	"resolution\x18\x02 \x01(\x0e2\x1c.identity.v1.PhotoResolutionR\n" +
+	"resolution\"]\n" +
 	"\fUserReadData\x12,\n" +
 	"\x04user\x18\x01 \x01(\v2\x18.identity.v1.PrivateUserR\x04user\x12\x1f\n" +
 	"\vprofile_url\x18\x03 \x01(\tR\n" +
@@ -2331,9 +2413,12 @@ const file_identity_v1_user_proto_rawDesc = "" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12-\n" +
-	"\x04data\x18\x04 \x01(\v2\x19.identity.v1.UserReadDataR\x04data\"#\n" +
+	"\x04data\x18\x04 \x01(\v2\x19.identity.v1.UserReadDataR\x04data\"a\n" +
 	"\x11ReadPublicRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x89\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
+	"\n" +
+	"resolution\x18\x02 \x01(\x0e2\x1c.identity.v1.PhotoResolutionR\n" +
+	"resolution\"\x89\x01\n" +
 	"\x12ReadPublicResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
@@ -2417,7 +2502,12 @@ const file_identity_v1_user_proto_rawDesc = "" +
 	"\x10ROLE_UNSPECIFIED\x10\x00\x12\r\n" +
 	"\tROLE_USER\x10\x01\x12\x0e\n" +
 	"\n" +
-	"ROLE_ADMIN\x10\x02*\xab\x01\n" +
+	"ROLE_ADMIN\x10\x02*\x89\x01\n" +
+	"\x0fPhotoResolution\x12 \n" +
+	"\x1cPHOTO_RESOLUTION_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19PHOTO_RESOLUTION_ORIGINAL\x10\x01\x12\x1b\n" +
+	"\x17PHOTO_RESOLUTION_MOBILE\x10\x02\x12\x18\n" +
+	"\x14PHOTO_RESOLUTION_WEB\x10\x03*\xab\x01\n" +
 	"\tSortField\x12\x1a\n" +
 	"\x16SORT_FIELD_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11SORT_FIELD_RATING\x10\x01\x12\x18\n" +
@@ -2459,99 +2549,103 @@ func file_identity_v1_user_proto_rawDescGZIP() []byte {
 	return file_identity_v1_user_proto_rawDescData
 }
 
-var file_identity_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_identity_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
 var file_identity_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_identity_v1_user_proto_goTypes = []any{
 	(Badge)(0),                    // 0: identity.v1.Badge
 	(Role)(0),                     // 1: identity.v1.Role
-	(SortField)(0),                // 2: identity.v1.SortField
-	(SortDirection)(0),            // 3: identity.v1.SortDirection
-	(*PublicUser)(nil),            // 4: identity.v1.PublicUser
-	(*PrivateUser)(nil),           // 5: identity.v1.PrivateUser
-	(*ListRequest)(nil),           // 6: identity.v1.ListRequest
-	(*ListOptions)(nil),           // 7: identity.v1.ListOptions
-	(*PaginationRequest)(nil),     // 8: identity.v1.PaginationRequest
-	(*SortOption)(nil),            // 9: identity.v1.SortOption
-	(*PaginationInfo)(nil),        // 10: identity.v1.PaginationInfo
-	(*UserList)(nil),              // 11: identity.v1.UserList
-	(*ListResponse)(nil),          // 12: identity.v1.ListResponse
-	(*ReadRequest)(nil),           // 13: identity.v1.ReadRequest
-	(*UserReadData)(nil),          // 14: identity.v1.UserReadData
-	(*ReadResponse)(nil),          // 15: identity.v1.ReadResponse
-	(*ReadPublicRequest)(nil),     // 16: identity.v1.ReadPublicRequest
-	(*ReadPublicResponse)(nil),    // 17: identity.v1.ReadPublicResponse
-	(*UpdateRequest)(nil),         // 18: identity.v1.UpdateRequest
-	(*UpdateResponse)(nil),        // 19: identity.v1.UpdateResponse
-	(*UpdateSelfRequest)(nil),     // 20: identity.v1.UpdateSelfRequest
-	(*UpdateSelfResponse)(nil),    // 21: identity.v1.UpdateSelfResponse
-	(*RegisterRequest)(nil),       // 22: identity.v1.RegisterRequest
-	(*RegisterResponse)(nil),      // 23: identity.v1.RegisterResponse
-	(*DeleteRequest)(nil),         // 24: identity.v1.DeleteRequest
-	(*DeleteResponse)(nil),        // 25: identity.v1.DeleteResponse
-	(*DeleteSelfRequest)(nil),     // 26: identity.v1.DeleteSelfRequest
-	(*DeleteSelfResponse)(nil),    // 27: identity.v1.DeleteSelfResponse
-	(*UploadProfileRequest)(nil),  // 28: identity.v1.UploadProfileRequest
-	(*UploadProfileResponse)(nil), // 29: identity.v1.UploadProfileResponse
-	(*CheckMobileRequest)(nil),    // 30: identity.v1.CheckMobileRequest
-	(*CheckMobileResponse)(nil),   // 31: identity.v1.CheckMobileResponse
-	(*FollowRequest)(nil),         // 32: identity.v1.FollowRequest
-	(*FollowResponse)(nil),        // 33: identity.v1.FollowResponse
-	(*UnfollowRequest)(nil),       // 34: identity.v1.UnfollowRequest
-	(*UnfollowResponse)(nil),      // 35: identity.v1.UnfollowResponse
-	(*timestamppb.Timestamp)(nil), // 36: google.protobuf.Timestamp
+	(PhotoResolution)(0),          // 2: identity.v1.PhotoResolution
+	(SortField)(0),                // 3: identity.v1.SortField
+	(SortDirection)(0),            // 4: identity.v1.SortDirection
+	(*PublicUser)(nil),            // 5: identity.v1.PublicUser
+	(*PrivateUser)(nil),           // 6: identity.v1.PrivateUser
+	(*ListRequest)(nil),           // 7: identity.v1.ListRequest
+	(*ListOptions)(nil),           // 8: identity.v1.ListOptions
+	(*PaginationRequest)(nil),     // 9: identity.v1.PaginationRequest
+	(*SortOption)(nil),            // 10: identity.v1.SortOption
+	(*PaginationInfo)(nil),        // 11: identity.v1.PaginationInfo
+	(*UserList)(nil),              // 12: identity.v1.UserList
+	(*ListResponse)(nil),          // 13: identity.v1.ListResponse
+	(*ReadRequest)(nil),           // 14: identity.v1.ReadRequest
+	(*UserReadData)(nil),          // 15: identity.v1.UserReadData
+	(*ReadResponse)(nil),          // 16: identity.v1.ReadResponse
+	(*ReadPublicRequest)(nil),     // 17: identity.v1.ReadPublicRequest
+	(*ReadPublicResponse)(nil),    // 18: identity.v1.ReadPublicResponse
+	(*UpdateRequest)(nil),         // 19: identity.v1.UpdateRequest
+	(*UpdateResponse)(nil),        // 20: identity.v1.UpdateResponse
+	(*UpdateSelfRequest)(nil),     // 21: identity.v1.UpdateSelfRequest
+	(*UpdateSelfResponse)(nil),    // 22: identity.v1.UpdateSelfResponse
+	(*RegisterRequest)(nil),       // 23: identity.v1.RegisterRequest
+	(*RegisterResponse)(nil),      // 24: identity.v1.RegisterResponse
+	(*DeleteRequest)(nil),         // 25: identity.v1.DeleteRequest
+	(*DeleteResponse)(nil),        // 26: identity.v1.DeleteResponse
+	(*DeleteSelfRequest)(nil),     // 27: identity.v1.DeleteSelfRequest
+	(*DeleteSelfResponse)(nil),    // 28: identity.v1.DeleteSelfResponse
+	(*UploadProfileRequest)(nil),  // 29: identity.v1.UploadProfileRequest
+	(*UploadProfileResponse)(nil), // 30: identity.v1.UploadProfileResponse
+	(*CheckMobileRequest)(nil),    // 31: identity.v1.CheckMobileRequest
+	(*CheckMobileResponse)(nil),   // 32: identity.v1.CheckMobileResponse
+	(*FollowRequest)(nil),         // 33: identity.v1.FollowRequest
+	(*FollowResponse)(nil),        // 34: identity.v1.FollowResponse
+	(*UnfollowRequest)(nil),       // 35: identity.v1.UnfollowRequest
+	(*UnfollowResponse)(nil),      // 36: identity.v1.UnfollowResponse
+	(*timestamppb.Timestamp)(nil), // 37: google.protobuf.Timestamp
 }
 var file_identity_v1_user_proto_depIdxs = []int32{
 	0,  // 0: identity.v1.PublicUser.badges:type_name -> identity.v1.Badge
-	36, // 1: identity.v1.PublicUser.created_at:type_name -> google.protobuf.Timestamp
+	37, // 1: identity.v1.PublicUser.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: identity.v1.PrivateUser.badges:type_name -> identity.v1.Badge
 	1,  // 3: identity.v1.PrivateUser.role:type_name -> identity.v1.Role
-	36, // 4: identity.v1.PrivateUser.created_at:type_name -> google.protobuf.Timestamp
-	36, // 5: identity.v1.PrivateUser.updated_at:type_name -> google.protobuf.Timestamp
-	7,  // 6: identity.v1.ListRequest.options:type_name -> identity.v1.ListOptions
-	8,  // 7: identity.v1.ListRequest.pagination:type_name -> identity.v1.PaginationRequest
-	9,  // 8: identity.v1.ListRequest.sort:type_name -> identity.v1.SortOption
-	1,  // 9: identity.v1.ListOptions.role:type_name -> identity.v1.Role
-	2,  // 10: identity.v1.SortOption.field:type_name -> identity.v1.SortField
-	3,  // 11: identity.v1.SortOption.direction:type_name -> identity.v1.SortDirection
-	5,  // 12: identity.v1.UserList.users:type_name -> identity.v1.PrivateUser
-	10, // 13: identity.v1.UserList.pagination:type_name -> identity.v1.PaginationInfo
-	11, // 14: identity.v1.ListResponse.data:type_name -> identity.v1.UserList
-	5,  // 15: identity.v1.UserReadData.user:type_name -> identity.v1.PrivateUser
-	14, // 16: identity.v1.ReadResponse.data:type_name -> identity.v1.UserReadData
-	4,  // 17: identity.v1.ReadPublicResponse.data:type_name -> identity.v1.PublicUser
-	1,  // 18: identity.v1.UpdateRequest.role:type_name -> identity.v1.Role
-	5,  // 19: identity.v1.UpdateResponse.data:type_name -> identity.v1.PrivateUser
-	5,  // 20: identity.v1.UpdateSelfResponse.data:type_name -> identity.v1.PrivateUser
-	5,  // 21: identity.v1.RegisterResponse.data:type_name -> identity.v1.PrivateUser
-	6,  // 22: identity.v1.UserService.List:input_type -> identity.v1.ListRequest
-	13, // 23: identity.v1.UserService.Read:input_type -> identity.v1.ReadRequest
-	16, // 24: identity.v1.UserService.ReadPublic:input_type -> identity.v1.ReadPublicRequest
-	18, // 25: identity.v1.UserService.Update:input_type -> identity.v1.UpdateRequest
-	20, // 26: identity.v1.UserService.UpdateSelf:input_type -> identity.v1.UpdateSelfRequest
-	22, // 27: identity.v1.UserService.Register:input_type -> identity.v1.RegisterRequest
-	24, // 28: identity.v1.UserService.Delete:input_type -> identity.v1.DeleteRequest
-	26, // 29: identity.v1.UserService.DeleteSelf:input_type -> identity.v1.DeleteSelfRequest
-	28, // 30: identity.v1.UserService.UploadProfile:input_type -> identity.v1.UploadProfileRequest
-	30, // 31: identity.v1.UserService.CheckMobile:input_type -> identity.v1.CheckMobileRequest
-	32, // 32: identity.v1.UserService.Follow:input_type -> identity.v1.FollowRequest
-	34, // 33: identity.v1.UserService.Unfollow:input_type -> identity.v1.UnfollowRequest
-	12, // 34: identity.v1.UserService.List:output_type -> identity.v1.ListResponse
-	15, // 35: identity.v1.UserService.Read:output_type -> identity.v1.ReadResponse
-	17, // 36: identity.v1.UserService.ReadPublic:output_type -> identity.v1.ReadPublicResponse
-	19, // 37: identity.v1.UserService.Update:output_type -> identity.v1.UpdateResponse
-	21, // 38: identity.v1.UserService.UpdateSelf:output_type -> identity.v1.UpdateSelfResponse
-	23, // 39: identity.v1.UserService.Register:output_type -> identity.v1.RegisterResponse
-	25, // 40: identity.v1.UserService.Delete:output_type -> identity.v1.DeleteResponse
-	27, // 41: identity.v1.UserService.DeleteSelf:output_type -> identity.v1.DeleteSelfResponse
-	29, // 42: identity.v1.UserService.UploadProfile:output_type -> identity.v1.UploadProfileResponse
-	31, // 43: identity.v1.UserService.CheckMobile:output_type -> identity.v1.CheckMobileResponse
-	33, // 44: identity.v1.UserService.Follow:output_type -> identity.v1.FollowResponse
-	35, // 45: identity.v1.UserService.Unfollow:output_type -> identity.v1.UnfollowResponse
-	34, // [34:46] is the sub-list for method output_type
-	22, // [22:34] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	37, // 4: identity.v1.PrivateUser.created_at:type_name -> google.protobuf.Timestamp
+	37, // 5: identity.v1.PrivateUser.updated_at:type_name -> google.protobuf.Timestamp
+	8,  // 6: identity.v1.ListRequest.options:type_name -> identity.v1.ListOptions
+	9,  // 7: identity.v1.ListRequest.pagination:type_name -> identity.v1.PaginationRequest
+	10, // 8: identity.v1.ListRequest.sort:type_name -> identity.v1.SortOption
+	2,  // 9: identity.v1.ListRequest.resolution:type_name -> identity.v1.PhotoResolution
+	1,  // 10: identity.v1.ListOptions.role:type_name -> identity.v1.Role
+	3,  // 11: identity.v1.SortOption.field:type_name -> identity.v1.SortField
+	4,  // 12: identity.v1.SortOption.direction:type_name -> identity.v1.SortDirection
+	6,  // 13: identity.v1.UserList.users:type_name -> identity.v1.PrivateUser
+	11, // 14: identity.v1.UserList.pagination:type_name -> identity.v1.PaginationInfo
+	12, // 15: identity.v1.ListResponse.data:type_name -> identity.v1.UserList
+	2,  // 16: identity.v1.ReadRequest.resolution:type_name -> identity.v1.PhotoResolution
+	6,  // 17: identity.v1.UserReadData.user:type_name -> identity.v1.PrivateUser
+	15, // 18: identity.v1.ReadResponse.data:type_name -> identity.v1.UserReadData
+	2,  // 19: identity.v1.ReadPublicRequest.resolution:type_name -> identity.v1.PhotoResolution
+	5,  // 20: identity.v1.ReadPublicResponse.data:type_name -> identity.v1.PublicUser
+	1,  // 21: identity.v1.UpdateRequest.role:type_name -> identity.v1.Role
+	6,  // 22: identity.v1.UpdateResponse.data:type_name -> identity.v1.PrivateUser
+	6,  // 23: identity.v1.UpdateSelfResponse.data:type_name -> identity.v1.PrivateUser
+	6,  // 24: identity.v1.RegisterResponse.data:type_name -> identity.v1.PrivateUser
+	7,  // 25: identity.v1.UserService.List:input_type -> identity.v1.ListRequest
+	14, // 26: identity.v1.UserService.Read:input_type -> identity.v1.ReadRequest
+	17, // 27: identity.v1.UserService.ReadPublic:input_type -> identity.v1.ReadPublicRequest
+	19, // 28: identity.v1.UserService.Update:input_type -> identity.v1.UpdateRequest
+	21, // 29: identity.v1.UserService.UpdateSelf:input_type -> identity.v1.UpdateSelfRequest
+	23, // 30: identity.v1.UserService.Register:input_type -> identity.v1.RegisterRequest
+	25, // 31: identity.v1.UserService.Delete:input_type -> identity.v1.DeleteRequest
+	27, // 32: identity.v1.UserService.DeleteSelf:input_type -> identity.v1.DeleteSelfRequest
+	29, // 33: identity.v1.UserService.UploadProfile:input_type -> identity.v1.UploadProfileRequest
+	31, // 34: identity.v1.UserService.CheckMobile:input_type -> identity.v1.CheckMobileRequest
+	33, // 35: identity.v1.UserService.Follow:input_type -> identity.v1.FollowRequest
+	35, // 36: identity.v1.UserService.Unfollow:input_type -> identity.v1.UnfollowRequest
+	13, // 37: identity.v1.UserService.List:output_type -> identity.v1.ListResponse
+	16, // 38: identity.v1.UserService.Read:output_type -> identity.v1.ReadResponse
+	18, // 39: identity.v1.UserService.ReadPublic:output_type -> identity.v1.ReadPublicResponse
+	20, // 40: identity.v1.UserService.Update:output_type -> identity.v1.UpdateResponse
+	22, // 41: identity.v1.UserService.UpdateSelf:output_type -> identity.v1.UpdateSelfResponse
+	24, // 42: identity.v1.UserService.Register:output_type -> identity.v1.RegisterResponse
+	26, // 43: identity.v1.UserService.Delete:output_type -> identity.v1.DeleteResponse
+	28, // 44: identity.v1.UserService.DeleteSelf:output_type -> identity.v1.DeleteSelfResponse
+	30, // 45: identity.v1.UserService.UploadProfile:output_type -> identity.v1.UploadProfileResponse
+	32, // 46: identity.v1.UserService.CheckMobile:output_type -> identity.v1.CheckMobileResponse
+	34, // 47: identity.v1.UserService.Follow:output_type -> identity.v1.FollowResponse
+	36, // 48: identity.v1.UserService.Unfollow:output_type -> identity.v1.UnfollowResponse
+	37, // [37:49] is the sub-list for method output_type
+	25, // [25:37] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_identity_v1_user_proto_init() }
@@ -2564,7 +2658,7 @@ func file_identity_v1_user_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_identity_v1_user_proto_rawDesc), len(file_identity_v1_user_proto_rawDesc)),
-			NumEnums:      4,
+			NumEnums:      5,
 			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,

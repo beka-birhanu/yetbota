@@ -9,6 +9,19 @@ import (
 	userSvc "github.com/beka-birhanu/yetbota/identity-service/internal/services/usecase/user"
 )
 
+func resolutionFromPb(r pb.PhotoResolution) userSvc.PhotoResolution {
+	switch r {
+	case pb.PhotoResolution_PHOTO_RESOLUTION_MOBILE:
+		return userSvc.PhotoResolutionMobile
+	case pb.PhotoResolution_PHOTO_RESOLUTION_WEB:
+		return userSvc.PhotoResolutionWeb
+	case pb.PhotoResolution_PHOTO_RESOLUTION_ORIGINAL:
+		return userSvc.PhotoResolutionOriginal
+	default:
+		return userSvc.PhotoResolutionUnspecified
+	}
+}
+
 func roleFromPb(s pb.Role) string {
 	switch s {
 	case pb.Role_ROLE_USER:

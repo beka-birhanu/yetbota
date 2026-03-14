@@ -20,6 +20,13 @@ enum Role {
   ROLE_ADMIN = 2;
 }
 
+enum PhotoResolution {
+  PHOTO_RESOLUTION_UNSPECIFIED = 0;
+  PHOTO_RESOLUTION_ORIGINAL    = 1;
+  PHOTO_RESOLUTION_MOBILE      = 2;
+  PHOTO_RESOLUTION_WEB         = 3;
+}
+
 message PublicUser {
   string id = 1;
   string username = 2;
@@ -59,6 +66,7 @@ message ListRequest {
   ListOptions options = 1;
   PaginationRequest pagination = 2;
   SortOption sort = 3;
+  PhotoResolution resolution = 4;
 }
 
 message ListOptions {
@@ -119,6 +127,7 @@ message ListResponse {
 
 message ReadRequest {
   string id = 1;
+  PhotoResolution resolution = 2;
 }
 
 message UserReadData {
@@ -139,6 +148,7 @@ message ReadResponse {
 
 message ReadPublicRequest {
   string id = 1;
+  PhotoResolution resolution = 2;
 }
 
 message ReadPublicResponse {

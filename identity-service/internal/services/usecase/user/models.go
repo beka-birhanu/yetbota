@@ -7,11 +7,22 @@ import (
 	domainUser "github.com/beka-birhanu/yetbota/identity-service/internal/domain/user"
 )
 
+// PhotoResolution represents the requested resolution for a profile photo.
+type PhotoResolution string
+
+const (
+	PhotoResolutionUnspecified PhotoResolution = ""
+	PhotoResolutionOriginal    PhotoResolution = "ORIGINAL"
+	PhotoResolutionMobile      PhotoResolution = "MOBILE"
+	PhotoResolutionWeb         PhotoResolution = "WEB"
+)
+
 // List
 type ListRequest struct {
 	Options    *domainUser.Options    `validate:"required"`
 	Pagination *domainUser.Pagination `validate:"required"`
 	Sort       *domainUser.SortOption `validate:"required"`
+	Resolution PhotoResolution
 }
 
 func (r *ListRequest) Validate() error {
@@ -41,7 +52,8 @@ type ListResponse struct {
 // Read
 
 type ReadRequest struct {
-	ID string `validate:"required"`
+	ID         string `validate:"required"`
+	Resolution PhotoResolution
 }
 
 func (r *ReadRequest) Validate() error {
@@ -58,7 +70,8 @@ type ReadResponse struct {
 // ReadPublic
 
 type ReadPublicRequest struct {
-	ID string `validate:"required"`
+	ID         string `validate:"required"`
+	Resolution PhotoResolution
 }
 
 func (r *ReadPublicRequest) Validate() error {

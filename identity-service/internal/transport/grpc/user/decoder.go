@@ -43,20 +43,23 @@ func decodeListReq(_ context.Context, req any) (any, error) {
 		Options:    opts,
 		Pagination: pagination,
 		Sort:       sort,
+		Resolution: resolutionFromPb(in.GetResolution()),
 	}, nil
 }
 
 func decodeReadReq(_ context.Context, req any) (any, error) {
 	in := req.(*pb.ReadRequest)
 	return &userSvc.ReadRequest{
-		ID: in.GetId(),
+		ID:         in.GetId(),
+		Resolution: resolutionFromPb(in.GetResolution()),
 	}, nil
 }
 
 func decodeReadPublicReq(_ context.Context, req any) (any, error) {
 	in := req.(*pb.ReadPublicRequest)
 	return &userSvc.ReadPublicRequest{
-		ID: in.GetId(),
+		ID:         in.GetId(),
+		Resolution: resolutionFromPb(in.GetResolution()),
 	}, nil
 }
 

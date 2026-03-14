@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -23,12 +24,14 @@ import (
 
 // Photo is an object representing the database table.
 type Photo struct {
-	ID             string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	BucketProvider string    `boil:"bucket_provider" json:"bucket_provider" toml:"bucket_provider" yaml:"bucket_provider"`
-	MimeType       string    `boil:"mime_type" json:"mime_type" toml:"mime_type" yaml:"mime_type"`
-	URL            string    `boil:"url" json:"url" toml:"url" yaml:"url"`
-	CreatedAt      time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt      time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID             string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	BucketProvider string      `boil:"bucket_provider" json:"bucket_provider" toml:"bucket_provider" yaml:"bucket_provider"`
+	MimeType       string      `boil:"mime_type" json:"mime_type" toml:"mime_type" yaml:"mime_type"`
+	URL            string      `boil:"url" json:"url" toml:"url" yaml:"url"`
+	CreatedAt      time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt      time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	URLMobile      null.String `boil:"url_mobile" json:"url_mobile,omitempty" toml:"url_mobile" yaml:"url_mobile,omitempty"`
+	URLWeb         null.String `boil:"url_web" json:"url_web,omitempty" toml:"url_web" yaml:"url_web,omitempty"`
 
 	R *photoR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L photoL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -41,6 +44,8 @@ var PhotoColumns = struct {
 	URL            string
 	CreatedAt      string
 	UpdatedAt      string
+	URLMobile      string
+	URLWeb         string
 }{
 	ID:             "id",
 	BucketProvider: "bucket_provider",
@@ -48,6 +53,8 @@ var PhotoColumns = struct {
 	URL:            "url",
 	CreatedAt:      "created_at",
 	UpdatedAt:      "updated_at",
+	URLMobile:      "url_mobile",
+	URLWeb:         "url_web",
 }
 
 var PhotoTableColumns = struct {
@@ -57,6 +64,8 @@ var PhotoTableColumns = struct {
 	URL            string
 	CreatedAt      string
 	UpdatedAt      string
+	URLMobile      string
+	URLWeb         string
 }{
 	ID:             "photos.id",
 	BucketProvider: "photos.bucket_provider",
@@ -64,6 +73,8 @@ var PhotoTableColumns = struct {
 	URL:            "photos.url",
 	CreatedAt:      "photos.created_at",
 	UpdatedAt:      "photos.updated_at",
+	URLMobile:      "photos.url_mobile",
+	URLWeb:         "photos.url_web",
 }
 
 // Generated where
@@ -120,6 +131,62 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" LIKE ?", x)
+}
+func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT LIKE ?", x)
+}
+func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" ILIKE ?", x)
+}
+func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT ILIKE ?", x)
+}
+func (w whereHelpernull_String) SIMILAR(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" SIMILAR TO ?", x)
+}
+func (w whereHelpernull_String) NSIMILAR(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
+}
+func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
+	values := make([]any, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
+	values := make([]any, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var PhotoWhere = struct {
 	ID             whereHelperstring
 	BucketProvider whereHelperstring
@@ -127,6 +194,8 @@ var PhotoWhere = struct {
 	URL            whereHelperstring
 	CreatedAt      whereHelpertime_Time
 	UpdatedAt      whereHelpertime_Time
+	URLMobile      whereHelpernull_String
+	URLWeb         whereHelpernull_String
 }{
 	ID:             whereHelperstring{field: "\"photos\".\"id\""},
 	BucketProvider: whereHelperstring{field: "\"photos\".\"bucket_provider\""},
@@ -134,6 +203,8 @@ var PhotoWhere = struct {
 	URL:            whereHelperstring{field: "\"photos\".\"url\""},
 	CreatedAt:      whereHelpertime_Time{field: "\"photos\".\"created_at\""},
 	UpdatedAt:      whereHelpertime_Time{field: "\"photos\".\"updated_at\""},
+	URLMobile:      whereHelpernull_String{field: "\"photos\".\"url_mobile\""},
+	URLWeb:         whereHelpernull_String{field: "\"photos\".\"url_web\""},
 }
 
 // PhotoRels is where relationship names are stored.
@@ -173,9 +244,9 @@ func (r *photoR) GetProfilePhotoUsers() UserSlice {
 type photoL struct{}
 
 var (
-	photoAllColumns            = []string{"id", "bucket_provider", "mime_type", "url", "created_at", "updated_at"}
+	photoAllColumns            = []string{"id", "bucket_provider", "mime_type", "url", "created_at", "updated_at", "url_mobile", "url_web"}
 	photoColumnsWithoutDefault = []string{"bucket_provider", "mime_type", "url"}
-	photoColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	photoColumnsWithDefault    = []string{"id", "created_at", "updated_at", "url_mobile", "url_web"}
 	photoPrimaryKeyColumns     = []string{"id"}
 	photoGeneratedColumns      = []string{}
 )

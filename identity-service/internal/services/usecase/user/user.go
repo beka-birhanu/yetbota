@@ -52,7 +52,7 @@ func (s *svc) List(ctx context.Context, ctxSess *ctxRP.Context, req *ListRequest
 		return nil, err
 	}
 
-	wrappers, err := s.assembleUserWrappers(ctx, users)
+	wrappers, err := s.assembleUserWrappers(ctx, users, req.Resolution)
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
@@ -86,7 +86,7 @@ func (s *svc) Read(ctx context.Context, ctxSess *ctxRP.Context, req *ReadRequest
 		return nil, err
 	}
 
-	wrapper, err := s.assembleUserWrapper(ctx, user)
+	wrapper, err := s.assembleUserWrapper(ctx, user, req.Resolution)
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
@@ -107,7 +107,7 @@ func (s *svc) ReadPublic(ctx context.Context, ctxSess *ctxRP.Context, req *ReadP
 		return nil, err
 	}
 
-	wrapper, err := s.assembleUserWrapper(ctx, user)
+	wrapper, err := s.assembleUserWrapper(ctx, user, req.Resolution)
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err

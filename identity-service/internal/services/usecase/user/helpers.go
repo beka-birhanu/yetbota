@@ -7,7 +7,6 @@ import (
 	"github.com/beka-birhanu/toddler/status"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/constants"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/dbmodels"
-	"github.com/beka-birhanu/yetbota/identity-service/internal/domain/storage"
 	domainUser "github.com/beka-birhanu/yetbota/identity-service/internal/domain/user"
 	"github.com/nyaruka/phonenumbers"
 	"golang.org/x/sync/errgroup"
@@ -41,12 +40,29 @@ func applyUserSelfUpdate(u *domainUser.User, req *UpdateSelfRequest) {
 	}
 }
 
-func (s *svc) assembleUserWrappers(ctx context.Context, users dbmodels.UserSlice) ([]*UserWrapper, error) {
+func pickPhotoURL(photo *dbmodels.Photo, res PhotoResolution) string {
+	switch res {
+	case PhotoResolutionMobile:
+		if photo.URLMobile.Valid && photo.URLMobile.String != "" {
+			return photo.URLMobile.String
+		}
+		fallthrough
+	case PhotoResolutionWeb:
+		if photo.URLWeb.Valid && photo.URLWeb.String != "" {
+			return photo.URLWeb.String
+		}
+		fallthrough
+	default:
+		return photo.URL
+	}
+}
+
+func (s *svc) assembleUserWrappers(ctx context.Context, users dbmodels.UserSlice, resolution PhotoResolution) ([]*UserWrapper, error) {
 	wrappers := make([]*UserWrapper, len(users))
 	eg, egCtx := errgroup.WithContext(ctx)
 	for i, user := range users {
 		eg.Go(func() error {
-			wrapper, err := s.assembleUserWrapper(egCtx, user)
+			wrapper, err := s.assembleUserWrapper(egCtx, user, resolution)
 			if err != nil {
 				return err
 			}
@@ -60,7 +76,7 @@ func (s *svc) assembleUserWrappers(ctx context.Context, users dbmodels.UserSlice
 	return wrappers, nil
 }
 
-func (s *svc) assembleUserWrapper(ctx context.Context, user *dbmodels.User) (*UserWrapper, error) {
+func (s *svc) assembleUserWrapper(ctx context.Context, user *dbmodels.User, resolution PhotoResolution) (*UserWrapper, error) {
 	var photo *dbmodels.Photo
 	var err error
 
@@ -73,16 +89,8 @@ func (s *svc) assembleUserWrapper(ctx context.Context, user *dbmodels.User) (*Us
 		}
 	}
 
-	resp, err := s.bucket.SignURL(ctx, &storage.SignURLRequest{
-		BucketName: s.bucketName,
-		FileName:   photo.URL,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	return &UserWrapper{
 		User:       user,
-		ProfileURL: resp.Url,
+		ProfileURL: pickPhotoURL(photo, resolution),
 	}, nil
 }

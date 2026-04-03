@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package ai.v1;
+
+option go_package = "/aipb/v1";
+
+message EmbedRequest {
+  string text = 1;
+}
+
+message EmbedResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  repeated float vector = 4;
+}
+
+message EmbedBatchRequest {
+  repeated string texts = 1;
+}
+
+message EmbedBatchResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  repeated Vector vectors = 4;
+}
+
+message Vector {
+  repeated float values = 1;
+}
+
+service EmbeddingService {
+  rpc Embed(EmbedRequest) returns (EmbedResponse);
+  rpc EmbedBatch(EmbedBatchRequest) returns (EmbedBatchResponse);
+}

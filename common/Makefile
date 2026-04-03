@@ -45,4 +45,51 @@ gengo-identity-user:
 gengo-identity: gengo-identity-auth gengo-identity-user
 
 # Global alias: run all services' proto generators
-gengo-all: gengo-identity
+gengo-all: gengo-identity gengo-ai
+
+
+# =====================
+# ai service (proto/definition/ai/<VERSION>)
+# =====================
+
+AI_PROTO_DIR := $(PROTO_DIR)/ai/$(VERSION)
+
+.PHONY: gengo-ai-embedding gengo-ai-vector gengo-ai-duplicate gengo-ai-rag gengo-ai
+
+gengo-ai-embedding:
+	@echo " > Generate ai/$(VERSION)/embedding.proto"
+	@mkdir -p $(OUT_DIR)
+	@protoc --proto_path=$(PROTO_DIR) \
+		--go_out=$(OUT_DIR) \
+		--go-grpc_out=$(OUT_DIR) \
+		$(PROTOC_GO_OPTS) $(PROTOC_GRPC_OPTS) \
+		$(AI_PROTO_DIR)/embedding.proto
+
+gengo-ai-vector:
+	@echo " > Generate ai/$(VERSION)/vector.proto"
+	@mkdir -p $(OUT_DIR)
+	@protoc --proto_path=$(PROTO_DIR) \
+		--go_out=$(OUT_DIR) \
+		--go-grpc_out=$(OUT_DIR) \
+		$(PROTOC_GO_OPTS) $(PROTOC_GRPC_OPTS) \
+		$(AI_PROTO_DIR)/vector.proto
+
+gengo-ai-duplicate:
+	@echo " > Generate ai/$(VERSION)/duplicate.proto"
+	@mkdir -p $(OUT_DIR)
+	@protoc --proto_path=$(PROTO_DIR) \
+		--go_out=$(OUT_DIR) \
+		--go-grpc_out=$(OUT_DIR) \
+		$(PROTOC_GO_OPTS) $(PROTOC_GRPC_OPTS) \
+		$(AI_PROTO_DIR)/duplicate.proto
+
+gengo-ai-rag:
+	@echo " > Generate ai/$(VERSION)/rag.proto"
+	@mkdir -p $(OUT_DIR)
+	@protoc --proto_path=$(PROTO_DIR) \
+		--go_out=$(OUT_DIR) \
+		--go-grpc_out=$(OUT_DIR) \
+		$(PROTOC_GO_OPTS) $(PROTOC_GRPC_OPTS) \
+		$(AI_PROTO_DIR)/rag.proto
+
+gengo-ai: gengo-ai-embedding gengo-ai-vector gengo-ai-duplicate gengo-ai-rag

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package ai.v1;
+
+option go_package = "/aipb/v1";
+
+message Citation {
+  string source_id = 1;
+  string text = 2;
+  float score = 3;
+}
+
+message ChatRequest {
+  string query = 1;
+}
+
+message ChatResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  string answer = 4;
+  repeated Citation citations = 5;
+}
+
+service RAGService {
+  rpc Chat(ChatRequest) returns (ChatResponse);
+}

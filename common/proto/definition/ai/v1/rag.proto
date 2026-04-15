@@ -25,3 +25,4 @@ message ChatResponse {
 service RAGService {
   rpc Chat(ChatRequest) returns (ChatResponse);
 }
+

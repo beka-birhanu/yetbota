@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from infra.config import get_settings
+from infrastructure.settings import get_settings
 
 
 router = APIRouter(tags=["meta"])

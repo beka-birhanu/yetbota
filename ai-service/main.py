@@ -6,7 +6,7 @@ import sys
 
 import uvicorn
 
-from infra.config import get_settings
+from infrastructure.settings import get_settings
 from interfaces.grpc.server import serve as serve_grpc
 from interfaces.rest.app import create_app
 

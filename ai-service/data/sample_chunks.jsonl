@@ -1,0 +1,2 @@
+{"source_id":"sample:verified","text":"YetBota sample verified fact: Weaviate retrieval is filtered to verified == true.","verified":true}
+{"source_id":"sample:unverified","text":"YetBota sample unverified fact: this should never appear in citations.","verified":false}

@@ -4,18 +4,27 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	"strings"
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
+	"github.com/beka-birhanu/yetbota/identity-service/drivers/constants"
+	"github.com/nyaruka/phonenumbers"
 )
 
-func normalizePhone(phone string) string {
-	phone = strings.TrimSpace(phone)
-	if strings.HasPrefix(phone, "0") {
-		phone = "+251" + phone[1:]
+func normalizePhone(mobile string) (string, error) {
+	parsed, err := phonenumbers.Parse(mobile, constants.DefaultPhoneRegion)
+	if err != nil {
+		return "", err
 	}
-	return phone
+	if !phonenumbers.IsValidNumber(parsed) {
+		return "", &toddlerr.Error{
+			PublicStatusCode:  status.BadRequest,
+			PublicMessage:     "Invalid phone number",
+			ServiceStatusCode: status.BadRequestMissingField,
+			ServiceMessage:    "invalid phone number",
+		}
+	}
+	return phonenumbers.Format(parsed, phonenumbers.E164), nil
 }
 
 func GenerateOTP(length int) (string, error) {

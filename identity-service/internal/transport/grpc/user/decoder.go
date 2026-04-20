@@ -35,8 +35,8 @@ func decodeListReq(_ context.Context, req any) (any, error) {
 		Direction: domainUser.SortDirectionDesc,
 	}
 	if in.GetSort() != nil {
-		sort.Field = domainUser.SortField(in.GetSort().GetField())
-		sort.Direction = domainUser.SortDirection(in.GetSort().GetDirection())
+		sort.Field = mapSortField(in.GetSort().GetField())
+		sort.Direction = mapSortDirection(in.GetSort().GetDirection())
 	}
 
 	return &userSvc.ListRequest{
@@ -84,7 +84,6 @@ func decodeUpdateSelfReq(_ context.Context, req any) (any, error) {
 func decodeRegisterReq(_ context.Context, req any) (any, error) {
 	in := req.(*pb.RegisterRequest)
 	return &userSvc.RegisterRequest{
-		ID:        in.GetId(),
 		FirstName: in.GetFirstName(),
 		LastName:  in.GetLastName(),
 		Username:  in.GetUsername(),

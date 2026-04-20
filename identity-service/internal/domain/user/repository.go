@@ -16,8 +16,8 @@ type Options struct {
 	Surname   string
 	Username  string
 	Mobile    string
-	Status    string
-	Role      string
+	Status    string `validate:"omitempty,oneof=ACTIVE INACTIVE"`
+	Role      string `validate:"omitempty,oneof=USER ADMIN"`
 	LoadPhoto bool
 }
 

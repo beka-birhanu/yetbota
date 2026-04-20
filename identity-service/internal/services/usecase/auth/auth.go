@@ -21,9 +21,25 @@ func (s *service) Login(ctx context.Context, ctxSess *contextYB.Context, req *Lo
 		return nil, err
 	}
 
+	if err := req.normalize(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
 	user, err := s.userRepo.ReadByUsername(ctx, req.Username, nil)
 	if err != nil {
 		err := invalidCredentialsError()
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if user.Status != dbmodels.UserStatusACTIVE {
+		err := &toddlerr.Error{
+			PublicStatusCode:  status.Unauthorized,
+			ServiceStatusCode: status.Unauthorized,
+			PublicMessage:     "Invalid username or password",
+			ServiceMessage:    "user status is not active",
+		}
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
@@ -161,7 +177,11 @@ func (s *service) GenerateMobileOTP(ctx context.Context, ctxSess *contextYB.Cont
 		return nil, err
 	}
 
-	mobile := normalizePhone(req.Mobile)
+	mobile, err := normalizePhone(req.Mobile)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
 	key := mobileOtpKey(mobile)
 	existing, err := s.otpStore.Read(ctx, key)
 	if err != nil {
@@ -222,12 +242,10 @@ func (s *service) GenerateMobileOTP(ctx context.Context, ctxSess *contextYB.Cont
 		return nil, err
 	}
 
-	if s.smsClient != nil {
-		err = s.smsClient.SendOTP(ctx, mobile, otpCode)
-		if err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
+	err = s.smsClient.SendOTP(ctx, mobile, otpCode)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
 	}
 
 	return &GenerateMobileOTPResponse{
@@ -244,7 +262,12 @@ func (s *service) ValidateOTP(ctx context.Context, ctxSess *contextYB.Context, r
 		return nil, err
 	}
 
-	key := mobileOtpKey(normalizePhone(req.Mobile))
+	mobile, err := normalizePhone(req.Mobile)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+	key := mobileOtpKey(mobile)
 	otp, err := s.otpStore.Read(ctx, key)
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
@@ -322,8 +345,18 @@ func (s *service) NewPassword(ctx context.Context, ctxSess *contextYB.Context, r
 		return nil, err
 	}
 
-	mobile := normalizePhone(req.Username)
-	key := mobileOtpKey(mobile)
+	if err := req.normalize(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	user, err := s.userRepo.ReadByMobile(ctx, req.Mobile, nil)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	key := mobileOtpKey(user.Mobile)
 
 	otp, err := s.otpStore.Read(ctx, key)
 	if err != nil {
@@ -333,12 +366,6 @@ func (s *service) NewPassword(ctx context.Context, ctxSess *contextYB.Context, r
 
 	if otp.Otp == "" || !otp.Verified || s.hasher.Verify(otp.Random, req.Random) != nil {
 		err := otpNotVerifiedError()
-		ctxSess.SetErrorMessage(err.Error())
-		return nil, err
-	}
-
-	user, err := s.userRepo.ReadByMobile(ctx, mobile, nil)
-	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
@@ -426,7 +453,11 @@ func (s *service) ChangeMobile(ctx context.Context, ctxSess *contextYB.Context, 
 		return nil, err
 	}
 
-	newMobile := normalizePhone(req.NewMobile)
+	newMobile, err := normalizePhone(req.NewMobile)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
 	key := mobileOtpKey(newMobile)
 
 	otp, err := s.otpStore.Read(ctx, key)

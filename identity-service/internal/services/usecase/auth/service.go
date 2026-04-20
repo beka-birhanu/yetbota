@@ -29,12 +29,12 @@ type Config struct {
 	OtpStore       domainAuth.OtpStore       `validate:"required"`
 	SessionManager domainAuth.SessionManager `validate:"required"`
 	Hasher         domainAuth.Hasher         `validate:"required"`
-	SMSClient      messaging.SMSClient
-	OtpTTL         time.Duration `validate:"required"`
-	LockRequestTTL time.Duration `validate:"required"`
-	LockInvalidTTL time.Duration `validate:"required"`
-	AccessTTL      time.Duration `validate:"required"`
-	RefreshTTL     time.Duration `validate:"required"`
+	SMSClient      messaging.SMSClient       `validate:"required"`
+	OtpTTL         time.Duration             `validate:"required"`
+	LockRequestTTL time.Duration             `validate:"required"`
+	LockInvalidTTL time.Duration             `validate:"required"`
+	AccessTTL      time.Duration             `validate:"required"`
+	RefreshTTL     time.Duration             `validate:"required"`
 }
 
 func (c *Config) Validate() error {

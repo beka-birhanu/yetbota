@@ -74,8 +74,23 @@ func (s *svc) Read(ctx context.Context, ctxSess *ctxRP.Context, req *ReadRequest
 		return nil, err
 	}
 
-	// if user is not self, check if admin
-	if err := utils.AllowAdminAccess(ctxSess); ctxSess.UserSession.SessionID != req.ID && err != nil {
+	// if not admin, set user id to self
+	if err := utils.AllowAdminAccess(ctxSess); err != nil {
+		if err := utils.AllowAccess(ctxSess); err != nil {
+			ctxSess.SetErrorMessage(err.Error())
+			return nil, err
+		}
+
+		req.ID = ctxSess.UserSession.UserID
+	}
+
+	if req.ID == "" {
+		err := &toddlerr.Error{
+			PublicStatusCode:  status.BadRequest,
+			ServiceStatusCode: status.BadRequest,
+			PublicMessage:     "User ID is required",
+			ServiceMessage:    "user id is required",
+		}
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
@@ -122,7 +137,7 @@ func (s *svc) Update(ctx context.Context, ctxSess *ctxRP.Context, req *UpdateReq
 		return nil, err
 	}
 
-	if err := utils.AllowAdminAccess(ctxSess); err != nil {
+	if err := utils.AllowAccess(ctxSess); err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
@@ -160,6 +175,11 @@ func (s *svc) UpdateSelf(ctx context.Context, ctxSess *ctxRP.Context, req *Updat
 		return nil, err
 	}
 
+	if err := req.normalize(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
 	user, err := s.userRepo.Read(ctx, ctxSess.UserSession.UserID, nil)
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
@@ -179,6 +199,11 @@ func (s *svc) UpdateSelf(ctx context.Context, ctxSess *ctxRP.Context, req *Updat
 
 func (s *svc) Register(ctx context.Context, ctxSess *ctxRP.Context, req *RegisterRequest) (*RegisterResponse, error) {
 	if err := req.Validate(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err := req.normalize(); err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
@@ -209,7 +234,7 @@ func (s *svc) Register(ctx context.Context, ctxSess *ctxRP.Context, req *Registe
 	}
 
 	newUser := &dbmodels.User{
-		ID:        req.ID,
+		ID:        uuid.NewString(),
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Username:  req.Username,
@@ -396,6 +421,15 @@ func (s *svc) Follow(ctx context.Context, ctxSess *ctxRP.Context, req *FollowReq
 		}
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
+	}
+
+	alreadyFollowing, err := s.followRepo.IsFollowing(ctx, followerID, req.FolloweeID)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+	if alreadyFollowing {
+		return &FollowResponse{}, nil
 	}
 
 	if err := s.followRepo.Follow(ctx, followerID, req.FolloweeID); err != nil {

@@ -54,7 +54,7 @@ func decodeNewPasswordReq(_ context.Context, req any) (any, error) {
 	return &authSvc.NewPasswordRequest{
 		Password: in.GetPassword(),
 		Random:   in.GetRandom(),
-		Username: in.GetUsername(),
+		Mobile:   in.GetMobile(),
 	}, nil
 }
 

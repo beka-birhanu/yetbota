@@ -72,7 +72,7 @@ func userToPublicUser(u *domainUser.User, profileURL string) *pb.PublicUser {
 	return &pb.PublicUser{
 		Id:             u.ID,
 		Username:       u.Username,
-		MobileVerified: false,
+		MobileVerified: u.Mobile != "",
 		Rating:         int32(u.Rating),
 		Badges:         []pb.Badge{},
 		Contributions:  int32(u.Contributions),
@@ -113,4 +113,32 @@ func readPublicResponseToProto(r *userSvc.ReadPublicResponse) *pb.PublicUser {
 		return nil
 	}
 	return userToPublicUser(r.User, r.ProfileURL)
+}
+
+func mapSortField(s pb.SortField) domainUser.SortField {
+	switch s {
+	case pb.SortField_SORT_FIELD_RATING:
+		return domainUser.SortFieldRating
+	case pb.SortField_SORT_FIELD_FOLLOWERS:
+		return domainUser.SortFieldFollowers
+	case pb.SortField_SORT_FIELD_FOLLOWING:
+		return domainUser.SortFieldFollowing
+	case pb.SortField_SORT_FIELD_CONTRIBUTIONS:
+		return domainUser.SortFieldContributions
+	case pb.SortField_SORT_FIELD_CREATED_AT:
+		return domainUser.SortFieldCreatedAt
+	default:
+		return ""
+	}
+}
+
+func mapSortDirection(s pb.SortDirection) domainUser.SortDirection {
+	switch s {
+	case pb.SortDirection_SORT_DIRECTION_ASC:
+		return domainUser.SortDirectionAsc
+	case pb.SortDirection_SORT_DIRECTION_DESC:
+		return domainUser.SortDirectionDesc
+	default:
+		return ""
+	}
 }

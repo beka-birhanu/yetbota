@@ -41,6 +41,9 @@ func applyUserSelfUpdate(u *domainUser.User, req *UpdateSelfRequest) {
 }
 
 func pickPhotoURL(photo *dbmodels.Photo, res PhotoResolution) string {
+	if photo == nil {
+		return ""
+	}
 	switch res {
 	case PhotoResolutionMobile:
 		if photo.URLMobile.Valid && photo.URLMobile.String != "" {
@@ -82,7 +85,7 @@ func (s *svc) assembleUserWrapper(ctx context.Context, user *dbmodels.User, reso
 
 	if user.R != nil && user.R.ProfilePhoto != nil {
 		photo = user.R.ProfilePhoto
-	} else {
+	} else if user.ProfilePhotoID.Valid {
 		photo, err = s.photoRepo.Read(ctx, user.ProfilePhotoID.String)
 		if err != nil {
 			return nil, err

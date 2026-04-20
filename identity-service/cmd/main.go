@@ -15,6 +15,7 @@ import (
 	logger "github.com/beka-birhanu/yetbota/identity-service/drivers/logger"
 	neo4jDriver "github.com/beka-birhanu/yetbota/identity-service/drivers/neo4j"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/postgres"
+	"github.com/beka-birhanu/yetbota/identity-service/drivers/smstaskadapter"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/storage"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/utils"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/validator"
@@ -173,12 +174,16 @@ func main() {
 		panic(fmt.Errorf("error creating follow repo: %v", err))
 	}
 
+	// SMS Client
+	smsClient := smstaskadapter.NewAdapter(&smstaskadapter.Config{})
+
 	// Auth usecase
 	authService, err := usecaseAuth.NewService(&usecaseAuth.Config{
 		UserRepo:       userRepo,
 		OtpStore:       otpStore,
 		SessionManager: sessionManager,
 		Hasher:         hasher,
+		SMSClient:      smsClient,
 		OtpTTL:         time.Duration(cfg.Otp.TTL) * time.Second,
 		LockRequestTTL: time.Duration(cfg.Otp.LockRequestTime) * time.Second,
 		LockInvalidTTL: time.Duration(cfg.Otp.LockInvalidTime) * time.Second,

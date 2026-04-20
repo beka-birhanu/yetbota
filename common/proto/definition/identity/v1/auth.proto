@@ -122,7 +122,7 @@ message ChangeMobileResponse {
 message NewPasswordRequest {
   string password = 1;
   string random = 2; // the random code sent by the client side on generate the otp.
-  string username = 3;
+  string mobile = 3;
 }
 
 message NewPasswordResponse {

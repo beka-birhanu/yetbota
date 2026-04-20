@@ -219,28 +219,3 @@ func (r *repo) CountFollowing(ctx context.Context, userID string) (int64, error)
 	}
 	return result.(int64), nil
 }
-
-func paginationParams(p *domainFollow.Pagination) (skip, limit int) {
-	if p == nil || p.Limit <= 0 || p.Page <= 0 {
-		return 0, 100
-	}
-	return (p.Page - 1) * p.Limit, p.Limit
-}
-
-func collectIDs(ctx context.Context, res neo4j.ResultWithContext) ([]string, error) {
-	var ids []string
-	for res.Next(ctx) {
-		id, _ := res.Record().Get("id")
-		ids = append(ids, id.(string))
-	}
-	return ids, res.Err()
-}
-
-func fromNeo4jError(err error) error {
-	return &toddlerr.Error{
-		PublicStatusCode:  status.ServerError,
-		ServiceStatusCode: status.ServerErrorDatabase,
-		PublicMessage:     "database error",
-		ServiceMessage:    err.Error(),
-	}
-}

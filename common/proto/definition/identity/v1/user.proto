@@ -22,9 +22,9 @@ enum Role {
 
 enum PhotoResolution {
   PHOTO_RESOLUTION_UNSPECIFIED = 0;
-  PHOTO_RESOLUTION_ORIGINAL    = 1;
-  PHOTO_RESOLUTION_MOBILE      = 2;
-  PHOTO_RESOLUTION_WEB         = 3;
+  PHOTO_RESOLUTION_ORIGINAL = 1;
+  PHOTO_RESOLUTION_MOBILE = 2;
+  PHOTO_RESOLUTION_WEB = 3;
 }
 
 message PublicUser {
@@ -197,13 +197,12 @@ message UpdateSelfResponse {
 // =====================
 
 message RegisterRequest {
-  string id = 1;
-  string first_name = 2;
-  string last_name = 3;
-  string username = 4;
-  string mobile = 5;
-  string password = 6;
-  string random = 7; // The random used to generate the otp
+  string first_name = 1;
+  string last_name = 2;
+  string username = 3;
+  string mobile = 4;
+  string password = 5;
+  string random = 6; // The random used to generate the otp
 }
 
 message RegisterResponse {

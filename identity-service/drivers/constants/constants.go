@@ -1,9 +1,12 @@
 package constants
 
-import "github.com/beka-birhanu/yetbota/identity-service/drivers/dbmodels"
+import (
+	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/identity/v1"
+	"github.com/beka-birhanu/yetbota/identity-service/drivers/dbmodels"
+)
 
 const (
-	MAXOTP         int32 = 2
+	MAXOTP         int32 = 3
 	MaxNotMatchOtp int32 = 3
 )
 
@@ -36,11 +39,12 @@ var AllowedAdminAccessMap = map[string]struct{}{
 }
 
 var SkipAuthGrpc = map[string]struct{}{
-	"/identity.v1.AuthService/Login":             {},
-	"/identity.v1.AuthService/GenerateMobileOTP": {},
-	"/identity.v1.AuthService/ValidateOTP":       {},
-	"/identity.v1.AuthService/NewPassword":       {},
-	"/identity.v1.UserService/Register":          {},
-	"/identity.v1.UserService/CheckMobile":       {},
-	"/identity.v1.UserService/ReadPublic":        {},
+	pb.AuthService_Login_FullMethodName:             {},
+	pb.AuthService_Refresh_FullMethodName:           {},
+	pb.AuthService_GenerateMobileOTP_FullMethodName: {},
+	pb.AuthService_ValidateOTP_FullMethodName:       {},
+	pb.AuthService_NewPassword_FullMethodName:       {},
+	pb.UserService_Register_FullMethodName:          {},
+	pb.UserService_CheckMobile_FullMethodName:       {},
+	pb.UserService_ReadPublic_FullMethodName:        {},
 }

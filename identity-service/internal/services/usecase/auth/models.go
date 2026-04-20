@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"strings"
+
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/validator"
 )
@@ -17,6 +19,11 @@ func (r *LoginRequest) Validate() error {
 	if err := validator.Validate.Struct(r); err != nil {
 		return toddlerr.FromValidationErrors(err)
 	}
+	return nil
+}
+
+func (r *LoginRequest) normalize() error {
+	r.Username = strings.ToLower(r.Username)
 	return nil
 }
 
@@ -68,7 +75,7 @@ type LogoutResponse struct{}
 
 type GenerateMobileOTPRequest struct {
 	Mobile string `validate:"required"`
-	Random string `validate:"required"`
+	Random string `validate:"required" mask:"true"`
 }
 
 func (r *GenerateMobileOTPRequest) Validate() error {
@@ -112,12 +119,21 @@ type ValidateOTPResponse struct {
 type NewPasswordRequest struct {
 	Password string `validate:"required,min=8" mask:"true"`
 	Random   string `validate:"required" mask:"true"`
-	Username string `validate:"required"`
+	Mobile   string `validate:"required"`
 }
 
 func (r *NewPasswordRequest) Validate() error {
 	if err := validator.Validate.Struct(r); err != nil {
 		return toddlerr.FromValidationErrors(err)
+	}
+	return nil
+}
+
+func (r *NewPasswordRequest) normalize() error {
+	var err error
+	r.Mobile, err = normalizePhone(r.Mobile)
+	if err != nil {
+		return err
 	}
 	return nil
 }

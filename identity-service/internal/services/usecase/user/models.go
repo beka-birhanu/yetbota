@@ -1,6 +1,8 @@
 package user
 
 import (
+	"strings"
+
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/dbmodels"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/validator"
@@ -52,7 +54,7 @@ type ListResponse struct {
 // Read
 
 type ReadRequest struct {
-	ID         string `validate:"required"`
+	ID         string `validate:"omitempty"`
 	Resolution PhotoResolution
 }
 
@@ -119,6 +121,11 @@ func (r *UpdateSelfRequest) Validate() error {
 	return nil
 }
 
+func (r *UpdateSelfRequest) normalize() error {
+	r.Username = strings.ToLower(r.Username)
+	return nil
+}
+
 type UpdateSelfResponse struct {
 	User *domainUser.User
 }
@@ -126,7 +133,6 @@ type UpdateSelfResponse struct {
 // Register
 
 type RegisterRequest struct {
-	ID        string `validate:"required"`
 	FirstName string `validate:"required"`
 	LastName  string `validate:"required"`
 	Username  string `validate:"required"`
@@ -139,12 +145,20 @@ func (r *RegisterRequest) Validate() error {
 	if err := validator.Validate.Struct(r); err != nil {
 		return toddlerr.FromValidationErrors(err)
 	}
+
+	return nil
+}
+
+func (r *RegisterRequest) normalize() error {
 	mobile, err := normalizePhone(r.Mobile)
 	if err != nil {
 		return err
 	}
+
 	r.Mobile = mobile
-	return nil
+
+	r.Username = strings.ToLower(r.Username)
+	return err
 }
 
 type RegisterResponse struct {

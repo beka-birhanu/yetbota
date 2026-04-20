@@ -163,20 +163,17 @@ func (s *SessionManager) SaveSession(ctx context.Context, td *auth.SessionDetail
 }
 
 func (s *SessionManager) ExtractUserSession(ctx context.Context, tokenInfo *auth.TokenInfo) (*auth.UserSession, error) {
-	var token *jwt.Token
-	var err error
-
+	var key string
 	switch tokenInfo.TokenType {
 	case auth.AccessToken:
-		token, err = s.parseAccessToken(tokenInfo.Token)
-		if err != nil {
-			return nil, err
-		}
+		key = s.accessKey
 	case auth.RefreshToken:
-		token, err = s.parseRefreshToken(tokenInfo.Token)
-		if err != nil {
-			return nil, err
-		}
+		key = s.refreshKey
+	}
+
+	token, err := s.parseToken(tokenInfo.Token, key)
+	if err != nil {
+		return nil, err
 	}
 
 	claims, err := validateToken(token)
@@ -184,53 +181,49 @@ func (s *SessionManager) ExtractUserSession(ctx context.Context, tokenInfo *auth
 		return nil, err
 	}
 
-	user := &auth.UserSession{
-		SessionID: claims["session_id"].(string),
-		Email:     claims["email"].(string),
-		Exp:       claims["exp"].(float64),
-		UserID:    claims["user_id"].(string),
-		RoleID:    claims["role_id"].(string),
-	}
-
-	return user, nil
-}
-
-func (s *SessionManager) parseAccessToken(tokens string) (*jwt.Token, error) {
-	parts := strings.SplitN(tokens, " ", 2)
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		return nil, &toddlerErr.Error{
-			PublicStatusCode:  status.BadRequest,
-			ServiceStatusCode: status.BadRequestInvalidFormat,
-			PublicMessage:     "Invalid token format",
-			ServiceMessage:    "Bearer token structure incorrect",
-		}
-	}
-
-	token, err := jwt.Parse(parts[1], func(token *jwt.Token) (any, error) {
-		if s.signingMethod != token.Method {
-			return nil, &toddlerErr.Error{
-				PublicStatusCode:  status.BadRequest,
-				ServiceStatusCode: status.BadRequest,
-				PublicMessage:     "Invalid token",
-				ServiceMessage:    "unexpected JWT signing method",
-			}
-		}
-		return []byte(s.accessKey), nil
-	})
-	if err != nil {
+	sessionID, ok1 := claims["session_id"].(string)
+	email, ok2 := claims["email"].(string)
+	exp, ok3 := claims["exp"].(float64)
+	userID, ok4 := claims["user_id"].(string)
+	roleID, ok5 := claims["role_id"].(string)
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 {
 		return nil, &toddlerErr.Error{
 			PublicStatusCode:  status.BadRequest,
 			ServiceStatusCode: status.BadRequest,
 			PublicMessage:     "Invalid token",
-			ServiceMessage:    fmt.Sprintf("jwt.Parse error: %v", err),
+			ServiceMessage:    "unexpected claim types in token",
 		}
 	}
 
-	return token, nil
+	exists, err := s.redisConn.Exists(ctx, sessionID).Result()
+	if err != nil {
+		return nil, &toddlerErr.Error{
+			PublicStatusCode:  status.ServerError,
+			ServiceStatusCode: status.ServerError,
+			PublicMessage:     "Something went wrong",
+			ServiceMessage:    "Redis error while verifying session: " + err.Error(),
+		}
+	}
+	if exists == 0 {
+		return nil, &toddlerErr.Error{
+			PublicStatusCode:  status.Unauthorized,
+			ServiceStatusCode: status.Unauthorized,
+			PublicMessage:     "Session expired or logged out",
+			ServiceMessage:    "session not found in Redis",
+		}
+	}
+
+	return &auth.UserSession{
+		SessionID: sessionID,
+		Email:     email,
+		Exp:       exp,
+		UserID:    userID,
+		RoleID:    roleID,
+	}, nil
 }
 
-func (s *SessionManager) parseRefreshToken(tokens string) (*jwt.Token, error) {
-	parts := strings.SplitN(tokens, " ", 2)
+func (s *SessionManager) parseToken(tokenStr, key string) (*jwt.Token, error) {
+	parts := strings.SplitN(tokenStr, " ", 2)
 	if len(parts) != 2 || parts[0] != "Bearer" {
 		return nil, &toddlerErr.Error{
 			PublicStatusCode:  status.BadRequest,
@@ -249,7 +242,7 @@ func (s *SessionManager) parseRefreshToken(tokens string) (*jwt.Token, error) {
 				ServiceMessage:    "unexpected JWT signing method",
 			}
 		}
-		return []byte(s.refreshKey), nil
+		return []byte(key), nil
 	})
 	if err != nil {
 		return nil, &toddlerErr.Error{

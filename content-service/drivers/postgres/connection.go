@@ -1,10 +1,10 @@
 package postgres
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -31,13 +31,18 @@ func (c *Config) getDSN() string {
 		c.Host, c.Port, c.User, c.Password, c.DB)
 }
 
-func NewDBMaster(c *Config) (*sqlx.DB, error) {
+func NewDB(c *Config) (*sql.DB, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
 
-	db, err := sqlx.Connect(postgresDBMS, c.getDSN())
+	db, err := sql.Open(postgresDBMS, c.getDSN())
 	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Ping(); err != nil {
+		_ = db.Close()
 		return nil, err
 	}
 

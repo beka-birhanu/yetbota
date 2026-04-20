@@ -5,13 +5,13 @@ import (
 	"net/http"
 
 	"github.com/beka-birhanu/yetbota/content-service/drivers/constants"
-	jwtlib "github.com/beka-birhanu/yetbota/content-service/drivers/jwt"
+	domainAuth "github.com/beka-birhanu/yetbota/content-service/internal/domain/auth"
 	ctxRP "github.com/beka-birhanu/yetbota/content-service/internal/domain/context"
 	"github.com/go-kit/kit/endpoint"
 )
 
 // AdminAuthMiddlewareEndpoint returns a middleware function that checks admin authentication
-func AdminAuthMiddlewareEndpoint() endpoint.Middleware {
+func AdminAuthMiddlewareEndpoint(sessionManager domainAuth.SessionManager) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
 			// Retrieve context session injected in serverBefore
@@ -32,18 +32,17 @@ func AdminAuthMiddlewareEndpoint() endpoint.Middleware {
 				return nil, &Error{Message: "Unauthorized", Code: http.StatusUnauthorized}
 			}
 
-			// Parse and validate JWT; extract user session
-			userSession, err := jwtlib.ExtractAdminTokenMetadata(authHeader)
+			// Parse and validate JWT via SessionManager
+			userSession, err := sessionManager.ExtractUserSession(ctx, &domainAuth.TokenInfo{
+				TokenType: domainAuth.AccessToken,
+				Token:     authHeader,
+			})
 			if err != nil {
 				return nil, &Error{Message: "Unauthorized", Code: http.StatusUnauthorized}
 			}
 
-			if _, err := jwtlib.FetchAuth(ctx, userSession.AccessUUID); err != nil {
-				return nil, &Error{Message: "Unauthorized", Code: http.StatusUnauthorized}
-			}
-
 			// Attach to context session
-			ctxSess.UserSession = userSession
+			ctxSess.UserSession = *userSession
 
 			// Enforce admin role
 			if ctxSess.UserSession.RoleID != constants.RoleAdmin {

@@ -33,8 +33,3 @@ type Bucket interface {
 	SignURL(ctx context.Context, in *SignURLRequest) (*SignURLResponse, error)
 	RemoveFile(ctx context.Context, in *DeleteRequest) error
 }
-
-type Queue[T any] interface {
-	Enqueue(ctx context.Context, topics []string, data T) error
-	Dequeue(ctx context.Context, topic string) ([]T, error)
-}

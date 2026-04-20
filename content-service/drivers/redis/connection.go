@@ -4,17 +4,19 @@ import (
 	"context"
 	"time"
 
+	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
+	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/go-redis/redis/v8"
 )
 
 type Config struct {
 	Address  string `yaml:"address" mapstructure:"address" validate:"required"`
-	Password string `yaml:"password" mapstructure:"password" validate:"required"`
+	Password string `yaml:"password" mapstructure:"password"`
 }
 
 func (c *Config) Validate() error {
-	if err := goconf.Validate.Struct(c); err != nil {
-		return err
+	if err := validator.Validate.Struct(c); err != nil {
+		return toddlerr.FromValidationErrors(err)
 	}
 	return nil
 }
@@ -38,5 +40,5 @@ func NewConnection(ctx context.Context, c *Config) (*redis.Client, error) {
 		return nil, err
 	}
 
-	return rdb
+	return rdb, nil
 }

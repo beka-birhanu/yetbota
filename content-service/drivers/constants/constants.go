@@ -7,6 +7,7 @@ const (
 
 const (
 	DefaultPaginationLength = 15
+	DefaultPhoneRegion      = "ETH"
 )
 
 const (
@@ -21,4 +22,24 @@ const (
 	MigrationFolder = "migrations"
 )
 
+const (
+	RoleAdmin = "ADMIN"
+	RoleUser  = "USER"
+)
+
 var SkipAuth = map[string]struct{}{}
+
+var SkipAuthGrpc = map[string]struct{}{}
+
+var AllowedAccessMap = map[string]struct{}{
+	RoleAdmin: {},
+	RoleUser:  {},
+}
+
+var AllowedAdminAccessMap = map[string]struct{}{
+	RoleAdmin: {},
+}
+
+var AllowedCSAAccessMap = map[string]struct{}{
+	RoleAdmin: {},
+}

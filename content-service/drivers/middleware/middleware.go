@@ -9,23 +9,21 @@ import (
 	"github.com/friendsofgo/errors"
 	"github.com/go-kit/kit/endpoint"
 
-	jwtLib "github.com/beka-birhanu/yetbota/content-service/drivers/jwt"
+	domainAuth "github.com/beka-birhanu/yetbota/content-service/internal/domain/auth"
 	ctxRP "github.com/beka-birhanu/yetbota/content-service/internal/domain/context"
 )
 
-const SessionID = "Session_Id"
-
 func httpError(w http.ResponseWriter, statusCode int, err string) {
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(err)
+	_ = json.NewEncoder(w).Encode(err)
 }
 
 func httpSuccess(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	_ = json.NewEncoder(w).Encode(data)
 }
 
-func AuthMiddleware() endpoint.Middleware {
+func AuthMiddleware(sessionManager domainAuth.SessionManager) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
 			data := ctx.Value(ctxRP.AppSession)
@@ -38,12 +36,15 @@ func AuthMiddleware() endpoint.Middleware {
 			bearerToken := strings.Split(authHeader, " ")
 
 			if len(bearerToken) == 2 {
-				userSession, errExtract := jwtLib.NewExtractTokenMetadata(authHeader)
+				userSession, errExtract := sessionManager.ExtractUserSession(ctx, &domainAuth.TokenInfo{
+					TokenType: domainAuth.AccessToken,
+					Token:     authHeader,
+				})
 				if errExtract != nil {
 					return nil, errExtract
 				}
 
-				ctxSess.UserSession = userSession
+				ctxSess.UserSession = *userSession
 
 				return next(ctx, request)
 			}
@@ -53,45 +54,27 @@ func AuthMiddleware() endpoint.Middleware {
 	}
 }
 
-func TokenVerify(ctx context.Context, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		bearerToken := strings.Split(authHeader, " ")
+func TokenVerify(sessionManager domainAuth.SessionManager) func(context.Context, http.Handler) http.Handler {
+	return func(ctx context.Context, next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			bearerToken := strings.Split(authHeader, " ")
 
-		if len(bearerToken) == 2 {
-			// Parsing the access token metadata
-			token, err := jwtLib.ParseAccessToken(authHeader)
-			if err != nil {
-				httpError(w, http.StatusUnauthorized, err.Error())
-				return
-			}
-
-			if token.Valid {
-				accessUuid, emailExtract, errExtract := jwtLib.ExtractTokenMetadata(authHeader)
-				if errExtract != nil {
-					httpError(w, http.StatusUnauthorized, errExtract.Error())
+			if len(bearerToken) == 2 {
+				userSession, err := sessionManager.ExtractUserSession(r.Context(), &domainAuth.TokenInfo{
+					TokenType: domainAuth.AccessToken,
+					Token:     authHeader,
+				})
+				if err != nil {
+					httpError(w, http.StatusUnauthorized, err.Error())
 					return
 				}
 
-				emailAuth, errAuth := jwtLib.FetchAuth(ctx, accessUuid)
-				if errAuth != nil {
-					httpError(w, http.StatusUnauthorized, errAuth.Error())
-					return
-				}
-
-				if emailExtract == emailAuth {
-					next.ServeHTTP(w, r)
-				} else {
-					httpError(w, http.StatusUnauthorized, "Invalid Authentication")
-					return
-				}
+				_ = userSession
+				next.ServeHTTP(w, r)
 			} else {
-				httpError(w, http.StatusUnauthorized, err.Error())
-				return
+				httpError(w, http.StatusUnauthorized, "Invalid token")
 			}
-		} else {
-			httpError(w, http.StatusUnauthorized, "Invalid token")
-			return
-		}
-	})
+		})
+	}
 }

@@ -44,7 +44,7 @@ func roleToProto(s string) pb.Role {
 	}
 }
 
-func userToPrivateUser(u *domainUser.User, profileURL string) *pb.PrivateUser {
+func userToPrivateUser(u *dbmodels.User, profileURL string) *pb.PrivateUser {
 	badges := make([]pb.Badge, 0, len(u.Badges))
 	// Badges stored as strings; map to proto enum if applicable
 	_ = u.Badges
@@ -68,7 +68,7 @@ func userToPrivateUser(u *domainUser.User, profileURL string) *pb.PrivateUser {
 	}
 }
 
-func userToPublicUser(u *domainUser.User, profileURL string) *pb.PublicUser {
+func userToPublicUser(u *dbmodels.User, profileURL string) *pb.PublicUser {
 	return &pb.PublicUser{
 		Id:             u.ID,
 		Username:       u.Username,

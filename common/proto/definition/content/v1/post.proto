@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package content.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/postpb/v1";
+
+enum PostVoteType {
+  POST_VOTE_TYPE_UNSPECIFIED = 0;
+  POST_VOTE_TYPE_LIKE = 1;
+  POST_VOTE_TYPE_DISLIKE = 2;
+}
+
+enum PhotoResolution {
+  PHOTO_RESOLUTION_UNSPECIFIED = 0;
+  PHOTO_RESOLUTION_ORIGINAL = 1;
+  PHOTO_RESOLUTION_MOBILE = 2;
+  PHOTO_RESOLUTION_WEB = 3;
+}
+
+message Coordinate {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message OrderedPhotoUpload {
+  bytes photo = 1;
+  int32 position = 2;
+}
+
+message OrderedPhoto {
+  string photo = 1;
+  string id = 2;
+  int32 position = 3;
+}
+
+message Post {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  int32 likes = 4;
+  int32 dislikes = 5;
+  int32 comments = 6;
+  string user_id = 7;
+  repeated string tags = 8;
+  bool is_question = 9;
+  repeated OrderedPhoto photos = 10;
+  Coordinate location = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+}
+
+message AddRequest {
+  string title = 1;
+  string description = 2;
+  repeated string tags = 3;
+  bool is_question = 4;
+  repeated OrderedPhotoUpload photos = 5;
+  Coordinate location = 6;
+}
+
+message AddResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  Post data = 4;
+}
+
+message ReadRequest {
+  string id = 1;
+  PhotoResolution resolution = 2;
+}
+
+message ReadResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  Post data = 4;
+}
+
+message UpdateRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  repeated string tags = 4;
+  repeated OrderedPhotoUpload upsert_photos = 5;
+  Coordinate location = 6;
+}
+
+message UpdateResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  Post data = 4;
+}
+
+message VotePostRequest {
+  string post_id = 1;
+  PostVoteType vote_type = 2;
+}
+
+message VotePostResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  int32 likes = 4;
+  int32 dislikes = 5;
+}
+
+service PostService {
+  rpc Add(AddRequest) returns (AddResponse);
+  rpc Read(ReadRequest) returns (ReadResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+  rpc Vote(VotePostRequest) returns (VotePostResponse);
+}

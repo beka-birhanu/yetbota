@@ -10,6 +10,16 @@ type Configs struct {
 	Redis    *Redis    `yaml:"redis" mapstructure:"redis" validate:"required"`
 	Otp      *Otp      `yaml:"otp" mapstructure:"otp" validate:"required"`
 	Jwt      *Jwt      `yaml:"jwt" mapstructure:"jwt" validate:"required"`
+	AWS      *AWS      `yaml:"aws" mapstructure:"aws" validate:"required"`
+}
+
+type AWS struct {
+	S3 *AWSS3 `yaml:"s3" mapstructure:"s3" validate:"required"`
+}
+
+type AWSS3 struct {
+	Region string `yaml:"region" mapstructure:"region" validate:"required"`
+	Bucket string `yaml:"bucket" mapstructure:"bucket" validate:"required"`
 }
 
 type App struct {

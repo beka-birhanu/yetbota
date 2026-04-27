@@ -103,7 +103,7 @@ func (r *UpdateRequest) Validate() error {
 }
 
 type UpdateResponse struct {
-	User *domainUser.User
+	User *dbmodels.User
 }
 
 // UpdateSelf
@@ -127,7 +127,7 @@ func (r *UpdateSelfRequest) normalize() error {
 }
 
 type UpdateSelfResponse struct {
-	User *domainUser.User
+	User *dbmodels.User
 }
 
 // Register
@@ -162,7 +162,7 @@ func (r *RegisterRequest) normalize() error {
 }
 
 type RegisterResponse struct {
-	User *domainUser.User
+	User *dbmodels.User
 }
 
 // Delete

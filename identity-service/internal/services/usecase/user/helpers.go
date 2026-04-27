@@ -7,7 +7,6 @@ import (
 	"github.com/beka-birhanu/toddler/status"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/constants"
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/dbmodels"
-	domainUser "github.com/beka-birhanu/yetbota/identity-service/internal/domain/user"
 	"github.com/nyaruka/phonenumbers"
 	"golang.org/x/sync/errgroup"
 )
@@ -28,7 +27,7 @@ func normalizePhone(mobile string) (string, error) {
 	return phonenumbers.Format(parsed, phonenumbers.E164), nil
 }
 
-func applyUserSelfUpdate(u *domainUser.User, req *UpdateSelfRequest) {
+func applyUserSelfUpdate(u *dbmodels.User, req *UpdateSelfRequest) {
 	if req.FirstName != "" {
 		u.FirstName = req.FirstName
 	}

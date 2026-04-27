@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
@@ -31,8 +33,11 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/pressly/goose"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/sync/errgroup"
 
 	cmdGrpc "github.com/beka-birhanu/yetbota/identity-service/cmd/grpc"
+	cmdHTTP "github.com/beka-birhanu/yetbota/identity-service/cmd/http"
+	transportHTTP "github.com/beka-birhanu/yetbota/identity-service/internal/transport/http"
 )
 
 func main() {
@@ -43,7 +48,8 @@ func main() {
 		logger.WithLevel(zapcore.DebugLevel),
 	)
 
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -227,16 +233,38 @@ func main() {
 		panic(fmt.Errorf("error creating user grpc server: %v", err))
 	}
 
-	// gRPC Server
-	if err := cmdGrpc.RunServer(ctx, &cmdGrpc.Config{
-		Port:                cfg.Grpc.Port,
-		KeepaliveTime:       time.Duration(cfg.Grpc.Keepalive.Time) * time.Second,
-		KeepaliveTimeout:    time.Duration(cfg.Grpc.Keepalive.Timeout) * time.Second,
-		KeepaliveMinTime:    time.Duration(cfg.Grpc.Keepalive.MinTime) * time.Second,
-		PermitWithoutStream: cfg.Grpc.Keepalive.PermitWithoutStream,
-		SessionManager:      sessionManager,
-		GrpcServers:         []cmdGrpc.GrpcServer{authServer, userServer},
-	}); err != nil {
-		panic(fmt.Errorf("gRPC server error: %v", err))
+	httpRouter, err := transportHTTP.NewRouter(&transportHTTP.Config{
+		E: endpoints,
+		SessionManager: sessionManager,
+		CorsHosts: cfg.Cors.Hosts,
+	})
+	if err != nil {
+		panic(fmt.Errorf("error creating http router: %v", err))
+	}
+
+	g, gctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return cmdGrpc.RunServer(gctx, &cmdGrpc.Config{
+			Port:                cfg.Grpc.Port,
+			KeepaliveTime:       time.Duration(cfg.Grpc.Keepalive.Time) * time.Second,
+			KeepaliveTimeout:    time.Duration(cfg.Grpc.Keepalive.Timeout) * time.Second,
+			KeepaliveMinTime:    time.Duration(cfg.Grpc.Keepalive.MinTime) * time.Second,
+			PermitWithoutStream: cfg.Grpc.Keepalive.PermitWithoutStream,
+			SessionManager:      sessionManager,
+			GrpcServers:         []cmdGrpc.GrpcServer{authServer, userServer},
+		})
+	})
+	g.Go(func() error {
+		return cmdHTTP.RunServer(gctx, &cmdHTTP.Config{
+			Port:         cfg.Rest.Port,
+			Handler:      httpRouter,
+			ReadTimeout:  time.Duration(cfg.Rest.ReadTimeout) * time.Second,
+			WriteTimeout: time.Duration(cfg.Rest.WriteTimeout) * time.Second,
+			IdleTimeout:  time.Duration(cfg.Rest.IdleTimeout) * time.Second,
+		})
+	})
+
+	if err := g.Wait(); err != nil {
+		panic(fmt.Errorf("server error: %v", err))
 	}
 }

@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package content.comment.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/commentpb/v1";
+
+enum CommentVoteType {
+  COMMENT_VOTE_TYPE_UNSPECIFIED = 0;
+  COMMENT_VOTE_TYPE_UP = 1;
+  COMMENT_VOTE_TYPE_DOWN = 2;
+}
+
+message Comment {
+  string id = 1;
+  string comment = 2;
+  int32 upvote = 3;
+  int32 downvote = 4;
+  string user_id = 5;
+  string post_id = 6;
+  bool is_answer = 7;
+  string comment_id = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message AddRequest {
+  string post_id = 1;
+  string comment = 2;
+  bool is_answer = 3;
+  string comment_id = 4;
+}
+
+message AddResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  Comment data = 4;
+}
+
+message ReadRequest {
+  string id = 1;
+}
+
+message ReadResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  Comment data = 4;
+}
+
+message ListRequest {
+  string post_id = 1;
+  string comment_id = 2;
+}
+
+message ListResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  repeated Comment data = 4;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message VoteCommentRequest {
+  string comment_id = 1;
+  CommentVoteType vote_type = 2;
+}
+
+message VoteCommentResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  int32 upvote = 4;
+  int32 downvote = 5;
+}
+
+service CommentService {
+  rpc Add(AddRequest) returns (AddResponse);
+  rpc Read(ReadRequest) returns (ReadResponse);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Vote(VoteCommentRequest) returns (VoteCommentResponse);
+}

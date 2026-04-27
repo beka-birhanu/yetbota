@@ -8,9 +8,6 @@ import (
 	"github.com/beka-birhanu/yetbota/identity-service/drivers/dbmodels"
 )
 
-// User is the db model for users.
-type User = dbmodels.User
-
 type Options struct {
 	FirstName string
 	Surname   string

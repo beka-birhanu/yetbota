@@ -19,13 +19,10 @@ import (
 const guestTokenTTL = 365 * 24 * time.Hour
 
 var claimKeys = []string{
-	// Kept for content-service issued tokens.
-	// Validation accepts both content-service and identity-service claim schemas.
 	"session_id",
-	"email",
 	"exp",
 	"user_id",
-	"role_id",
+	"role",
 }
 
 type SessionManager struct {
@@ -78,7 +75,7 @@ func NewSessionManager(cfg *Config) (*SessionManager, error) {
 
 func (s *SessionManager) NewSessionDetails(ctx context.Context, sessInfo *auth.SessionInfo) (*auth.SessionDetails, error) {
 	accessUuid := uuid.NewString()
-	refreshUuid := accessUuid + "++" + sessInfo.Email
+	refreshUuid := accessUuid + "++" + sessInfo.Username
 
 	td := &auth.SessionDetails{
 		AccessTtl:   s.accessTTL,
@@ -90,9 +87,9 @@ func (s *SessionManager) NewSessionDetails(ctx context.Context, sessInfo *auth.S
 	// Creating Access Token
 	atClaims := jwt.MapClaims{
 		"session_id": accessUuid,
-		"email":      sessInfo.Email,
+		"username":   sessInfo.Username,
 		"user_id":    sessInfo.UserID,
-		"role_id":    sessInfo.RoleID,
+		"role":       sessInfo.Role,
 		"exp":        time.Now().Add(s.accessTTL).Unix(),
 	}
 	at := jwt.NewWithClaims(s.signingMethod, atClaims)
@@ -110,9 +107,9 @@ func (s *SessionManager) NewSessionDetails(ctx context.Context, sessInfo *auth.S
 	// Creating Refresh Token
 	rtClaims := jwt.MapClaims{
 		"session_id": td.RefreshUuid,
-		"email":      sessInfo.Email,
+		"username":   sessInfo.Username,
 		"user_id":    sessInfo.UserID,
-		"role_id":    sessInfo.RoleID,
+		"role":       sessInfo.Role,
 		"exp":        time.Now().Add(s.refreshTTL).Unix(),
 	}
 	rt := jwt.NewWithClaims(s.signingMethod, rtClaims)
@@ -184,27 +181,12 @@ func (s *SessionManager) ExtractUserSession(ctx context.Context, tokenInfo *auth
 	}
 
 	sessionID, ok1 := claims["session_id"].(string)
+	role, ok2 := claims["role"].(string)
 	exp, ok3 := claims["exp"].(float64)
 	userID, ok4 := claims["user_id"].(string)
+	username, ok5 := claims["username"].(string)
 
-	// Accept either:
-	// - content-service schema: email + role_id
-	// - identity-service schema: username + role
-	var email string
-	if v, ok := claims["email"].(string); ok {
-		email = v
-	} else if v, ok := claims["username"].(string); ok {
-		email = v
-	}
-
-	var roleID string
-	if v, ok := claims["role_id"].(string); ok {
-		roleID = v
-	} else if v, ok := claims["role"].(string); ok {
-		roleID = v
-	}
-
-	if !ok1 || !ok3 || !ok4 || email == "" || roleID == "" {
+	if !ok1 || !ok3 || !ok4 || !ok5 || !ok2 {
 		return nil, &toddlerErr.Error{
 			PublicStatusCode:  status.BadRequest,
 			ServiceStatusCode: status.BadRequest,
@@ -233,10 +215,10 @@ func (s *SessionManager) ExtractUserSession(ctx context.Context, tokenInfo *auth
 
 	return &auth.UserSession{
 		SessionID: sessionID,
-		Email:     email,
+		Username:  username,
 		Exp:       exp,
 		UserID:    userID,
-		RoleID:    roleID,
+		Role:      role,
 	}, nil
 }
 
@@ -369,8 +351,7 @@ func validateToken(token *jwt.Token) (jwt.MapClaims, error) {
 		}
 	}
 
-	// Validate required common claims plus either identity-service or content-service identity fields.
-	for _, key := range []string{"session_id", "user_id", "exp"} {
+	for _, key := range claimKeys {
 		if _, ok := claims[key]; !ok {
 			return nil, &toddlerErr.Error{
 				PublicStatusCode:  status.BadRequest,
@@ -378,28 +359,6 @@ func validateToken(token *jwt.Token) (jwt.MapClaims, error) {
 				PublicMessage:     "Invalid token",
 				ServiceMessage:    fmt.Sprintf("missing claim: %s", key),
 			}
-		}
-	}
-
-	_, hasEmail := claims["email"]
-	_, hasUsername := claims["username"]
-	if !hasEmail && !hasUsername {
-		return nil, &toddlerErr.Error{
-			PublicStatusCode:  status.BadRequest,
-			ServiceStatusCode: status.BadRequest,
-			PublicMessage:     "Invalid token",
-			ServiceMessage:    "missing claim: email|username",
-		}
-	}
-
-	_, hasRoleID := claims["role_id"]
-	_, hasRole := claims["role"]
-	if !hasRoleID && !hasRole {
-		return nil, &toddlerErr.Error{
-			PublicStatusCode:  status.BadRequest,
-			ServiceStatusCode: status.BadRequest,
-			PublicMessage:     "Invalid token",
-			ServiceMessage:    "missing claim: role_id|role",
 		}
 	}
 

@@ -20,7 +20,7 @@ PROTOC_GRPC_OPTS = --go-grpc_opt=paths=source_relative --go-grpc_opt=require_uni
 # =====================
 
 IDENTITY_PROTO_DIR := $(PROTO_DIR)/identity/$(VERSION)
-CONTENT_PROTO_DIR := $(PROTO_DIR)/content/$(VERSION)
+CONTENT_POST_PROTO_DIR := $(PROTO_DIR)/content/post/$(VERSION)
 CONTENT_COMMENT_PROTO_DIR := $(PROTO_DIR)/content/comment/$(VERSION)
 
 .PHONY: gengo-identity-auth gengo-identity-user gengo-identity gengo-all
@@ -44,13 +44,13 @@ gengo-identity-user:
 		$(IDENTITY_PROTO_DIR)/user.proto
 
 gengo-content-post:
-	@echo " > Generate content/$(VERSION)/post.proto"
+	@echo " > Generate content/post/$(VERSION)/post.proto"
 	@mkdir -p $(OUT_DIR)
 	@protoc --proto_path=$(PROTO_DIR) \
 		--go_out=$(OUT_DIR) \
 		--go-grpc_out=$(OUT_DIR) \
 		$(PROTOC_GO_OPTS) $(PROTOC_GRPC_OPTS) \
-		$(CONTENT_PROTO_DIR)/post.proto
+		$(CONTENT_POST_PROTO_DIR)/post.proto
 
 gengo-content-comment:
 	@echo " > Generate content/comment/$(VERSION)/comment.proto"

@@ -62,9 +62,9 @@ message Post {
   bool is_question = 9;
   repeated OrderedPhoto photos = 10;
   Coordinate location = 11;
-  google.protobuf.Timestamp created_at = 12;
-  google.protobuf.Timestamp updated_at = 13;
-  string address = 14;
+  string address = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
 }
 
 message AddRequest {

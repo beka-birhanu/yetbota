@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -36,6 +37,7 @@ func makeUnaryServerInterceptor(sessionManager domainAuth.SessionManager) grpc.U
 				Token:     token,
 			})
 			if err != nil {
+				fmt.Println(err)
 				return nil, status.Error(codes.Unauthenticated, "invalid token")
 			}
 

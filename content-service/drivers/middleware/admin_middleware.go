@@ -45,7 +45,7 @@ func AdminAuthMiddlewareEndpoint(sessionManager domainAuth.SessionManager) endpo
 			ctxSess.UserSession = *userSession
 
 			// Enforce admin role
-			if ctxSess.UserSession.RoleID != constants.RoleAdmin {
+			if ctxSess.UserSession.Role != constants.RoleAdmin {
 				return nil, &Error{Message: "Forbidden - Admin access required", Code: http.StatusForbidden}
 			}
 

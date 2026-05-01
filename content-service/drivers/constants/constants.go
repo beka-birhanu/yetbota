@@ -31,6 +31,7 @@ var SkipAuth = map[string]struct{}{}
 
 var SkipAuthGrpc = map[string]struct{}{
 	"/content.v1.PostService/List": {},
+	"/content.v1.PostService/Read": {},
 }
 
 var AllowedAccessMap = map[string]struct{}{

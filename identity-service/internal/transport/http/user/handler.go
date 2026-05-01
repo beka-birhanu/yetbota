@@ -27,8 +27,10 @@ func NewHandler(cfg *Config) (http.Handler, error) {
 		uploadProfileEndpoint := cfg.E.UserUploadProfile
 		followEndpoint := cfg.E.UserFollow
 		unfollowEndpoint := cfg.E.UserUnfollow
+		readMeEndpoint := cfg.E.UserRead
 		if cfg.SessionManager != nil {
 			listEndpoint = driverMW.AuthMiddleware(cfg.SessionManager)(listEndpoint)
+			readMeEndpoint = driverMW.AuthMiddleware(cfg.SessionManager)(readMeEndpoint)
 			updateEndpoint = driverMW.AuthMiddleware(cfg.SessionManager)(updateEndpoint)
 			updateSelfEndpoint = driverMW.AuthMiddleware(cfg.SessionManager)(updateSelfEndpoint)
 			deleteEndpoint = driverMW.AuthMiddleware(cfg.SessionManager)(deleteEndpoint)
@@ -41,6 +43,12 @@ func NewHandler(cfg *Config) (http.Handler, error) {
 			listEndpoint,
 			decodeUserListHTTP,
 			encodeUserListHTTP,
+			shared.ServerOptions()...,
+		)
+		readMeServer := kithttp.NewServer(
+			readMeEndpoint,
+			decodeUserReadMeHTTP,
+			encodeUserReadHTTP,
 			shared.ServerOptions()...,
 		)
 		readPublicServer := kithttp.NewServer(
@@ -105,6 +113,7 @@ func NewHandler(cfg *Config) (http.Handler, error) {
 		)
 
 		mux.Handle("GET /", listServer)
+		mux.Handle("GET /me", readMeServer)
 		mux.Handle("GET /{id}", readPublicServer)
 		mux.Handle("POST /register", registerServer)
 		mux.Handle("POST /check-mobile", checkMobileServer)

@@ -118,6 +118,30 @@ type readPublicData struct {
 	User userDTO `json:"user"`
 }
 
+func encodeUserReadHTTP(ctx context.Context, w http.ResponseWriter, resp any) error {
+	if te, ok := resp.(*toddlerr.Error); ok {
+		return te
+	}
+	out, ok := resp.(*userSvc.ReadResponse)
+	if !ok || out == nil || out.UserWrapper == nil || out.UserWrapper.User == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return json.NewEncoder(w).Encode(shared.Envelope{Success: false, Message: "something went wrong"})
+	}
+
+	u := out.UserWrapper.User
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	env := shared.Envelope{
+		Success: true,
+		Data: readPublicData{
+			User: toUserDTO(u, out.UserWrapper.ProfileURL),
+		},
+	}
+	setCtxResponse(ctx, env)
+	return json.NewEncoder(w).Encode(env)
+}
+
 func encodeUserReadPublicHTTP(ctx context.Context, w http.ResponseWriter, resp any) error {
 	if te, ok := resp.(*toddlerr.Error); ok {
 		return te

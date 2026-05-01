@@ -13,7 +13,6 @@ import (
 	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 )
 
-
 type repo struct {
 	db *sql.DB
 }

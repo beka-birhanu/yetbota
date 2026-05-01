@@ -29,13 +29,14 @@ type Service interface {
 }
 
 type Config struct {
-	UserRepo   domainUser.Repository   `validate:"required"`
-	PhotoRepo  domainPhoto.Repository  `validate:"required"`
-	FollowRepo domainFollow.Repository `validate:"required"`
-	OtpStore   domainAuth.OtpStore     `validate:"required"`
-	Hasher     domainAuth.Hasher       `validate:"required"`
-	Bucket     domainStorage.Bucket    `validate:"required"`
-	BucketName string                  `validate:"required"`
+	UserRepo     domainUser.Repository   `validate:"required"`
+	PhotoRepo    domainPhoto.Repository  `validate:"required"`
+	FollowRepo   domainFollow.Repository `validate:"required"`
+	OtpStore     domainAuth.OtpStore     `validate:"required"`
+	Hasher       domainAuth.Hasher       `validate:"required"`
+	Bucket       domainStorage.Bucket    `validate:"required"`
+	BucketName   string                  `validate:"required"`
+	BucketRegion string                  `validate:"required"`
 }
 
 func (c *Config) Validate() error {
@@ -46,13 +47,14 @@ func (c *Config) Validate() error {
 }
 
 type svc struct {
-	userRepo   domainUser.Repository
-	photoRepo  domainPhoto.Repository
-	followRepo domainFollow.Repository
-	otpStore   domainAuth.OtpStore
-	hasher     domainAuth.Hasher
-	bucket     domainStorage.Bucket
-	bucketName string
+	userRepo     domainUser.Repository
+	photoRepo    domainPhoto.Repository
+	followRepo   domainFollow.Repository
+	otpStore     domainAuth.OtpStore
+	hasher       domainAuth.Hasher
+	bucket       domainStorage.Bucket
+	bucketName   string
+	bucketRegion string
 }
 
 func NewService(cfg *Config) (Service, error) {
@@ -60,12 +62,13 @@ func NewService(cfg *Config) (Service, error) {
 		return nil, err
 	}
 	return &svc{
-		userRepo:   cfg.UserRepo,
-		photoRepo:  cfg.PhotoRepo,
-		followRepo: cfg.FollowRepo,
-		otpStore:   cfg.OtpStore,
-		hasher:     cfg.Hasher,
-		bucket:     cfg.Bucket,
-		bucketName: cfg.BucketName,
+		userRepo:     cfg.UserRepo,
+		photoRepo:    cfg.PhotoRepo,
+		followRepo:   cfg.FollowRepo,
+		otpStore:     cfg.OtpStore,
+		hasher:       cfg.Hasher,
+		bucket:       cfg.Bucket,
+		bucketName:   cfg.BucketName,
+		bucketRegion: cfg.BucketRegion,
 	}, nil
 }

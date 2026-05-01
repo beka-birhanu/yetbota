@@ -28,6 +28,7 @@ func (s *svc) Add(ctx context.Context, ctxSess *ctxRP.Context, req *AddRequest) 
 	}
 
 	post := postFromAddReq(req)
+	post.UserID = ctxSess.UserSession.UserID
 
 	uploaded, err := s.uploadPhotos(ctx, post.ID, req.Photos)
 	if err != nil {

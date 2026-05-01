@@ -47,7 +47,7 @@ otp:
 aws:
   s3:
     region: us-east-1
-    bucket: profiles
+    bucket: yetbota
 neo4j:
   uri: ${neo4jURI}
   username: ${neo4jUsername}

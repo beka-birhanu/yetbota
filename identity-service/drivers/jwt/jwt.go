@@ -245,6 +245,15 @@ func (s *SessionManager) parseToken(tokenStr, key string) (*jwt.Token, error) {
 		return []byte(key), nil
 	})
 	if err != nil {
+		// Treat expiration as an authentication failure (401) rather than a generic bad request.
+		if ve, ok := err.(*jwt.ValidationError); ok && (ve.Errors&jwt.ValidationErrorExpired) != 0 {
+			return nil, &toddlerErr.Error{
+				PublicStatusCode:  status.Unauthorized,
+				ServiceStatusCode: status.Unauthorized,
+				PublicMessage:     "Session expired or logged out",
+				ServiceMessage:    fmt.Sprintf("jwt.Parse expired: %v", err),
+			}
+		}
 		return nil, &toddlerErr.Error{
 			PublicStatusCode:  status.BadRequest,
 			ServiceStatusCode: status.BadRequest,

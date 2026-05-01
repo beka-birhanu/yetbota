@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -115,9 +116,28 @@ func sortDirectionFromQuery(v string) domainUser.SortDirection {
 	}
 }
 
+func decodeUserReadMeHTTP(ctx context.Context, r *http.Request) (any, error) {
+	req := &userSvc.ReadRequest{}
+	if res := r.URL.Query().Get("resolution"); res != "" {
+		req.Resolution = userSvc.PhotoResolution(res)
+	}
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	setCtxRequest(ctx, req)
+	return req, nil
+}
+
 func decodeUserReadPublicHTTP(ctx context.Context, r *http.Request) (any, error) {
+	id := r.PathValue("id")
+	if id == "me" {
+		return nil, badRequest(
+			`use GET /v1/users/me with Authorization for the current user; "me" is not a user id`,
+			errors.New("reserved path segment"),
+		)
+	}
 	req := &userSvc.ReadPublicRequest{
-		ID: r.PathValue("id"),
+		ID: id,
 	}
 	if res := r.URL.Query().Get("resolution"); res != "" {
 		req.Resolution = userSvc.PhotoResolution(res)

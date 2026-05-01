@@ -4,7 +4,7 @@ import (
 	"context"
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
-	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/v1"
+	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/post/v1"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
 	"github.com/beka-birhanu/yetbota/content-service/internal/services/endpoint"
 	gkgrpc "github.com/go-kit/kit/transport/grpc"
@@ -17,7 +17,7 @@ type Handler struct {
 	read   gkgrpc.Handler
 	update gkgrpc.Handler
 	vote   gkgrpc.Handler
-	list gkgrpc.Handler
+	list   gkgrpc.Handler
 }
 
 type Config struct {
@@ -40,7 +40,7 @@ func NewHandler(c *Config) (*Handler, error) {
 		read:   gkgrpc.NewServer(c.E.PostRead, decodeReadReq, encodeReadRes),
 		update: gkgrpc.NewServer(c.E.PostUpdate, decodeUpdateReq, encodeUpdateRes),
 		vote:   gkgrpc.NewServer(c.E.PostVote, decodeVoteReq, encodeVoteRes),
-		list: gkgrpc.NewServer(c.E.PostList, decodeListReq, encodeListRes),
+		list:   gkgrpc.NewServer(c.E.PostList, decodeListReq, encodeListRes),
 	}, nil
 }
 

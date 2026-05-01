@@ -59,5 +59,9 @@ func (n NullPoint) Value() (driver.Value, error) {
 	if !n.Valid || n.Point == nil {
 		return nil, nil
 	}
-	return ewkb.Marshal(n.Point, binary.LittleEndian)
+	b, err := ewkb.Marshal(n.Point, binary.LittleEndian)
+	if err != nil {
+		return nil, err
+	}
+	return hex.EncodeToString(b), nil
 }

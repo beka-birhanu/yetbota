@@ -3,7 +3,7 @@ package post
 import (
 	"context"
 
-	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/v1"
+	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/post/v1"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
 	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
@@ -25,6 +25,7 @@ func postToProto(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) *pb.Post {
 		orderedPhotos = append(orderedPhotos, &pb.OrderedPhoto{
 			Photo:    photo.URL,
 			Position: int32(photo.Position),
+			Id:       photo.ID,
 		})
 	}
 
@@ -32,8 +33,8 @@ func postToProto(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) *pb.Post {
 	if p.Location.Valid && p.Location.Point != nil {
 		coords := p.Location.Point.FlatCoords()
 		loc = &pb.Coordinate{
-			Latitude:  coords[0],
-			Longitude: coords[1],
+			Latitude:  coords[1],
+			Longitude: coords[0],
 		}
 	}
 

@@ -8,12 +8,12 @@ import (
 )
 
 type OrderedPhotoUpload struct {
-	Photo    []byte
+	Photo    []byte `mask:"true"`
 	Position int
 }
 
 type OrderedPhoto struct {
-	PhotoID  string
+	ID       string
 	URL      string
 	Position int
 }
@@ -37,7 +37,7 @@ type AddRequest struct {
 	Photos      []*OrderedPhotoUpload
 	Latitude    float64
 	Longitude   float64
-	Address     string   `validate:"omitempty,max=255"`
+	Address     string `validate:"omitempty,max=255"`
 }
 
 func (r *AddRequest) Validate() error {

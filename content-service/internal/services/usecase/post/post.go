@@ -186,7 +186,7 @@ func (s *svc) Update(ctx context.Context, ctxSess *ctxRP.Context, req *UpdateReq
 	post.Title = req.Title
 	post.Description = req.Description
 	post.Tags = req.Tags
-	post.Location = geotypes.NullPoint{Point: geom.NewPoint(geom.XY).MustSetCoords([]float64{req.Latitude, req.Longitude})}
+	post.Location = geotypes.NullPoint{Point: geom.NewPoint(geom.XY).MustSetCoords([]float64{req.Longitude, req.Latitude}), Valid: true}
 	post.Address = null.NewString(req.Address, req.Address != "")
 
 	err = s.postRepo.Update(ctx, tx, post)

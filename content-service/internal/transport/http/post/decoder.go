@@ -5,10 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
+	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	ctxYB "github.com/beka-birhanu/yetbota/content-service/internal/domain/context"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 )
@@ -19,6 +21,7 @@ func decodePostAddHTTP(ctx context.Context, r *http.Request) (any, error) {
 		Description string   `json:"description"`
 		Tags        []string `json:"tags"`
 		IsQuestion  bool     `json:"is_question"`
+		Address     string   `json:"address"`
 		Photos      []struct {
 			PhotoBase64 string `json:"photo_base64"`
 			Position    int    `json:"position"`
@@ -58,6 +61,7 @@ func decodePostAddHTTP(ctx context.Context, r *http.Request) (any, error) {
 		Photos:      photos,
 		Latitude:    lat,
 		Longitude:   lon,
+		Address:     in.Address,
 	}
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -88,6 +92,7 @@ func decodePostUpdateHTTP(ctx context.Context, r *http.Request) (any, error) {
 		Title        string   `json:"title"`
 		Description  string   `json:"description"`
 		Tags         []string `json:"tags"`
+		Address      string   `json:"address"`
 		UpsertPhotos []struct {
 			PhotoBase64 string `json:"photo_base64"`
 			Position    int    `json:"position"`
@@ -127,6 +132,7 @@ func decodePostUpdateHTTP(ctx context.Context, r *http.Request) (any, error) {
 		UpsertPhotos: photos,
 		Latitude:     lat,
 		Longitude:    lon,
+		Address:      in.Address,
 	}
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -152,6 +158,78 @@ func decodePostVoteHTTP(ctx context.Context, r *http.Request) (any, error) {
 	}
 	setCtxRequest(ctx, req)
 	return req, nil
+}
+
+func decodePostListHTTP(ctx context.Context, r *http.Request) (any, error) {
+	q := r.URL.Query()
+
+	page, _ := strconv.Atoi(q.Get("page"))
+	pageSize, _ := strconv.Atoi(q.Get("page_size"))
+
+	opts := domainPost.ListOptions{
+		UserID:    q.Get("user_id"),
+		Tags:      q["tags"],
+		Search:    q.Get("search"),
+		SortField: mapSortFieldHTTP(q.Get("sort_by")),
+		SortDir:   mapSortDirHTTP(q.Get("sort_dir")),
+		Page:      page,
+		PageSize:  pageSize,
+	}
+
+	if v := q.Get("is_question"); v != "" {
+		b := strings.EqualFold(v, "true")
+		opts.IsQuestion = &b
+	}
+
+	if latStr := q.Get("near_lat"); latStr != "" {
+		lat, err := strconv.ParseFloat(latStr, 64)
+		if err != nil {
+			return nil, badRequest("invalid near_lat", err)
+		}
+		lon, err := strconv.ParseFloat(q.Get("near_lon"), 64)
+		if err != nil {
+			return nil, badRequest("invalid near_lon", err)
+		}
+		km, err := strconv.ParseFloat(q.Get("radius_km"), 64)
+		if err != nil {
+			return nil, badRequest("invalid radius_km", err)
+		}
+		opts.NearLat = &lat
+		opts.NearLon = &lon
+		opts.RadiusKm = &km
+	}
+
+	resolution := strings.ToUpper(strings.TrimSpace(q.Get("resolution")))
+
+	req := &postSvc.ListRequest{
+		ListOptions:     opts,
+		PhotoResolution: postSvc.PhotoResolution(resolution),
+	}
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	setCtxRequest(ctx, req)
+	return req, nil
+}
+
+func mapSortFieldHTTP(s string) domainPost.ListSortField {
+	switch strings.ToLower(s) {
+	case "likes":
+		return domainPost.ListSortFieldLikes
+	case "dislikes":
+		return domainPost.ListSortFieldDislikes
+	case "comments":
+		return domainPost.ListSortFieldComments
+	default:
+		return domainPost.ListSortFieldCreatedAt
+	}
+}
+
+func mapSortDirHTTP(s string) domainPost.ListSortDir {
+	if strings.EqualFold(s, "asc") {
+		return domainPost.ListSortDirAsc
+	}
+	return domainPost.ListSortDirDesc
 }
 
 func setCtxRequest(ctx context.Context, req any) {

@@ -36,6 +36,7 @@ type postDTO struct {
 	IsQuestion  bool              `json:"is_question"`
 	Photos      []orderedPhotoDTO `json:"photos,omitempty"`
 	Location    *coordinateDTO    `json:"location,omitempty"`
+	Address     string            `json:"address,omitempty"`
 	CreatedAt   time.Time         `json:"created_at"`
 	UpdatedAt   time.Time         `json:"updated_at"`
 }
@@ -58,7 +59,6 @@ func toPostDTO(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) postDTO {
 	if p.Location.Valid && p.Location.Point != nil {
 		coords := p.Location.Point.Coords()
 		if len(coords) >= 2 {
-			// PostGIS point is typically (x=lon, y=lat). We keep names explicit.
 			loc = &coordinateDTO{Latitude: coords[1], Longitude: coords[0]}
 		}
 	}
@@ -71,7 +71,7 @@ func toPostDTO(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) postDTO {
 				continue
 			}
 			outPhotos = append(outPhotos, orderedPhotoDTO{
-				ID:       ph.PhotoID,
+				ID:       ph.ID,
 				PhotoURL: ph.URL,
 				Position: ph.Position,
 			})
@@ -90,6 +90,7 @@ func toPostDTO(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) postDTO {
 		IsQuestion:  p.IsQuestion,
 		Photos:      outPhotos,
 		Location:    loc,
+		Address:     p.Address.String,
 		CreatedAt:   p.CreatedAt,
 		UpdatedAt:   p.UpdatedAt,
 	}
@@ -166,6 +167,43 @@ func encodePostVoteHTTP(ctx context.Context, w http.ResponseWriter, resp any) er
 	}
 
 	env := shared.Envelope{Success: true, Data: voteData{Likes: out.Likes, Dislikes: out.Dislikes}}
+	setCtxResponse(ctx, env)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	return json.NewEncoder(w).Encode(env)
+}
+
+type listData struct {
+	Posts    []postDTO `json:"posts"`
+	Total    int64     `json:"total"`
+	Page     int       `json:"page"`
+	PageSize int       `json:"page_size"`
+}
+
+func encodePostListHTTP(ctx context.Context, w http.ResponseWriter, resp any) error {
+	if te, ok := resp.(*toddlerr.Error); ok {
+		return te
+	}
+	out, ok := resp.(*postSvc.ListResponse)
+	if !ok || out == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return json.NewEncoder(w).Encode(shared.Envelope{Success: false, Message: "something went wrong"})
+	}
+
+	posts := make([]postDTO, 0, len(out.Posts))
+	for _, p := range out.Posts {
+		posts = append(posts, toPostDTO(p, out.Photos[p.ID]))
+	}
+
+	env := shared.Envelope{
+		Success: true,
+		Data: listData{
+			Posts:    posts,
+			Total:    out.Total,
+			Page:     out.Page,
+			PageSize: out.PageSize,
+		},
+	}
 	setCtxResponse(ctx, env)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

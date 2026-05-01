@@ -49,7 +49,7 @@ func objectKeyFromURL(keyOrURL string) string {
 func postFromAddReq(req *AddRequest) *dbmodels.Post {
 	var location geotypes.NullPoint
 	if req.Latitude != 0 || req.Longitude != 0 {
-		location = geotypes.NullPoint{Point: geom.NewPoint(geom.XY).MustSetCoords([]float64{req.Latitude, req.Longitude})}
+		location = geotypes.NullPoint{Point: geom.NewPoint(geom.XY).MustSetCoords([]float64{req.Longitude, req.Latitude}), Valid: true}
 	}
 
 	return &dbmodels.Post{
@@ -170,7 +170,7 @@ func (s *svc) assembleOrderedPhoto(ctx context.Context, postPhotos dbmodels.Post
 		}
 
 		orderedPhotos[i] = &OrderedPhoto{
-			PhotoID:  photo.ID,
+			ID:       photo.ID,
 			URL:      url,
 			Position: postPhoto.Position,
 		}

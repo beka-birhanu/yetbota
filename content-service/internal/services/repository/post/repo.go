@@ -144,7 +144,7 @@ func (r *repo) List(ctx context.Context, opts *domainPost.ListOptions) ([]*dbmod
 	if opts.NearLat != nil && opts.NearLon != nil && opts.RadiusKm != nil {
 		filterMods = append(filterMods, qm.Where(
 			"location IS NOT NULL AND ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)",
-			*opts.NearLat, *opts.NearLon, *opts.RadiusKm*1000,
+			*opts.NearLon, *opts.NearLat, *opts.RadiusKm*1000,
 		))
 	}
 

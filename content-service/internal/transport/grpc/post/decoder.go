@@ -3,7 +3,7 @@ package post
 import (
 	"context"
 
-	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/v1"
+	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/post/v1"
 	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 )
@@ -110,7 +110,7 @@ func decodeListReq(_ context.Context, req any) (any, error) {
 	}
 
 	return &postSvc.ListRequest{
-		ListOptions:   opts,
+		ListOptions:     opts,
 		PhotoResolution: mapPhotoResolutionFromProto(in.GetResolution()),
 	}, nil
 }

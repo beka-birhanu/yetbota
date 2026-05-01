@@ -6,7 +6,7 @@ import (
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
-	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/v1"
+	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/post/v1"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 )
 

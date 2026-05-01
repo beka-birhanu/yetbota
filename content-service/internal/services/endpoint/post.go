@@ -117,3 +117,30 @@ func makePostVoteEndpoint(svc postSvc.Service) endpoint.Endpoint {
 		return respOK, nil
 	}
 }
+
+func makePostListEndpoint(svc postSvc.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request any) (any, error) {
+		data := ctx.Value(ctxRP.AppSession)
+		ctxSess, ok := data.(*ctxRP.Context)
+		if !ok {
+			return errors.New("error parsing AppSession"), nil
+		}
+		r, ok := request.(*postSvc.ListRequest)
+		if !ok {
+			err := errors.New("error parse ListRequest")
+			ctxSess.SetErrorMessage(err.Error())
+			ctxSess.Lv4()
+			return nil, err
+		}
+		ctxSess.SetRequest(r)
+		ctxSess.Lv1("Incoming message PostList")
+
+		respOK, respErr := svc.List(ctx, ctxSess, r)
+		if respErr != nil {
+			ctxSess.Lv4()
+			return respErr, nil
+		}
+		ctxSess.Lv4()
+		return respOK, nil
+	}
+}

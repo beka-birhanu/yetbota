@@ -3,8 +3,23 @@ syntax = "proto3";
 package content.v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 
 option go_package = "/postpb/v1";
+
+enum PostSortField {
+  POST_SORT_FIELD_UNSPECIFIED = 0;
+  POST_SORT_FIELD_CREATED_AT = 1;
+  POST_SORT_FIELD_LIKES = 2;
+  POST_SORT_FIELD_DISLIKES = 3;
+  POST_SORT_FIELD_COMMENTS = 4;
+}
+
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASC = 1;
+  SORT_DIRECTION_DESC = 2;
+}
 
 enum PostVoteType {
   POST_VOTE_TYPE_UNSPECIFIED = 0;
@@ -95,12 +110,12 @@ message UpdateResponse {
   Post data = 4;
 }
 
-message VotePostRequest {
+message VoteRequest {
   string post_id = 1;
   PostVoteType vote_type = 2;
 }
 
-message VotePostResponse {
+message VoteResponse {
   string code = 1;
   bool success = 2;
   string message = 3;
@@ -108,9 +123,34 @@ message VotePostResponse {
   int32 dislikes = 5;
 }
 
+message ListRequest {
+  string user_id = 1;
+  repeated string tags = 2;
+  google.protobuf.BoolValue is_question = 3;
+  string search = 4;
+  Coordinate near = 5;
+  double radius_km = 6;
+  PostSortField sort_by = 7;
+  SortDirection sort_dir = 8;
+  int32 page = 9;
+  int32 page_size = 10;
+  PhotoResolution resolution = 11;
+}
+
+message ListResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  repeated Post data = 4;
+  int64 total = 5;
+  int32 page = 6;
+  int32 page_size = 7;
+}
+
 service PostService {
   rpc Add(AddRequest) returns (AddResponse);
   rpc Read(ReadRequest) returns (ReadResponse);
   rpc Update(UpdateRequest) returns (UpdateResponse);
-  rpc Vote(VotePostRequest) returns (VotePostResponse);
+  rpc Vote(VoteRequest) returns (VoteResponse);
+  rpc List(ListRequest) returns (ListResponse);
 }

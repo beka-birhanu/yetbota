@@ -4,6 +4,7 @@ import (
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
+	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 )
 
 type OrderedPhotoUpload struct {
@@ -113,4 +114,35 @@ func (r *PostVoteRequest) Validate() error {
 type PostVoteResponse struct {
 	Likes    int
 	Dislikes int
+}
+
+// List
+
+type ListRequest struct {
+	domainPost.ListOptions
+	PhotoResolution PhotoResolution
+}
+
+func (r *ListRequest) Validate() error {
+	if r.Page <= 0 {
+		r.Page = 1
+	}
+	if r.PageSize <= 0 {
+		r.PageSize = 20
+	}
+	if r.PhotoResolution == PhotoResolutionUnspecified {
+		r.PhotoResolution = PhotoResolutionMobile
+	}
+	if err := validator.Validate.Struct(r); err != nil {
+		return toddlerr.FromValidationErrors(err)
+	}
+	return nil
+}
+
+type ListResponse struct {
+	Posts    []*dbmodels.Post
+	Photos   map[string][]*OrderedPhoto
+	Total    int64
+	Page     int
+	PageSize int
 }

@@ -17,6 +17,7 @@ type Handler struct {
 	read   gkgrpc.Handler
 	update gkgrpc.Handler
 	vote   gkgrpc.Handler
+	list gkgrpc.Handler
 }
 
 type Config struct {
@@ -39,6 +40,7 @@ func NewHandler(c *Config) (*Handler, error) {
 		read:   gkgrpc.NewServer(c.E.PostRead, decodeReadReq, encodeReadRes),
 		update: gkgrpc.NewServer(c.E.PostUpdate, decodeUpdateReq, encodeUpdateRes),
 		vote:   gkgrpc.NewServer(c.E.PostVote, decodeVoteReq, encodeVoteRes),
+		list: gkgrpc.NewServer(c.E.PostList, decodeListReq, encodeListRes),
 	}, nil
 }
 
@@ -79,7 +81,7 @@ func (h *Handler) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.Update
 	return resp.(*pb.UpdateResponse), nil
 }
 
-func (h *Handler) Vote(ctx context.Context, req *pb.VotePostRequest) (*pb.VotePostResponse, error) {
+func (h *Handler) Vote(ctx context.Context, req *pb.VoteRequest) (*pb.VoteResponse, error) {
 	if err := deadlineExceeded(ctx); err != nil {
 		return nil, err
 	}
@@ -87,5 +89,16 @@ func (h *Handler) Vote(ctx context.Context, req *pb.VotePostRequest) (*pb.VotePo
 	if err != nil {
 		return nil, err
 	}
-	return resp.(*pb.VotePostResponse), nil
+	return resp.(*pb.VoteResponse), nil
+}
+
+func (h *Handler) List(ctx context.Context, req *pb.ListRequest) (*pb.ListResponse, error) {
+	if err := deadlineExceeded(ctx); err != nil {
+		return nil, err
+	}
+	_, resp, err := h.list.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*pb.ListResponse), nil
 }

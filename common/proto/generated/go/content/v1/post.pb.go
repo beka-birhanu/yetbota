@@ -10,6 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -21,6 +22,110 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+type PostSortField int32
+
+const (
+	PostSortField_POST_SORT_FIELD_UNSPECIFIED PostSortField = 0
+	PostSortField_POST_SORT_FIELD_CREATED_AT  PostSortField = 1
+	PostSortField_POST_SORT_FIELD_LIKES       PostSortField = 2
+	PostSortField_POST_SORT_FIELD_DISLIKES    PostSortField = 3
+	PostSortField_POST_SORT_FIELD_COMMENTS    PostSortField = 4
+)
+
+// Enum value maps for PostSortField.
+var (
+	PostSortField_name = map[int32]string{
+		0: "POST_SORT_FIELD_UNSPECIFIED",
+		1: "POST_SORT_FIELD_CREATED_AT",
+		2: "POST_SORT_FIELD_LIKES",
+		3: "POST_SORT_FIELD_DISLIKES",
+		4: "POST_SORT_FIELD_COMMENTS",
+	}
+	PostSortField_value = map[string]int32{
+		"POST_SORT_FIELD_UNSPECIFIED": 0,
+		"POST_SORT_FIELD_CREATED_AT":  1,
+		"POST_SORT_FIELD_LIKES":       2,
+		"POST_SORT_FIELD_DISLIKES":    3,
+		"POST_SORT_FIELD_COMMENTS":    4,
+	}
+)
+
+func (x PostSortField) Enum() *PostSortField {
+	p := new(PostSortField)
+	*p = x
+	return p
+}
+
+func (x PostSortField) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PostSortField) Descriptor() protoreflect.EnumDescriptor {
+	return file_content_v1_post_proto_enumTypes[0].Descriptor()
+}
+
+func (PostSortField) Type() protoreflect.EnumType {
+	return &file_content_v1_post_proto_enumTypes[0]
+}
+
+func (x PostSortField) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PostSortField.Descriptor instead.
+func (PostSortField) EnumDescriptor() ([]byte, []int) {
+	return file_content_v1_post_proto_rawDescGZIP(), []int{0}
+}
+
+type SortDirection int32
+
+const (
+	SortDirection_SORT_DIRECTION_UNSPECIFIED SortDirection = 0
+	SortDirection_SORT_DIRECTION_ASC         SortDirection = 1
+	SortDirection_SORT_DIRECTION_DESC        SortDirection = 2
+)
+
+// Enum value maps for SortDirection.
+var (
+	SortDirection_name = map[int32]string{
+		0: "SORT_DIRECTION_UNSPECIFIED",
+		1: "SORT_DIRECTION_ASC",
+		2: "SORT_DIRECTION_DESC",
+	}
+	SortDirection_value = map[string]int32{
+		"SORT_DIRECTION_UNSPECIFIED": 0,
+		"SORT_DIRECTION_ASC":         1,
+		"SORT_DIRECTION_DESC":        2,
+	}
+)
+
+func (x SortDirection) Enum() *SortDirection {
+	p := new(SortDirection)
+	*p = x
+	return p
+}
+
+func (x SortDirection) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SortDirection) Descriptor() protoreflect.EnumDescriptor {
+	return file_content_v1_post_proto_enumTypes[1].Descriptor()
+}
+
+func (SortDirection) Type() protoreflect.EnumType {
+	return &file_content_v1_post_proto_enumTypes[1]
+}
+
+func (x SortDirection) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SortDirection.Descriptor instead.
+func (SortDirection) EnumDescriptor() ([]byte, []int) {
+	return file_content_v1_post_proto_rawDescGZIP(), []int{1}
+}
 
 type PostVoteType int32
 
@@ -55,11 +160,11 @@ func (x PostVoteType) String() string {
 }
 
 func (PostVoteType) Descriptor() protoreflect.EnumDescriptor {
-	return file_content_v1_post_proto_enumTypes[0].Descriptor()
+	return file_content_v1_post_proto_enumTypes[2].Descriptor()
 }
 
 func (PostVoteType) Type() protoreflect.EnumType {
-	return &file_content_v1_post_proto_enumTypes[0]
+	return &file_content_v1_post_proto_enumTypes[2]
 }
 
 func (x PostVoteType) Number() protoreflect.EnumNumber {
@@ -68,7 +173,7 @@ func (x PostVoteType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PostVoteType.Descriptor instead.
 func (PostVoteType) EnumDescriptor() ([]byte, []int) {
-	return file_content_v1_post_proto_rawDescGZIP(), []int{0}
+	return file_content_v1_post_proto_rawDescGZIP(), []int{2}
 }
 
 type PhotoResolution int32
@@ -107,11 +212,11 @@ func (x PhotoResolution) String() string {
 }
 
 func (PhotoResolution) Descriptor() protoreflect.EnumDescriptor {
-	return file_content_v1_post_proto_enumTypes[1].Descriptor()
+	return file_content_v1_post_proto_enumTypes[3].Descriptor()
 }
 
 func (PhotoResolution) Type() protoreflect.EnumType {
-	return &file_content_v1_post_proto_enumTypes[1]
+	return &file_content_v1_post_proto_enumTypes[3]
 }
 
 func (x PhotoResolution) Number() protoreflect.EnumNumber {
@@ -120,7 +225,7 @@ func (x PhotoResolution) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PhotoResolution.Descriptor instead.
 func (PhotoResolution) EnumDescriptor() ([]byte, []int) {
-	return file_content_v1_post_proto_rawDescGZIP(), []int{1}
+	return file_content_v1_post_proto_rawDescGZIP(), []int{3}
 }
 
 type Coordinate struct {
@@ -851,7 +956,7 @@ func (x *UpdateResponse) GetData() *Post {
 	return nil
 }
 
-type VotePostRequest struct {
+type VoteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	VoteType      PostVoteType           `protobuf:"varint,2,opt,name=vote_type,json=voteType,proto3,enum=content.v1.PostVoteType" json:"vote_type,omitempty"`
@@ -859,20 +964,20 @@ type VotePostRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VotePostRequest) Reset() {
-	*x = VotePostRequest{}
+func (x *VoteRequest) Reset() {
+	*x = VoteRequest{}
 	mi := &file_content_v1_post_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VotePostRequest) String() string {
+func (x *VoteRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VotePostRequest) ProtoMessage() {}
+func (*VoteRequest) ProtoMessage() {}
 
-func (x *VotePostRequest) ProtoReflect() protoreflect.Message {
+func (x *VoteRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_content_v1_post_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -884,26 +989,26 @@ func (x *VotePostRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VotePostRequest.ProtoReflect.Descriptor instead.
-func (*VotePostRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use VoteRequest.ProtoReflect.Descriptor instead.
+func (*VoteRequest) Descriptor() ([]byte, []int) {
 	return file_content_v1_post_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *VotePostRequest) GetPostId() string {
+func (x *VoteRequest) GetPostId() string {
 	if x != nil {
 		return x.PostId
 	}
 	return ""
 }
 
-func (x *VotePostRequest) GetVoteType() PostVoteType {
+func (x *VoteRequest) GetVoteType() PostVoteType {
 	if x != nil {
 		return x.VoteType
 	}
 	return PostVoteType_POST_VOTE_TYPE_UNSPECIFIED
 }
 
-type VotePostResponse struct {
+type VoteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
 	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
@@ -914,20 +1019,20 @@ type VotePostResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VotePostResponse) Reset() {
-	*x = VotePostResponse{}
+func (x *VoteResponse) Reset() {
+	*x = VoteResponse{}
 	mi := &file_content_v1_post_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VotePostResponse) String() string {
+func (x *VoteResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VotePostResponse) ProtoMessage() {}
+func (*VoteResponse) ProtoMessage() {}
 
-func (x *VotePostResponse) ProtoReflect() protoreflect.Message {
+func (x *VoteResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_content_v1_post_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -939,42 +1044,258 @@ func (x *VotePostResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VotePostResponse.ProtoReflect.Descriptor instead.
-func (*VotePostResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use VoteResponse.ProtoReflect.Descriptor instead.
+func (*VoteResponse) Descriptor() ([]byte, []int) {
 	return file_content_v1_post_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *VotePostResponse) GetCode() string {
+func (x *VoteResponse) GetCode() string {
 	if x != nil {
 		return x.Code
 	}
 	return ""
 }
 
-func (x *VotePostResponse) GetSuccess() bool {
+func (x *VoteResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
 	return false
 }
 
-func (x *VotePostResponse) GetMessage() string {
+func (x *VoteResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *VotePostResponse) GetLikes() int32 {
+func (x *VoteResponse) GetLikes() int32 {
 	if x != nil {
 		return x.Likes
 	}
 	return 0
 }
 
-func (x *VotePostResponse) GetDislikes() int32 {
+func (x *VoteResponse) GetDislikes() int32 {
 	if x != nil {
 		return x.Dislikes
+	}
+	return 0
+}
+
+type ListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Tags          []string               `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
+	IsQuestion    *wrapperspb.BoolValue  `protobuf:"bytes,3,opt,name=is_question,json=isQuestion,proto3" json:"is_question,omitempty"`
+	Search        string                 `protobuf:"bytes,4,opt,name=search,proto3" json:"search,omitempty"`
+	Near          *Coordinate            `protobuf:"bytes,5,opt,name=near,proto3" json:"near,omitempty"`
+	RadiusKm      float64                `protobuf:"fixed64,6,opt,name=radius_km,json=radiusKm,proto3" json:"radius_km,omitempty"`
+	SortBy        PostSortField          `protobuf:"varint,7,opt,name=sort_by,json=sortBy,proto3,enum=content.v1.PostSortField" json:"sort_by,omitempty"`
+	SortDir       SortDirection          `protobuf:"varint,8,opt,name=sort_dir,json=sortDir,proto3,enum=content.v1.SortDirection" json:"sort_dir,omitempty"`
+	Page          int32                  `protobuf:"varint,9,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,10,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Resolution    PhotoResolution        `protobuf:"varint,11,opt,name=resolution,proto3,enum=content.v1.PhotoResolution" json:"resolution,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRequest) Reset() {
+	*x = ListRequest{}
+	mi := &file_content_v1_post_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRequest) ProtoMessage() {}
+
+func (x *ListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_content_v1_post_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRequest.ProtoReflect.Descriptor instead.
+func (*ListRequest) Descriptor() ([]byte, []int) {
+	return file_content_v1_post_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ListRequest) GetTags() []string {
+	if x != nil {
+		return x.Tags
+	}
+	return nil
+}
+
+func (x *ListRequest) GetIsQuestion() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.IsQuestion
+	}
+	return nil
+}
+
+func (x *ListRequest) GetSearch() string {
+	if x != nil {
+		return x.Search
+	}
+	return ""
+}
+
+func (x *ListRequest) GetNear() *Coordinate {
+	if x != nil {
+		return x.Near
+	}
+	return nil
+}
+
+func (x *ListRequest) GetRadiusKm() float64 {
+	if x != nil {
+		return x.RadiusKm
+	}
+	return 0
+}
+
+func (x *ListRequest) GetSortBy() PostSortField {
+	if x != nil {
+		return x.SortBy
+	}
+	return PostSortField_POST_SORT_FIELD_UNSPECIFIED
+}
+
+func (x *ListRequest) GetSortDir() SortDirection {
+	if x != nil {
+		return x.SortDir
+	}
+	return SortDirection_SORT_DIRECTION_UNSPECIFIED
+}
+
+func (x *ListRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListRequest) GetResolution() PhotoResolution {
+	if x != nil {
+		return x.Resolution
+	}
+	return PhotoResolution_PHOTO_RESOLUTION_UNSPECIFIED
+}
+
+type ListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	Data          []*Post                `protobuf:"bytes,4,rep,name=data,proto3" json:"data,omitempty"`
+	Total         int64                  `protobuf:"varint,5,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,6,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,7,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListResponse) Reset() {
+	*x = ListResponse{}
+	mi := &file_content_v1_post_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListResponse) ProtoMessage() {}
+
+func (x *ListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_content_v1_post_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListResponse.ProtoReflect.Descriptor instead.
+func (*ListResponse) Descriptor() ([]byte, []int) {
+	return file_content_v1_post_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListResponse) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *ListResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ListResponse) GetData() []*Post {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *ListResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
 	}
 	return 0
 }
@@ -984,7 +1305,7 @@ var File_content_v1_post_proto protoreflect.FileDescriptor
 const file_content_v1_post_proto_rawDesc = "" +
 	"\n" +
 	"\x15content/v1/post.proto\x12\n" +
-	"content.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"F\n" +
+	"content.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\"F\n" +
 	"\n" +
 	"Coordinate\x12\x1a\n" +
 	"\blatitude\x18\x01 \x01(\x01R\blatitude\x12\x1c\n" +
@@ -1049,16 +1370,50 @@ const file_content_v1_post_proto_rawDesc = "" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12$\n" +
-	"\x04data\x18\x04 \x01(\v2\x10.content.v1.PostR\x04data\"a\n" +
-	"\x0fVotePostRequest\x12\x17\n" +
+	"\x04data\x18\x04 \x01(\v2\x10.content.v1.PostR\x04data\"]\n" +
+	"\vVoteRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x125\n" +
-	"\tvote_type\x18\x02 \x01(\x0e2\x18.content.v1.PostVoteTypeR\bvoteType\"\x8c\x01\n" +
-	"\x10VotePostResponse\x12\x12\n" +
+	"\tvote_type\x18\x02 \x01(\x0e2\x18.content.v1.PostVoteTypeR\bvoteType\"\x88\x01\n" +
+	"\fVoteResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12\x14\n" +
 	"\x05likes\x18\x04 \x01(\x05R\x05likes\x12\x1a\n" +
-	"\bdislikes\x18\x05 \x01(\x05R\bdislikes*c\n" +
+	"\bdislikes\x18\x05 \x01(\x05R\bdislikes\"\xb2\x03\n" +
+	"\rListRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04tags\x18\x02 \x03(\tR\x04tags\x12;\n" +
+	"\vis_question\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\n" +
+	"isQuestion\x12\x16\n" +
+	"\x06search\x18\x04 \x01(\tR\x06search\x12*\n" +
+	"\x04near\x18\x05 \x01(\v2\x16.content.v1.CoordinateR\x04near\x12\x1b\n" +
+	"\tradius_km\x18\x06 \x01(\x01R\bradiusKm\x122\n" +
+	"\asort_by\x18\a \x01(\x0e2\x19.content.v1.PostSortFieldR\x06sortBy\x124\n" +
+	"\bsort_dir\x18\b \x01(\x0e2\x19.content.v1.SortDirectionR\asortDir\x12\x12\n" +
+	"\x04page\x18\t \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\n" +
+	" \x01(\x05R\bpageSize\x12;\n" +
+	"\n" +
+	"resolution\x18\v \x01(\x0e2\x1b.content.v1.PhotoResolutionR\n" +
+	"resolution\"\xc5\x01\n" +
+	"\x0eListResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\x12$\n" +
+	"\x04data\x18\x04 \x03(\v2\x10.content.v1.PostR\x04data\x12\x14\n" +
+	"\x05total\x18\x05 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x06 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\a \x01(\x05R\bpageSize*\xa7\x01\n" +
+	"\rPostSortField\x12\x1f\n" +
+	"\x1bPOST_SORT_FIELD_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aPOST_SORT_FIELD_CREATED_AT\x10\x01\x12\x19\n" +
+	"\x15POST_SORT_FIELD_LIKES\x10\x02\x12\x1c\n" +
+	"\x18POST_SORT_FIELD_DISLIKES\x10\x03\x12\x1c\n" +
+	"\x18POST_SORT_FIELD_COMMENTS\x10\x04*`\n" +
+	"\rSortDirection\x12\x1e\n" +
+	"\x1aSORT_DIRECTION_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12SORT_DIRECTION_ASC\x10\x01\x12\x17\n" +
+	"\x13SORT_DIRECTION_DESC\x10\x02*c\n" +
 	"\fPostVoteType\x12\x1e\n" +
 	"\x1aPOST_VOTE_TYPE_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13POST_VOTE_TYPE_LIKE\x10\x01\x12\x1a\n" +
@@ -1067,12 +1422,13 @@ const file_content_v1_post_proto_rawDesc = "" +
 	"\x1cPHOTO_RESOLUTION_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19PHOTO_RESOLUTION_ORIGINAL\x10\x01\x12\x1b\n" +
 	"\x17PHOTO_RESOLUTION_MOBILE\x10\x02\x12\x18\n" +
-	"\x14PHOTO_RESOLUTION_WEB\x10\x032\x84\x02\n" +
+	"\x14PHOTO_RESOLUTION_WEB\x10\x032\xbd\x02\n" +
 	"\vPostService\x126\n" +
 	"\x03Add\x12\x16.content.v1.AddRequest\x1a\x17.content.v1.AddResponse\x129\n" +
 	"\x04Read\x12\x17.content.v1.ReadRequest\x1a\x18.content.v1.ReadResponse\x12?\n" +
-	"\x06Update\x12\x19.content.v1.UpdateRequest\x1a\x1a.content.v1.UpdateResponse\x12A\n" +
-	"\x04Vote\x12\x1b.content.v1.VotePostRequest\x1a\x1c.content.v1.VotePostResponseB\fZ\n" +
+	"\x06Update\x12\x19.content.v1.UpdateRequest\x1a\x1a.content.v1.UpdateResponse\x129\n" +
+	"\x04Vote\x12\x17.content.v1.VoteRequest\x1a\x18.content.v1.VoteResponse\x12?\n" +
+	"\x06List\x12\x19.content.v1.ListRequest\x1a\x1a.content.v1.ListResponseB\fZ\n" +
 	"/postpb/v1b\x06proto3"
 
 var (
@@ -1087,52 +1443,65 @@ func file_content_v1_post_proto_rawDescGZIP() []byte {
 	return file_content_v1_post_proto_rawDescData
 }
 
-var file_content_v1_post_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_content_v1_post_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_content_v1_post_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_content_v1_post_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_content_v1_post_proto_goTypes = []any{
-	(PostVoteType)(0),             // 0: content.v1.PostVoteType
-	(PhotoResolution)(0),          // 1: content.v1.PhotoResolution
-	(*Coordinate)(nil),            // 2: content.v1.Coordinate
-	(*OrderedPhotoUpload)(nil),    // 3: content.v1.OrderedPhotoUpload
-	(*OrderedPhoto)(nil),          // 4: content.v1.OrderedPhoto
-	(*Post)(nil),                  // 5: content.v1.Post
-	(*AddRequest)(nil),            // 6: content.v1.AddRequest
-	(*AddResponse)(nil),           // 7: content.v1.AddResponse
-	(*ReadRequest)(nil),           // 8: content.v1.ReadRequest
-	(*ReadResponse)(nil),          // 9: content.v1.ReadResponse
-	(*UpdateRequest)(nil),         // 10: content.v1.UpdateRequest
-	(*UpdateResponse)(nil),        // 11: content.v1.UpdateResponse
-	(*VotePostRequest)(nil),       // 12: content.v1.VotePostRequest
-	(*VotePostResponse)(nil),      // 13: content.v1.VotePostResponse
-	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
+	(PostSortField)(0),            // 0: content.v1.PostSortField
+	(SortDirection)(0),            // 1: content.v1.SortDirection
+	(PostVoteType)(0),             // 2: content.v1.PostVoteType
+	(PhotoResolution)(0),          // 3: content.v1.PhotoResolution
+	(*Coordinate)(nil),            // 4: content.v1.Coordinate
+	(*OrderedPhotoUpload)(nil),    // 5: content.v1.OrderedPhotoUpload
+	(*OrderedPhoto)(nil),          // 6: content.v1.OrderedPhoto
+	(*Post)(nil),                  // 7: content.v1.Post
+	(*AddRequest)(nil),            // 8: content.v1.AddRequest
+	(*AddResponse)(nil),           // 9: content.v1.AddResponse
+	(*ReadRequest)(nil),           // 10: content.v1.ReadRequest
+	(*ReadResponse)(nil),          // 11: content.v1.ReadResponse
+	(*UpdateRequest)(nil),         // 12: content.v1.UpdateRequest
+	(*UpdateResponse)(nil),        // 13: content.v1.UpdateResponse
+	(*VoteRequest)(nil),           // 14: content.v1.VoteRequest
+	(*VoteResponse)(nil),          // 15: content.v1.VoteResponse
+	(*ListRequest)(nil),         // 16: content.v1.ListRequest
+	(*ListResponse)(nil),        // 17: content.v1.ListResponse
+	(*timestamppb.Timestamp)(nil), // 18: google.protobuf.Timestamp
+	(*wrapperspb.BoolValue)(nil),  // 19: google.protobuf.BoolValue
 }
 var file_content_v1_post_proto_depIdxs = []int32{
-	4,  // 0: content.v1.Post.photos:type_name -> content.v1.OrderedPhoto
-	2,  // 1: content.v1.Post.location:type_name -> content.v1.Coordinate
-	14, // 2: content.v1.Post.created_at:type_name -> google.protobuf.Timestamp
-	14, // 3: content.v1.Post.updated_at:type_name -> google.protobuf.Timestamp
-	3,  // 4: content.v1.AddRequest.photos:type_name -> content.v1.OrderedPhotoUpload
-	2,  // 5: content.v1.AddRequest.location:type_name -> content.v1.Coordinate
-	5,  // 6: content.v1.AddResponse.data:type_name -> content.v1.Post
-	1,  // 7: content.v1.ReadRequest.resolution:type_name -> content.v1.PhotoResolution
-	5,  // 8: content.v1.ReadResponse.data:type_name -> content.v1.Post
-	3,  // 9: content.v1.UpdateRequest.upsert_photos:type_name -> content.v1.OrderedPhotoUpload
-	2,  // 10: content.v1.UpdateRequest.location:type_name -> content.v1.Coordinate
-	5,  // 11: content.v1.UpdateResponse.data:type_name -> content.v1.Post
-	0,  // 12: content.v1.VotePostRequest.vote_type:type_name -> content.v1.PostVoteType
-	6,  // 13: content.v1.PostService.Add:input_type -> content.v1.AddRequest
-	8,  // 14: content.v1.PostService.Read:input_type -> content.v1.ReadRequest
-	10, // 15: content.v1.PostService.Update:input_type -> content.v1.UpdateRequest
-	12, // 16: content.v1.PostService.Vote:input_type -> content.v1.VotePostRequest
-	7,  // 17: content.v1.PostService.Add:output_type -> content.v1.AddResponse
-	9,  // 18: content.v1.PostService.Read:output_type -> content.v1.ReadResponse
-	11, // 19: content.v1.PostService.Update:output_type -> content.v1.UpdateResponse
-	13, // 20: content.v1.PostService.Vote:output_type -> content.v1.VotePostResponse
-	17, // [17:21] is the sub-list for method output_type
-	13, // [13:17] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	6,  // 0: content.v1.Post.photos:type_name -> content.v1.OrderedPhoto
+	4,  // 1: content.v1.Post.location:type_name -> content.v1.Coordinate
+	18, // 2: content.v1.Post.created_at:type_name -> google.protobuf.Timestamp
+	18, // 3: content.v1.Post.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 4: content.v1.AddRequest.photos:type_name -> content.v1.OrderedPhotoUpload
+	4,  // 5: content.v1.AddRequest.location:type_name -> content.v1.Coordinate
+	7,  // 6: content.v1.AddResponse.data:type_name -> content.v1.Post
+	3,  // 7: content.v1.ReadRequest.resolution:type_name -> content.v1.PhotoResolution
+	7,  // 8: content.v1.ReadResponse.data:type_name -> content.v1.Post
+	5,  // 9: content.v1.UpdateRequest.upsert_photos:type_name -> content.v1.OrderedPhotoUpload
+	4,  // 10: content.v1.UpdateRequest.location:type_name -> content.v1.Coordinate
+	7,  // 11: content.v1.UpdateResponse.data:type_name -> content.v1.Post
+	2,  // 12: content.v1.VoteRequest.vote_type:type_name -> content.v1.PostVoteType
+	19, // 13: content.v1.ListRequest.is_question:type_name -> google.protobuf.BoolValue
+	4,  // 14: content.v1.ListRequest.near:type_name -> content.v1.Coordinate
+	0,  // 15: content.v1.ListRequest.sort_by:type_name -> content.v1.PostSortField
+	1,  // 16: content.v1.ListRequest.sort_dir:type_name -> content.v1.SortDirection
+	3,  // 17: content.v1.ListRequest.resolution:type_name -> content.v1.PhotoResolution
+	7,  // 18: content.v1.ListResponse.data:type_name -> content.v1.Post
+	8,  // 19: content.v1.PostService.Add:input_type -> content.v1.AddRequest
+	10, // 20: content.v1.PostService.Read:input_type -> content.v1.ReadRequest
+	12, // 21: content.v1.PostService.Update:input_type -> content.v1.UpdateRequest
+	14, // 22: content.v1.PostService.Vote:input_type -> content.v1.VoteRequest
+	16, // 23: content.v1.PostService.List:input_type -> content.v1.ListRequest
+	9,  // 24: content.v1.PostService.Add:output_type -> content.v1.AddResponse
+	11, // 25: content.v1.PostService.Read:output_type -> content.v1.ReadResponse
+	13, // 26: content.v1.PostService.Update:output_type -> content.v1.UpdateResponse
+	15, // 27: content.v1.PostService.Vote:output_type -> content.v1.VoteResponse
+	17, // 28: content.v1.PostService.List:output_type -> content.v1.ListResponse
+	24, // [24:29] is the sub-list for method output_type
+	19, // [19:24] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_content_v1_post_proto_init() }
@@ -1145,8 +1514,8 @@ func file_content_v1_post_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_content_v1_post_proto_rawDesc), len(file_content_v1_post_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   12,
+			NumEnums:      4,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

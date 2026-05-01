@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/v1"
+	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 )
 
@@ -72,9 +73,42 @@ func decodeUpdateReq(_ context.Context, req any) (any, error) {
 }
 
 func decodeVoteReq(_ context.Context, req any) (any, error) {
-	in := req.(*pb.VotePostRequest)
+	in := req.(*pb.VoteRequest)
 	return &postSvc.PostVoteRequest{
 		PostID:   in.GetPostId(),
 		VoteType: mapPostVoteTypeFromProto(in.GetVoteType()),
+	}, nil
+}
+
+func decodeListReq(_ context.Context, req any) (any, error) {
+	in := req.(*pb.ListRequest)
+
+	opts := domainPost.ListOptions{
+		UserID:    in.GetUserId(),
+		Tags:      in.GetTags(),
+		Search:    in.GetSearch(),
+		SortField: mapSortFieldFromProto(in.GetSortBy()),
+		SortDir:   mapSortDirFromProto(in.GetSortDir()),
+		Page:      int(in.GetPage()),
+		PageSize:  int(in.GetPageSize()),
+	}
+
+	if v := in.GetIsQuestion(); v != nil {
+		b := v.GetValue()
+		opts.IsQuestion = &b
+	}
+
+	if loc := in.GetNear(); loc != nil {
+		lat := loc.GetLatitude()
+		lon := loc.GetLongitude()
+		km := in.GetRadiusKm()
+		opts.NearLat = &lat
+		opts.NearLon = &lon
+		opts.RadiusKm = &km
+	}
+
+	return &postSvc.ListRequest{
+		ListOptions:   opts,
+		PhotoResolution: mapPhotoResolutionFromProto(in.GetResolution()),
 	}, nil
 }

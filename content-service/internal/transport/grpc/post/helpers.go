@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/v1"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
+	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -75,4 +76,24 @@ func mapPostVoteTypeFromProto(v pb.PostVoteType) string {
 	default:
 		return dbmodels.PostVoteTypeLike
 	}
+}
+
+func mapSortFieldFromProto(f pb.PostSortField) domainPost.ListSortField {
+	switch f {
+	case pb.PostSortField_POST_SORT_FIELD_LIKES:
+		return domainPost.ListSortFieldLikes
+	case pb.PostSortField_POST_SORT_FIELD_DISLIKES:
+		return domainPost.ListSortFieldDislikes
+	case pb.PostSortField_POST_SORT_FIELD_COMMENTS:
+		return domainPost.ListSortFieldComments
+	default:
+		return domainPost.ListSortFieldCreatedAt
+	}
+}
+
+func mapSortDirFromProto(d pb.SortDirection) domainPost.ListSortDir {
+	if d == pb.SortDirection_SORT_DIRECTION_ASC {
+		return domainPost.ListSortDirAsc
+	}
+	return domainPost.ListSortDirDesc
 }

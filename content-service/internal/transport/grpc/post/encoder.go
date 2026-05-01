@@ -84,7 +84,7 @@ func encodeUpdateRes(_ context.Context, resp any) (any, error) {
 
 func encodeVoteRes(_ context.Context, resp any) (any, error) {
 	if errResp, ok := resp.(*toddlerr.Error); ok {
-		return &pb.VotePostResponse{
+		return &pb.VoteResponse{
 			Code:    fmt.Sprintf("%d", errResp.PublicStatusCode),
 			Success: false,
 			Message: errResp.PublicMessage,
@@ -92,7 +92,7 @@ func encodeVoteRes(_ context.Context, resp any) (any, error) {
 	}
 	r, ok := resp.(*postSvc.PostVoteResponse)
 	if ok {
-		return &pb.VotePostResponse{
+		return &pb.VoteResponse{
 			Code:     "00",
 			Success:  true,
 			Message:  "Vote recorded",
@@ -100,9 +100,43 @@ func encodeVoteRes(_ context.Context, resp any) (any, error) {
 			Dislikes: int32(r.Dislikes),
 		}, nil
 	}
-	return &pb.VotePostResponse{
+	return &pb.VoteResponse{
 		Code:    fmt.Sprintf("%d", status.ServerError),
 		Success: false,
 		Message: "something went wrong",
+	}, nil
+}
+
+func encodeListRes(_ context.Context, resp any) (any, error) {
+	if errResp, ok := resp.(*toddlerr.Error); ok {
+		return &pb.ListResponse{
+			Code:    fmt.Sprintf("%d", errResp.PublicStatusCode),
+			Success: false,
+			Message: errResp.PublicMessage,
+		}, nil
+	}
+	r, ok := resp.(*postSvc.ListResponse)
+	if !ok {
+		return &pb.ListResponse{
+			Code:    fmt.Sprintf("%d", status.ServerError),
+			Success: false,
+			Message: "something went wrong",
+		}, nil
+	}
+
+	posts := make([]*pb.Post, 0, len(r.Posts))
+	for _, p := range r.Posts {
+		photos := r.Photos[p.ID]
+		posts = append(posts, postToProto(p, photos))
+	}
+
+	return &pb.ListResponse{
+		Code:     "00",
+		Success:  true,
+		Message:  "Posts retrieved successfully",
+		Data:     posts,
+		Total:    r.Total,
+		Page:     int32(r.Page),
+		PageSize: int32(r.PageSize),
 	}, nil
 }

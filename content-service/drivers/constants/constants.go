@@ -29,7 +29,9 @@ const (
 
 var SkipAuth = map[string]struct{}{}
 
-var SkipAuthGrpc = map[string]struct{}{}
+var SkipAuthGrpc = map[string]struct{}{
+	"/content.v1.PostService/List": {},
+}
 
 var AllowedAccessMap = map[string]struct{}{
 	RoleAdmin: {},

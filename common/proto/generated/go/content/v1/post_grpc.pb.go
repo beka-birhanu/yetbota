@@ -23,6 +23,7 @@ const (
 	PostService_Read_FullMethodName   = "/content.v1.PostService/Read"
 	PostService_Update_FullMethodName = "/content.v1.PostService/Update"
 	PostService_Vote_FullMethodName   = "/content.v1.PostService/Vote"
+	PostService_List_FullMethodName = "/content.v1.PostService/List"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -32,7 +33,8 @@ type PostServiceClient interface {
 	Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
-	Vote(ctx context.Context, in *VotePostRequest, opts ...grpc.CallOption) (*VotePostResponse, error)
+	Vote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error)
+	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 }
 
 type postServiceClient struct {
@@ -73,10 +75,20 @@ func (c *postServiceClient) Update(ctx context.Context, in *UpdateRequest, opts 
 	return out, nil
 }
 
-func (c *postServiceClient) Vote(ctx context.Context, in *VotePostRequest, opts ...grpc.CallOption) (*VotePostResponse, error) {
+func (c *postServiceClient) Vote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VotePostResponse)
+	out := new(VoteResponse)
 	err := c.cc.Invoke(ctx, PostService_Vote_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListResponse)
+	err := c.cc.Invoke(ctx, PostService_List_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +102,8 @@ type PostServiceServer interface {
 	Add(context.Context, *AddRequest) (*AddResponse, error)
 	Read(context.Context, *ReadRequest) (*ReadResponse, error)
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
-	Vote(context.Context, *VotePostRequest) (*VotePostResponse, error)
+	Vote(context.Context, *VoteRequest) (*VoteResponse, error)
+	List(context.Context, *ListRequest) (*ListResponse, error)
 }
 
 // UnimplementedPostServiceServer should be embedded to have
@@ -109,8 +122,11 @@ func (UnimplementedPostServiceServer) Read(context.Context, *ReadRequest) (*Read
 func (UnimplementedPostServiceServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedPostServiceServer) Vote(context.Context, *VotePostRequest) (*VotePostResponse, error) {
+func (UnimplementedPostServiceServer) Vote(context.Context, *VoteRequest) (*VoteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Vote not implemented")
+}
+func (UnimplementedPostServiceServer) List(context.Context, *ListRequest) (*ListResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedPostServiceServer) testEmbeddedByValue() {}
 
@@ -187,7 +203,7 @@ func _PostService_Update_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _PostService_Vote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VotePostRequest)
+	in := new(VoteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -199,7 +215,25 @@ func _PostService_Vote_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: PostService_Vote_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).Vote(ctx, req.(*VotePostRequest))
+		return srv.(PostServiceServer).Vote(ctx, req.(*VoteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_List_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).List(ctx, req.(*ListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -226,6 +260,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Vote",
 			Handler:    _PostService_Vote_Handler,
+		},
+		{
+			MethodName: "List",
+			Handler:    _PostService_List_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

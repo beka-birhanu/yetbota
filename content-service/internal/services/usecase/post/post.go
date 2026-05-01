@@ -3,6 +3,7 @@ package post
 import (
 	"context"
 	"errors"
+	"sync"
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
@@ -14,6 +15,7 @@ import (
 	domainPostphoto "github.com/beka-birhanu/yetbota/content-service/internal/domain/postphoto"
 	repository "github.com/beka-birhanu/yetbota/content-service/internal/services/repository"
 	"github.com/twpayne/go-geom"
+	"golang.org/x/sync/errgroup"
 )
 
 func (s *svc) Add(ctx context.Context, ctxSess *ctxRP.Context, req *AddRequest) (*AddResponse, error) {
@@ -255,6 +257,60 @@ func (s *svc) Update(ctx context.Context, ctxSess *ctxRP.Context, req *UpdateReq
 	}
 
 	return &UpdateResponse{Post: post}, nil
+}
+
+func (s *svc) List(ctx context.Context, ctxSess *ctxRP.Context, req *ListRequest) (*ListResponse, error) {
+	if err := req.Validate(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	posts, total, err := s.postRepo.List(ctx, &req.ListOptions)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	photosByPost := make(map[string][]*OrderedPhoto, len(posts))
+	eg, egCtx := errgroup.WithContext(ctx)
+	var mu sync.Mutex
+
+	for _, p := range posts {
+		postID := p.ID
+		eg.Go(func() error {
+			ppList, err := s.postPhotoRepo.List(egCtx, &domainPostphoto.Options{
+				PostID:    postID,
+				LoadPhoto: true,
+			}, &domainPostphoto.SortOptions{
+				Field:     domainPostphoto.SortFieldPosition,
+				Direction: domainPostphoto.SortDirectionAsc,
+			})
+			if err != nil {
+				return err
+			}
+			ordered, err := s.assembleOrderedPhoto(egCtx, ppList, req.PhotoResolution)
+			if err != nil {
+				return err
+			}
+			mu.Lock()
+			photosByPost[postID] = ordered
+			mu.Unlock()
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	return &ListResponse{
+		Posts:    posts,
+		Photos:   photosByPost,
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, nil
 }
 
 func (s *svc) Vote(ctx context.Context, ctxSess *ctxRP.Context, req *PostVoteRequest) (*PostVoteResponse, error) {

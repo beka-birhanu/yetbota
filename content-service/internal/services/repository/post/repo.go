@@ -6,11 +6,13 @@ import (
 	"fmt"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
 	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
+	"github.com/lib/pq"
 )
 
 
@@ -122,6 +124,71 @@ func (r *repo) UpdateVote(ctx context.Context, tx *sql.Tx, entity *dbmodels.Post
 		return toddlerr.FromDBError(err, dbmodels.TableNames.PostVotes)
 	}
 	return nil
+}
+
+func (r *repo) List(ctx context.Context, opts *domainPost.ListOptions) ([]*dbmodels.Post, int64, error) {
+	var filterMods []qm.QueryMod
+
+	if opts.UserID != "" {
+		filterMods = append(filterMods, dbmodels.PostWhere.UserID.EQ(opts.UserID))
+	}
+	if opts.Search != "" {
+		pat := "%" + opts.Search + "%"
+		filterMods = append(filterMods, qm.Where("(title ILIKE ? OR description ILIKE ?)", pat, pat))
+	}
+	if opts.IsQuestion != nil {
+		filterMods = append(filterMods, dbmodels.PostWhere.IsQuestion.EQ(*opts.IsQuestion))
+	}
+	if len(opts.Tags) > 0 {
+		filterMods = append(filterMods, qm.Where("tags && ?", pq.Array(opts.Tags)))
+	}
+	if opts.NearLat != nil && opts.NearLon != nil && opts.RadiusKm != nil {
+		filterMods = append(filterMods, qm.Where(
+			"location IS NOT NULL AND ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)",
+			*opts.NearLat, *opts.NearLon, *opts.RadiusKm*1000,
+		))
+	}
+
+	total, err := dbmodels.Posts(filterMods...).Count(ctx, r.db)
+	if err != nil {
+		return nil, 0, toddlerr.FromDBError(err, dbmodels.TableNames.Posts)
+	}
+
+	sortField := "created_at"
+	switch opts.SortField {
+	case domainPost.ListSortFieldLikes:
+		sortField = "likes"
+	case domainPost.ListSortFieldDislikes:
+		sortField = "dislikes"
+	case domainPost.ListSortFieldComments:
+		sortField = "comments"
+	}
+	sortDir := "DESC"
+	if opts.SortDir == domainPost.ListSortDirAsc {
+		sortDir = "ASC"
+	}
+
+	pageSize := opts.PageSize
+	if pageSize <= 0 || pageSize > 100 {
+		pageSize = 20
+	}
+	page := opts.Page
+	if page <= 0 {
+		page = 1
+	}
+
+	allMods := append(filterMods,
+		qm.OrderBy(fmt.Sprintf("%s %s", sortField, sortDir)),
+		qm.Limit(pageSize),
+		qm.Offset((page-1)*pageSize),
+	)
+
+	posts, err := dbmodels.Posts(allMods...).All(ctx, r.db)
+	if err != nil {
+		return nil, 0, toddlerr.FromDBError(err, dbmodels.TableNames.Posts)
+	}
+
+	return posts, total, nil
 }
 
 func (r *repo) UpdateCounts(ctx context.Context, tx *sql.Tx, id string, likesDelta, dislikesDelta, expectedLikes, expectedDislikes int) error {

@@ -14,6 +14,7 @@ type Endpoints struct {
 	PostRead   endpoint.Endpoint
 	PostUpdate endpoint.Endpoint
 	PostVote   endpoint.Endpoint
+	PostList endpoint.Endpoint
 
 	CommentAdd    endpoint.Endpoint
 	CommentRead   endpoint.Endpoint
@@ -43,6 +44,7 @@ func NewEndpoints(c *Config) (*Endpoints, error) {
 		PostRead:   makePostReadEndpoint(c.PostService),
 		PostUpdate: makePostUpdateEndpoint(c.PostService),
 		PostVote:   makePostVoteEndpoint(c.PostService),
+		PostList: makePostListEndpoint(c.PostService),
 
 		CommentAdd:    makeCommentAddEndpoint(c.CommentService),
 		CommentRead:   makeCommentReadEndpoint(c.CommentService),

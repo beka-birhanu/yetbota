@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/aarondl/null/v8"
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/constants"
@@ -31,6 +32,7 @@ func postFromAddReq(req *AddRequest) *dbmodels.Post {
 		Tags:        req.Tags,
 		IsQuestion:  req.IsQuestion,
 		Location:    location,
+		Address:     null.NewString(req.Address, req.Address != ""),
 	}
 }
 

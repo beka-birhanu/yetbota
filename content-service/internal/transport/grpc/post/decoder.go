@@ -33,6 +33,7 @@ func decodeAddReq(_ context.Context, req any) (any, error) {
 		Photos:      photos,
 		Latitude:    lat,
 		Longitude:   lon,
+		Address:     in.GetAddress(),
 	}, nil
 }
 
@@ -69,6 +70,7 @@ func decodeUpdateReq(_ context.Context, req any) (any, error) {
 		UpsertPhotos: photos,
 		Latitude:     lat,
 		Longitude:    lon,
+		Address:      in.GetAddress(),
 	}, nil
 }
 

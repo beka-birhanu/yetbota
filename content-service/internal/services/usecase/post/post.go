@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/aarondl/null/v8"
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
@@ -185,6 +186,7 @@ func (s *svc) Update(ctx context.Context, ctxSess *ctxRP.Context, req *UpdateReq
 	post.Description = req.Description
 	post.Tags = req.Tags
 	post.Location = geotypes.NullPoint{Point: geom.NewPoint(geom.XY).MustSetCoords([]float64{req.Latitude, req.Longitude})}
+	post.Address = null.NewString(req.Address, req.Address != "")
 
 	err = s.postRepo.Update(ctx, tx, post)
 	if err != nil {

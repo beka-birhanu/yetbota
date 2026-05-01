@@ -51,6 +51,7 @@ func postToProto(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) *pb.Post {
 		Location:    loc,
 		CreatedAt:   timestamppb.New(p.CreatedAt),
 		UpdatedAt:   timestamppb.New(p.UpdatedAt),
+		Address:     p.Address.String,
 	}
 }
 

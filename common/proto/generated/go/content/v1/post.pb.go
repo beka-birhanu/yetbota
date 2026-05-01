@@ -407,6 +407,7 @@ type Post struct {
 	Location      *Coordinate            `protobuf:"bytes,11,opt,name=location,proto3" json:"location,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Address       string                 `protobuf:"bytes,14,opt,name=address,proto3" json:"address,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -532,6 +533,13 @@ func (x *Post) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Post) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
 type AddRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
@@ -540,6 +548,7 @@ type AddRequest struct {
 	IsQuestion    bool                   `protobuf:"varint,4,opt,name=is_question,json=isQuestion,proto3" json:"is_question,omitempty"`
 	Photos        []*OrderedPhotoUpload  `protobuf:"bytes,5,rep,name=photos,proto3" json:"photos,omitempty"`
 	Location      *Coordinate            `protobuf:"bytes,6,opt,name=location,proto3" json:"location,omitempty"`
+	Address       string                 `protobuf:"bytes,7,opt,name=address,proto3" json:"address,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -614,6 +623,13 @@ func (x *AddRequest) GetLocation() *Coordinate {
 		return x.Location
 	}
 	return nil
+}
+
+func (x *AddRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
 }
 
 type AddResponse struct {
@@ -812,6 +828,7 @@ type UpdateRequest struct {
 	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
 	UpsertPhotos  []*OrderedPhotoUpload  `protobuf:"bytes,5,rep,name=upsert_photos,json=upsertPhotos,proto3" json:"upsert_photos,omitempty"`
 	Location      *Coordinate            `protobuf:"bytes,6,opt,name=location,proto3" json:"location,omitempty"`
+	Address       string                 `protobuf:"bytes,7,opt,name=address,proto3" json:"address,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -886,6 +903,13 @@ func (x *UpdateRequest) GetLocation() *Coordinate {
 		return x.Location
 	}
 	return nil
+}
+
+func (x *UpdateRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
 }
 
 type UpdateResponse struct {

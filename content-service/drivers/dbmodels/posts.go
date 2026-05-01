@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -37,6 +38,7 @@ type Post struct {
 	CreatedAt   time.Time          `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time          `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	Dislikes    int                `boil:"dislikes" json:"dislikes" toml:"dislikes" yaml:"dislikes"`
+	Address     null.String        `boil:"address" json:"address,omitempty" toml:"address" yaml:"address,omitempty"`
 
 	R *postR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L postL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -55,6 +57,7 @@ var PostColumns = struct {
 	CreatedAt   string
 	UpdatedAt   string
 	Dislikes    string
+	Address     string
 }{
 	ID:          "id",
 	Title:       "title",
@@ -68,6 +71,7 @@ var PostColumns = struct {
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 	Dislikes:    "dislikes",
+	Address:     "address",
 }
 
 var PostTableColumns = struct {
@@ -83,6 +87,7 @@ var PostTableColumns = struct {
 	CreatedAt   string
 	UpdatedAt   string
 	Dislikes    string
+	Address     string
 }{
 	ID:          "posts.id",
 	Title:       "posts.title",
@@ -96,6 +101,7 @@ var PostTableColumns = struct {
 	CreatedAt:   "posts.created_at",
 	UpdatedAt:   "posts.updated_at",
 	Dislikes:    "posts.dislikes",
+	Address:     "posts.address",
 }
 
 // Generated where
@@ -160,6 +166,7 @@ var PostWhere = struct {
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 	Dislikes    whereHelperint
+	Address     whereHelpernull_String
 }{
 	ID:          whereHelperstring{field: "\"posts\".\"id\""},
 	Title:       whereHelperstring{field: "\"posts\".\"title\""},
@@ -173,6 +180,7 @@ var PostWhere = struct {
 	CreatedAt:   whereHelpertime_Time{field: "\"posts\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"posts\".\"updated_at\""},
 	Dislikes:    whereHelperint{field: "\"posts\".\"dislikes\""},
+	Address:     whereHelpernull_String{field: "\"posts\".\"address\""},
 }
 
 // PostRels is where relationship names are stored.
@@ -250,9 +258,9 @@ func (r *postR) GetPostVotes() PostVoteSlice {
 type postL struct{}
 
 var (
-	postAllColumns            = []string{"id", "title", "description", "likes", "comments", "user_id", "tags", "is_question", "location", "created_at", "updated_at", "dislikes"}
+	postAllColumns            = []string{"id", "title", "description", "likes", "comments", "user_id", "tags", "is_question", "location", "created_at", "updated_at", "dislikes", "address"}
 	postColumnsWithoutDefault = []string{"title", "description", "user_id", "tags"}
-	postColumnsWithDefault    = []string{"id", "likes", "comments", "is_question", "location", "created_at", "updated_at", "dislikes"}
+	postColumnsWithDefault    = []string{"id", "likes", "comments", "is_question", "location", "created_at", "updated_at", "dislikes", "address"}
 	postPrimaryKeyColumns     = []string{"id"}
 	postGeneratedColumns      = []string{}
 )

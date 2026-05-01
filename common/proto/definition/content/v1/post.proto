@@ -64,6 +64,7 @@ message Post {
   Coordinate location = 11;
   google.protobuf.Timestamp created_at = 12;
   google.protobuf.Timestamp updated_at = 13;
+  string address = 14;
 }
 
 message AddRequest {
@@ -73,6 +74,7 @@ message AddRequest {
   bool is_question = 4;
   repeated OrderedPhotoUpload photos = 5;
   Coordinate location = 6;
+  string address = 7;
 }
 
 message AddResponse {
@@ -101,6 +103,7 @@ message UpdateRequest {
   repeated string tags = 4;
   repeated OrderedPhotoUpload upsert_photos = 5;
   Coordinate location = 6;
+  string address = 7;
 }
 
 message UpdateResponse {

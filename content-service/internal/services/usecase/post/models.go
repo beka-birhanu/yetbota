@@ -37,6 +37,7 @@ type AddRequest struct {
 	Photos      []*OrderedPhotoUpload
 	Latitude    float64
 	Longitude   float64
+	Address     string   `validate:"omitempty,max=255"`
 }
 
 func (r *AddRequest) Validate() error {
@@ -80,6 +81,7 @@ type UpdateRequest struct {
 	UpsertPhotos []*OrderedPhotoUpload
 	Latitude     float64 `validate:"omitempty,min=-90,max=90"`
 	Longitude    float64 `validate:"omitempty,min=-180,max=180"`
+	Address      string  `validate:"omitempty,max=255"`
 }
 
 func (r *UpdateRequest) Validate() error {

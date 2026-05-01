@@ -16,7 +16,7 @@ const (
 	ListSortFieldCreatedAt ListSortField = "created_at"
 	ListSortFieldLikes     ListSortField = "likes"
 	ListSortFieldDislikes  ListSortField = "dislikes"
-	ListSortFieldComments  ListSortField = "comments"
+	ListSortFieldComments  ListSortField = "comment_count"
 )
 
 type ListSortDir string

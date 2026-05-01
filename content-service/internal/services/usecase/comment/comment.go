@@ -31,7 +31,7 @@ func (s *svc) Add(ctx context.Context, ctxSess *ctxRP.Context, req *AddRequest) 
 
 	comment := &dbmodels.Comment{
 		ID:        uuid.New().String(),
-		Comment:   req.Comment,
+		Content:   req.Comment,
 		UserID:    ctxSess.UserSession.UserID,
 		PostID:    req.PostID,
 		CommentID: null.NewString(req.CommentID, req.CommentID != ""),

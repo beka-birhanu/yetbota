@@ -160,7 +160,7 @@ func (r *repo) List(ctx context.Context, opts *domainPost.ListOptions) ([]*dbmod
 	case domainPost.ListSortFieldDislikes:
 		sortField = "dislikes"
 	case domainPost.ListSortFieldComments:
-		sortField = "comments"
+		sortField = "comment_count"
 	}
 	sortDir := "DESC"
 	if opts.SortDir == domainPost.ListSortDirAsc {

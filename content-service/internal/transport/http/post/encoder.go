@@ -84,7 +84,7 @@ func toPostDTO(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) postDTO {
 		Description: p.Description,
 		Likes:       p.Likes,
 		Dislikes:    p.Dislikes,
-		Comments:    p.Comments,
+		Comments:    p.CommentCount,
 		UserID:      p.UserID,
 		Tags:        []string(p.Tags),
 		IsQuestion:  p.IsQuestion,

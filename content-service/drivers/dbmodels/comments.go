@@ -25,7 +25,7 @@ import (
 // Comment is an object representing the database table.
 type Comment struct {
 	ID        string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Comment   string      `boil:"comment" json:"comment" toml:"comment" yaml:"comment"`
+	Content   string      `boil:"content" json:"content" toml:"content" yaml:"content"`
 	Upvote    int         `boil:"upvote" json:"upvote" toml:"upvote" yaml:"upvote"`
 	Downvote  int         `boil:"downvote" json:"downvote" toml:"downvote" yaml:"downvote"`
 	UserID    string      `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
@@ -41,7 +41,7 @@ type Comment struct {
 
 var CommentColumns = struct {
 	ID        string
-	Comment   string
+	Content   string
 	Upvote    string
 	Downvote  string
 	UserID    string
@@ -52,7 +52,7 @@ var CommentColumns = struct {
 	UpdatedAt string
 }{
 	ID:        "id",
-	Comment:   "comment",
+	Content:   "content",
 	Upvote:    "upvote",
 	Downvote:  "downvote",
 	UserID:    "user_id",
@@ -65,7 +65,7 @@ var CommentColumns = struct {
 
 var CommentTableColumns = struct {
 	ID        string
-	Comment   string
+	Content   string
 	Upvote    string
 	Downvote  string
 	UserID    string
@@ -76,7 +76,7 @@ var CommentTableColumns = struct {
 	UpdatedAt string
 }{
 	ID:        "comments.id",
-	Comment:   "comments.comment",
+	Content:   "comments.content",
 	Upvote:    "comments.upvote",
 	Downvote:  "comments.downvote",
 	UserID:    "comments.user_id",
@@ -179,7 +179,7 @@ func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereI
 
 var CommentWhere = struct {
 	ID        whereHelperstring
-	Comment   whereHelperstring
+	Content   whereHelperstring
 	Upvote    whereHelperint
 	Downvote  whereHelperint
 	UserID    whereHelperstring
@@ -190,7 +190,7 @@ var CommentWhere = struct {
 	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperstring{field: "\"comments\".\"id\""},
-	Comment:   whereHelperstring{field: "\"comments\".\"comment\""},
+	Content:   whereHelperstring{field: "\"comments\".\"content\""},
 	Upvote:    whereHelperint{field: "\"comments\".\"upvote\""},
 	Downvote:  whereHelperint{field: "\"comments\".\"downvote\""},
 	UserID:    whereHelperstring{field: "\"comments\".\"user_id\""},
@@ -295,8 +295,8 @@ func (r *commentR) GetComments() CommentSlice {
 type commentL struct{}
 
 var (
-	commentAllColumns            = []string{"id", "comment", "upvote", "downvote", "user_id", "post_id", "is_answer", "comment_id", "created_at", "updated_at"}
-	commentColumnsWithoutDefault = []string{"comment", "user_id", "post_id"}
+	commentAllColumns            = []string{"id", "content", "upvote", "downvote", "user_id", "post_id", "is_answer", "comment_id", "created_at", "updated_at"}
+	commentColumnsWithoutDefault = []string{"content", "user_id", "post_id"}
 	commentColumnsWithDefault    = []string{"id", "upvote", "downvote", "is_answer", "comment_id", "created_at", "updated_at"}
 	commentPrimaryKeyColumns     = []string{"id"}
 	commentGeneratedColumns      = []string{}
@@ -607,8 +607,8 @@ func (q commentQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 	return count > 0, nil
 }
 
-// ParentComment pointed to by the foreign key.
-func (o *Comment) ParentComment(mods ...qm.QueryMod) commentQuery {
+// Comment pointed to by the foreign key.
+func (o *Comment) Comment(mods ...qm.QueryMod) commentQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.CommentID),
 	}

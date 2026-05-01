@@ -41,7 +41,7 @@ func toCommentDTO(c *dbmodels.Comment) commentDTO {
 	}
 	out := commentDTO{
 		ID:        c.ID,
-		Comment:   c.Comment,
+		Comment:   c.Content,
 		Upvote:    c.Upvote,
 		Downvote:  c.Downvote,
 		UserID:    c.UserID,

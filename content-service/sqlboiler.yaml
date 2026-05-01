@@ -1,16 +1,4 @@
 output: "drivers/dbmodels"
-aliases:
-  tables:
-    posts:
-      relationships:
-        comments:
-          local: PostComments
-          foreign: Posts
-    comments:
-      relationships:
-        comment:
-          local: ParentComment
-          foreign: ChildComments
 wipe: true
 no-tests: true
 pkgname: "dbmodels"
@@ -30,6 +18,19 @@ psql:
     - "comments"
     - "comment_votes"
     - "post_votes"
+
+aliases:
+  tables:
+    posts:
+      relationships:
+        comments:
+          local: "RelatedComments"
+          foreign: "Post"
+    comments:
+      relationships:
+        comments.comment_id:
+          local: "ParentComment"
+          foreign: "ChildComments"
 
 types:
   - tables:

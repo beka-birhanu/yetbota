@@ -43,7 +43,7 @@ func postToProto(p *dbmodels.Post, photos []*postSvc.OrderedPhoto) *pb.Post {
 		Description: p.Description,
 		Likes:       int32(p.Likes),
 		Dislikes:    int32(p.Dislikes),
-		Comments:    int32(p.Comments),
+		Comments:    int32(p.CommentCount),
 		UserId:      p.UserID,
 		Tags:        p.Tags,
 		IsQuestion:  p.IsQuestion,

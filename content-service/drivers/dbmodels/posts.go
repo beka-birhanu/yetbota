@@ -26,82 +26,82 @@ import (
 
 // Post is an object representing the database table.
 type Post struct {
-	ID          string             `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title       string             `boil:"title" json:"title" toml:"title" yaml:"title"`
-	Description string             `boil:"description" json:"description" toml:"description" yaml:"description"`
-	Likes       int                `boil:"likes" json:"likes" toml:"likes" yaml:"likes"`
-	Comments    int                `boil:"comments" json:"comments" toml:"comments" yaml:"comments"`
-	UserID      string             `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	Tags        types.StringArray  `boil:"tags" json:"tags" toml:"tags" yaml:"tags"`
-	IsQuestion  bool               `boil:"is_question" json:"is_question" toml:"is_question" yaml:"is_question"`
-	Location    geotypes.NullPoint `boil:"location" json:"location,omitempty" toml:"location" yaml:"location,omitempty"`
-	CreatedAt   time.Time          `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt   time.Time          `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	Dislikes    int                `boil:"dislikes" json:"dislikes" toml:"dislikes" yaml:"dislikes"`
-	Address     null.String        `boil:"address" json:"address,omitempty" toml:"address" yaml:"address,omitempty"`
+	ID           string             `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Title        string             `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Description  string             `boil:"description" json:"description" toml:"description" yaml:"description"`
+	Likes        int                `boil:"likes" json:"likes" toml:"likes" yaml:"likes"`
+	CommentCount int                `boil:"comment_count" json:"comment_count" toml:"comment_count" yaml:"comment_count"`
+	UserID       string             `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	Tags         types.StringArray  `boil:"tags" json:"tags" toml:"tags" yaml:"tags"`
+	IsQuestion   bool               `boil:"is_question" json:"is_question" toml:"is_question" yaml:"is_question"`
+	Location     geotypes.NullPoint `boil:"location" json:"location,omitempty" toml:"location" yaml:"location,omitempty"`
+	CreatedAt    time.Time          `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt    time.Time          `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	Dislikes     int                `boil:"dislikes" json:"dislikes" toml:"dislikes" yaml:"dislikes"`
+	Address      null.String        `boil:"address" json:"address,omitempty" toml:"address" yaml:"address,omitempty"`
 
 	R *postR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L postL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var PostColumns = struct {
-	ID          string
-	Title       string
-	Description string
-	Likes       string
-	Comments    string
-	UserID      string
-	Tags        string
-	IsQuestion  string
-	Location    string
-	CreatedAt   string
-	UpdatedAt   string
-	Dislikes    string
-	Address     string
+	ID           string
+	Title        string
+	Description  string
+	Likes        string
+	CommentCount string
+	UserID       string
+	Tags         string
+	IsQuestion   string
+	Location     string
+	CreatedAt    string
+	UpdatedAt    string
+	Dislikes     string
+	Address      string
 }{
-	ID:          "id",
-	Title:       "title",
-	Description: "description",
-	Likes:       "likes",
-	Comments:    "comments",
-	UserID:      "user_id",
-	Tags:        "tags",
-	IsQuestion:  "is_question",
-	Location:    "location",
-	CreatedAt:   "created_at",
-	UpdatedAt:   "updated_at",
-	Dislikes:    "dislikes",
-	Address:     "address",
+	ID:           "id",
+	Title:        "title",
+	Description:  "description",
+	Likes:        "likes",
+	CommentCount: "comment_count",
+	UserID:       "user_id",
+	Tags:         "tags",
+	IsQuestion:   "is_question",
+	Location:     "location",
+	CreatedAt:    "created_at",
+	UpdatedAt:    "updated_at",
+	Dislikes:     "dislikes",
+	Address:      "address",
 }
 
 var PostTableColumns = struct {
-	ID          string
-	Title       string
-	Description string
-	Likes       string
-	Comments    string
-	UserID      string
-	Tags        string
-	IsQuestion  string
-	Location    string
-	CreatedAt   string
-	UpdatedAt   string
-	Dislikes    string
-	Address     string
+	ID           string
+	Title        string
+	Description  string
+	Likes        string
+	CommentCount string
+	UserID       string
+	Tags         string
+	IsQuestion   string
+	Location     string
+	CreatedAt    string
+	UpdatedAt    string
+	Dislikes     string
+	Address      string
 }{
-	ID:          "posts.id",
-	Title:       "posts.title",
-	Description: "posts.description",
-	Likes:       "posts.likes",
-	Comments:    "posts.comments",
-	UserID:      "posts.user_id",
-	Tags:        "posts.tags",
-	IsQuestion:  "posts.is_question",
-	Location:    "posts.location",
-	CreatedAt:   "posts.created_at",
-	UpdatedAt:   "posts.updated_at",
-	Dislikes:    "posts.dislikes",
-	Address:     "posts.address",
+	ID:           "posts.id",
+	Title:        "posts.title",
+	Description:  "posts.description",
+	Likes:        "posts.likes",
+	CommentCount: "posts.comment_count",
+	UserID:       "posts.user_id",
+	Tags:         "posts.tags",
+	IsQuestion:   "posts.is_question",
+	Location:     "posts.location",
+	CreatedAt:    "posts.created_at",
+	UpdatedAt:    "posts.updated_at",
+	Dislikes:     "posts.dislikes",
+	Address:      "posts.address",
 }
 
 // Generated where
@@ -154,33 +154,33 @@ func (w whereHelpergeotypes_NullPoint) IsNotNull() qm.QueryMod {
 }
 
 var PostWhere = struct {
-	ID          whereHelperstring
-	Title       whereHelperstring
-	Description whereHelperstring
-	Likes       whereHelperint
-	Comments    whereHelperint
-	UserID      whereHelperstring
-	Tags        whereHelpertypes_StringArray
-	IsQuestion  whereHelperbool
-	Location    whereHelpergeotypes_NullPoint
-	CreatedAt   whereHelpertime_Time
-	UpdatedAt   whereHelpertime_Time
-	Dislikes    whereHelperint
-	Address     whereHelpernull_String
+	ID           whereHelperstring
+	Title        whereHelperstring
+	Description  whereHelperstring
+	Likes        whereHelperint
+	CommentCount whereHelperint
+	UserID       whereHelperstring
+	Tags         whereHelpertypes_StringArray
+	IsQuestion   whereHelperbool
+	Location     whereHelpergeotypes_NullPoint
+	CreatedAt    whereHelpertime_Time
+	UpdatedAt    whereHelpertime_Time
+	Dislikes     whereHelperint
+	Address      whereHelpernull_String
 }{
-	ID:          whereHelperstring{field: "\"posts\".\"id\""},
-	Title:       whereHelperstring{field: "\"posts\".\"title\""},
-	Description: whereHelperstring{field: "\"posts\".\"description\""},
-	Likes:       whereHelperint{field: "\"posts\".\"likes\""},
-	Comments:    whereHelperint{field: "\"posts\".\"comments\""},
-	UserID:      whereHelperstring{field: "\"posts\".\"user_id\""},
-	Tags:        whereHelpertypes_StringArray{field: "\"posts\".\"tags\""},
-	IsQuestion:  whereHelperbool{field: "\"posts\".\"is_question\""},
-	Location:    whereHelpergeotypes_NullPoint{field: "\"posts\".\"location\""},
-	CreatedAt:   whereHelpertime_Time{field: "\"posts\".\"created_at\""},
-	UpdatedAt:   whereHelpertime_Time{field: "\"posts\".\"updated_at\""},
-	Dislikes:    whereHelperint{field: "\"posts\".\"dislikes\""},
-	Address:     whereHelpernull_String{field: "\"posts\".\"address\""},
+	ID:           whereHelperstring{field: "\"posts\".\"id\""},
+	Title:        whereHelperstring{field: "\"posts\".\"title\""},
+	Description:  whereHelperstring{field: "\"posts\".\"description\""},
+	Likes:        whereHelperint{field: "\"posts\".\"likes\""},
+	CommentCount: whereHelperint{field: "\"posts\".\"comment_count\""},
+	UserID:       whereHelperstring{field: "\"posts\".\"user_id\""},
+	Tags:         whereHelpertypes_StringArray{field: "\"posts\".\"tags\""},
+	IsQuestion:   whereHelperbool{field: "\"posts\".\"is_question\""},
+	Location:     whereHelpergeotypes_NullPoint{field: "\"posts\".\"location\""},
+	CreatedAt:    whereHelpertime_Time{field: "\"posts\".\"created_at\""},
+	UpdatedAt:    whereHelpertime_Time{field: "\"posts\".\"updated_at\""},
+	Dislikes:     whereHelperint{field: "\"posts\".\"dislikes\""},
+	Address:      whereHelpernull_String{field: "\"posts\".\"address\""},
 }
 
 // PostRels is where relationship names are stored.
@@ -258,9 +258,9 @@ func (r *postR) GetPostVotes() PostVoteSlice {
 type postL struct{}
 
 var (
-	postAllColumns            = []string{"id", "title", "description", "likes", "comments", "user_id", "tags", "is_question", "location", "created_at", "updated_at", "dislikes", "address"}
+	postAllColumns            = []string{"id", "title", "description", "likes", "comment_count", "user_id", "tags", "is_question", "location", "created_at", "updated_at", "dislikes", "address"}
 	postColumnsWithoutDefault = []string{"title", "description", "user_id", "tags"}
-	postColumnsWithDefault    = []string{"id", "likes", "comments", "is_question", "location", "created_at", "updated_at", "dislikes", "address"}
+	postColumnsWithDefault    = []string{"id", "likes", "comment_count", "is_question", "location", "created_at", "updated_at", "dislikes", "address"}
 	postPrimaryKeyColumns     = []string{"id"}
 	postGeneratedColumns      = []string{}
 )
@@ -570,8 +570,8 @@ func (q postQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
-// PostComments retrieves all the comment's Comments with an executor.
-func (o *Post) PostComments(mods ...qm.QueryMod) commentQuery {
+// Comments retrieves all the comment's Comments with an executor.
+func (o *Post) Comments(mods ...qm.QueryMod) commentQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)

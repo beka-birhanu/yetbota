@@ -8,7 +8,7 @@ cors:
     - localhost:3002
 debug: ${debug}
 grpc:
-  port: ${grpcPort}
+  port: 9696
   keepalive:
     time: 20
     timeout: 20
@@ -16,7 +16,7 @@ grpc:
     permit_without_stream: true
 rest:
   idle_timeout: 60
-  port: ${restPort}
+  port: 9966
   read_timeout: 15
   write_timeout: 15
 jwt:

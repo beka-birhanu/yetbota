@@ -20,7 +20,7 @@ func deadlineExceeded(ctx context.Context) error {
 func commentToProto(c *dbmodels.Comment) *pb.Comment {
 	return &pb.Comment{
 		Id:        c.ID,
-		Comment:   c.Comment,
+		Comment:   c.Content,
 		Upvote:    int32(c.Upvote),
 		Downvote:  int32(c.Downvote),
 		UserId:    c.UserID,

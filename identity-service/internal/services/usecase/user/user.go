@@ -82,6 +82,8 @@ func (s *svc) Read(ctx context.Context, ctxSess *ctxRP.Context, req *ReadRequest
 		}
 
 		req.ID = ctxSess.UserSession.UserID
+	} else if req.ID == "" {
+		req.ID = ctxSess.UserSession.UserID
 	}
 
 	if req.ID == "" {
@@ -342,15 +344,7 @@ func (s *svc) UploadProfile(ctx context.Context, ctxSess *ctxRP.Context, req *Up
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
-
-	signResp, err := s.bucket.SignURL(ctx, &domainStorage.SignURLRequest{
-		BucketName: s.bucketName,
-		FileName:   uploadResp.FileName,
-	})
-	if err != nil {
-		ctxSess.SetErrorMessage(err.Error())
-		return nil, err
-	}
+	publicURL := buildPublicS3URL(s.bucketName, s.bucketRegion, uploadResp.FileName)
 
 	tx, err := repository.BeginNewTx(ctx)
 	if err != nil {
@@ -363,12 +357,12 @@ func (s *svc) UploadProfile(ctx context.Context, ctxSess *ctxRP.Context, req *Up
 		}
 	}()
 
-	// Store object key in URL so we can generate signed URLs on read/list.
+	// Store the public URL in the DB (media is publicly readable).
 	photo, err := s.photoRepo.Add(ctx, tx, &dbmodels.Photo{
 		ID:             uuid.NewString(),
 		BucketProvider: dbmodels.PhotoBucketS3,
 		MimeType:       uploadResp.ContentType,
-		URL:            uploadResp.FileName,
+		URL:            publicURL,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	})
@@ -396,7 +390,7 @@ func (s *svc) UploadProfile(ctx context.Context, ctxSess *ctxRP.Context, req *Up
 	}
 
 	return &UploadProfileResponse{
-		URL: signResp.Url,
+		URL: publicURL,
 	}, nil
 }
 

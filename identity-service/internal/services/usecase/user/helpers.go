@@ -2,6 +2,9 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"net/url"
+	"strings"
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
@@ -10,6 +13,15 @@ import (
 	"github.com/nyaruka/phonenumbers"
 	"golang.org/x/sync/errgroup"
 )
+
+func buildPublicS3URL(bucketName, region, key string) string {
+	if key == "" {
+		return ""
+	}
+	escaped := url.PathEscape(key)
+	escaped = strings.ReplaceAll(escaped, "%2F", "/")
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, escaped)
+}
 
 func normalizePhone(mobile string) (string, error) {
 	parsed, err := phonenumbers.Parse(mobile, constants.DefaultPhoneRegion)
@@ -91,8 +103,15 @@ func (s *svc) assembleUserWrapper(ctx context.Context, user *dbmodels.User, reso
 		}
 	}
 
+	keyOrURL := pickPhotoURL(photo, resolution)
+	profileURL := keyOrURL
+	if profileURL != "" && !strings.HasPrefix(profileURL, "http://") && !strings.HasPrefix(profileURL, "https://") {
+		// Backwards compatible: if the DB contains a raw object key, return a public S3 URL.
+		profileURL = buildPublicS3URL(s.bucketName, s.bucketRegion, profileURL)
+	}
+
 	return &UserWrapper{
 		User:       user,
-		ProfileURL: pickPhotoURL(photo, resolution),
+		ProfileURL: profileURL,
 	}, nil
 }

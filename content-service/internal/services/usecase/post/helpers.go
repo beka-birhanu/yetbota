@@ -3,7 +3,9 @@ package post
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"slices"
+	"strings"
 	"time"
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
@@ -17,6 +19,31 @@ import (
 	"github.com/twpayne/go-geom"
 	"golang.org/x/sync/errgroup"
 )
+
+func buildPublicS3URL(bucketName, region, key string) string {
+	if key == "" {
+		return ""
+	}
+	escaped := url.PathEscape(key)
+	// Keep path separators if keys ever include them.
+	escaped = strings.ReplaceAll(escaped, "%2F", "/")
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, escaped)
+}
+
+func objectKeyFromURL(keyOrURL string) string {
+	if keyOrURL == "" {
+		return ""
+	}
+	if !strings.HasPrefix(keyOrURL, "http://") && !strings.HasPrefix(keyOrURL, "https://") {
+		return keyOrURL
+	}
+	u, err := url.Parse(keyOrURL)
+	if err != nil {
+		// Best-effort fallback: treat as key.
+		return keyOrURL
+	}
+	return strings.TrimPrefix(u.Path, "/")
+}
 
 func postFromAddReq(req *AddRequest) *dbmodels.Post {
 	var location geotypes.NullPoint
@@ -77,7 +104,7 @@ func (s *svc) uploadPhotos(ctx context.Context, postID string, photos []*Ordered
 				ID:             id,
 				BucketProvider: dbmodels.PhotoBucketS3,
 				MimeType:       uploadResp.ContentType,
-				URL:            uploadResp.FileName,
+				URL:            buildPublicS3URL(s.bucketName, s.bucketRegion, uploadResp.FileName),
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
 			}
@@ -103,10 +130,11 @@ func (s *svc) deleteUploads(ctx context.Context, photos dbmodels.PhotoSlice) err
 	gctx, _ := errgroup.WithContext(ctx)
 
 	for _, photo := range photos {
+		key := objectKeyFromURL(photo.URL)
 		gctx.Go(func() error {
 			return s.bucket.RemoveFile(ctx, &storage.DeleteRequest{
 				BucketName: s.bucketName,
-				FileName:   photo.URL,
+				FileName:   key,
 			})
 		})
 	}
@@ -132,9 +160,16 @@ func (s *svc) assembleOrderedPhoto(ctx context.Context, postPhotos dbmodels.Post
 			}
 		}
 
+		keyOrURL := pickPhotoURL(photo, resolution)
+		url := keyOrURL
+		if url != "" && !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+			// Backwards compatible: if the DB contains a raw object key, return a public S3 URL.
+			url = buildPublicS3URL(s.bucketName, s.bucketRegion, url)
+		}
+
 		orderedPhotos[i] = &OrderedPhoto{
 			PhotoID:  photo.ID,
-			URL:      pickPhotoURL(photo, resolution),
+			URL:      url,
 			Position: postPhoto.Position,
 		}
 	}

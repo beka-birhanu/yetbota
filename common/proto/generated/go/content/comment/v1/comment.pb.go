@@ -659,7 +659,7 @@ func (x *DeleteResponse) GetMessage() string {
 	return ""
 }
 
-type VoteCommentRequest struct {
+type VoteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CommentId     string                 `protobuf:"bytes,1,opt,name=comment_id,json=commentId,proto3" json:"comment_id,omitempty"`
 	VoteType      CommentVoteType        `protobuf:"varint,2,opt,name=vote_type,json=voteType,proto3,enum=content.comment.v1.CommentVoteType" json:"vote_type,omitempty"`
@@ -667,20 +667,20 @@ type VoteCommentRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VoteCommentRequest) Reset() {
-	*x = VoteCommentRequest{}
+func (x *VoteRequest) Reset() {
+	*x = VoteRequest{}
 	mi := &file_content_comment_v1_comment_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VoteCommentRequest) String() string {
+func (x *VoteRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VoteCommentRequest) ProtoMessage() {}
+func (*VoteRequest) ProtoMessage() {}
 
-func (x *VoteCommentRequest) ProtoReflect() protoreflect.Message {
+func (x *VoteRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_content_comment_v1_comment_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -692,26 +692,26 @@ func (x *VoteCommentRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VoteCommentRequest.ProtoReflect.Descriptor instead.
-func (*VoteCommentRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use VoteRequest.ProtoReflect.Descriptor instead.
+func (*VoteRequest) Descriptor() ([]byte, []int) {
 	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *VoteCommentRequest) GetCommentId() string {
+func (x *VoteRequest) GetCommentId() string {
 	if x != nil {
 		return x.CommentId
 	}
 	return ""
 }
 
-func (x *VoteCommentRequest) GetVoteType() CommentVoteType {
+func (x *VoteRequest) GetVoteType() CommentVoteType {
 	if x != nil {
 		return x.VoteType
 	}
 	return CommentVoteType_COMMENT_VOTE_TYPE_UNSPECIFIED
 }
 
-type VoteCommentResponse struct {
+type VoteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
 	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
@@ -722,20 +722,20 @@ type VoteCommentResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VoteCommentResponse) Reset() {
-	*x = VoteCommentResponse{}
+func (x *VoteResponse) Reset() {
+	*x = VoteResponse{}
 	mi := &file_content_comment_v1_comment_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VoteCommentResponse) String() string {
+func (x *VoteResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VoteCommentResponse) ProtoMessage() {}
+func (*VoteResponse) ProtoMessage() {}
 
-func (x *VoteCommentResponse) ProtoReflect() protoreflect.Message {
+func (x *VoteResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_content_comment_v1_comment_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -747,40 +747,40 @@ func (x *VoteCommentResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VoteCommentResponse.ProtoReflect.Descriptor instead.
-func (*VoteCommentResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use VoteResponse.ProtoReflect.Descriptor instead.
+func (*VoteResponse) Descriptor() ([]byte, []int) {
 	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *VoteCommentResponse) GetCode() string {
+func (x *VoteResponse) GetCode() string {
 	if x != nil {
 		return x.Code
 	}
 	return ""
 }
 
-func (x *VoteCommentResponse) GetSuccess() bool {
+func (x *VoteResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
 	return false
 }
 
-func (x *VoteCommentResponse) GetMessage() string {
+func (x *VoteResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *VoteCommentResponse) GetUpvote() int32 {
+func (x *VoteResponse) GetUpvote() int32 {
 	if x != nil {
 		return x.Upvote
 	}
 	return 0
 }
 
-func (x *VoteCommentResponse) GetDownvote() int32 {
+func (x *VoteResponse) GetDownvote() int32 {
 	if x != nil {
 		return x.Downvote
 	}
@@ -840,12 +840,12 @@ const file_content_comment_v1_comment_proto_rawDesc = "" +
 	"\x0eDeleteResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\"u\n" +
-	"\x12VoteCommentRequest\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"n\n" +
+	"\vVoteRequest\x12\x1d\n" +
 	"\n" +
 	"comment_id\x18\x01 \x01(\tR\tcommentId\x12@\n" +
-	"\tvote_type\x18\x02 \x01(\x0e2#.content.comment.v1.CommentVoteTypeR\bvoteType\"\x91\x01\n" +
-	"\x13VoteCommentResponse\x12\x12\n" +
+	"\tvote_type\x18\x02 \x01(\x0e2#.content.comment.v1.CommentVoteTypeR\bvoteType\"\x8a\x01\n" +
+	"\fVoteResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12\x16\n" +
@@ -854,13 +854,13 @@ const file_content_comment_v1_comment_proto_rawDesc = "" +
 	"\x0fCommentVoteType\x12!\n" +
 	"\x1dCOMMENT_VOTE_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14COMMENT_VOTE_TYPE_UP\x10\x01\x12\x1a\n" +
-	"\x16COMMENT_VOTE_TYPE_DOWN\x10\x022\x98\x03\n" +
+	"\x16COMMENT_VOTE_TYPE_DOWN\x10\x022\x8a\x03\n" +
 	"\x0eCommentService\x12F\n" +
 	"\x03Add\x12\x1e.content.comment.v1.AddRequest\x1a\x1f.content.comment.v1.AddResponse\x12I\n" +
 	"\x04Read\x12\x1f.content.comment.v1.ReadRequest\x1a .content.comment.v1.ReadResponse\x12I\n" +
 	"\x04List\x12\x1f.content.comment.v1.ListRequest\x1a .content.comment.v1.ListResponse\x12O\n" +
-	"\x06Delete\x12!.content.comment.v1.DeleteRequest\x1a\".content.comment.v1.DeleteResponse\x12W\n" +
-	"\x04Vote\x12&.content.comment.v1.VoteCommentRequest\x1a'.content.comment.v1.VoteCommentResponseB\x0fZ\r/commentpb/v1b\x06proto3"
+	"\x06Delete\x12!.content.comment.v1.DeleteRequest\x1a\".content.comment.v1.DeleteResponse\x12I\n" +
+	"\x04Vote\x12\x1f.content.comment.v1.VoteRequest\x1a .content.comment.v1.VoteResponseB\x0fZ\r/commentpb/v1b\x06proto3"
 
 var (
 	file_content_comment_v1_comment_proto_rawDescOnce sync.Once
@@ -887,8 +887,8 @@ var file_content_comment_v1_comment_proto_goTypes = []any{
 	(*ListResponse)(nil),          // 7: content.comment.v1.ListResponse
 	(*DeleteRequest)(nil),         // 8: content.comment.v1.DeleteRequest
 	(*DeleteResponse)(nil),        // 9: content.comment.v1.DeleteResponse
-	(*VoteCommentRequest)(nil),    // 10: content.comment.v1.VoteCommentRequest
-	(*VoteCommentResponse)(nil),   // 11: content.comment.v1.VoteCommentResponse
+	(*VoteRequest)(nil),           // 10: content.comment.v1.VoteRequest
+	(*VoteResponse)(nil),          // 11: content.comment.v1.VoteResponse
 	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
 }
 var file_content_comment_v1_comment_proto_depIdxs = []int32{
@@ -897,17 +897,17 @@ var file_content_comment_v1_comment_proto_depIdxs = []int32{
 	1,  // 2: content.comment.v1.AddResponse.data:type_name -> content.comment.v1.Comment
 	1,  // 3: content.comment.v1.ReadResponse.data:type_name -> content.comment.v1.Comment
 	1,  // 4: content.comment.v1.ListResponse.data:type_name -> content.comment.v1.Comment
-	0,  // 5: content.comment.v1.VoteCommentRequest.vote_type:type_name -> content.comment.v1.CommentVoteType
+	0,  // 5: content.comment.v1.VoteRequest.vote_type:type_name -> content.comment.v1.CommentVoteType
 	2,  // 6: content.comment.v1.CommentService.Add:input_type -> content.comment.v1.AddRequest
 	4,  // 7: content.comment.v1.CommentService.Read:input_type -> content.comment.v1.ReadRequest
 	6,  // 8: content.comment.v1.CommentService.List:input_type -> content.comment.v1.ListRequest
 	8,  // 9: content.comment.v1.CommentService.Delete:input_type -> content.comment.v1.DeleteRequest
-	10, // 10: content.comment.v1.CommentService.Vote:input_type -> content.comment.v1.VoteCommentRequest
+	10, // 10: content.comment.v1.CommentService.Vote:input_type -> content.comment.v1.VoteRequest
 	3,  // 11: content.comment.v1.CommentService.Add:output_type -> content.comment.v1.AddResponse
 	5,  // 12: content.comment.v1.CommentService.Read:output_type -> content.comment.v1.ReadResponse
 	7,  // 13: content.comment.v1.CommentService.List:output_type -> content.comment.v1.ListResponse
 	9,  // 14: content.comment.v1.CommentService.Delete:output_type -> content.comment.v1.DeleteResponse
-	11, // 15: content.comment.v1.CommentService.Vote:output_type -> content.comment.v1.VoteCommentResponse
+	11, // 15: content.comment.v1.CommentService.Vote:output_type -> content.comment.v1.VoteResponse
 	11, // [11:16] is the sub-list for method output_type
 	6,  // [6:11] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name

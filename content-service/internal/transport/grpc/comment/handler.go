@@ -92,7 +92,7 @@ func (h *Handler) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Delete
 	return resp.(*pb.DeleteResponse), nil
 }
 
-func (h *Handler) Vote(ctx context.Context, req *pb.VoteCommentRequest) (*pb.VoteCommentResponse, error) {
+func (h *Handler) Vote(ctx context.Context, req *pb.VoteRequest) (*pb.VoteResponse, error) {
 	if err := deadlineExceeded(ctx); err != nil {
 		return nil, err
 	}
@@ -100,5 +100,5 @@ func (h *Handler) Vote(ctx context.Context, req *pb.VoteCommentRequest) (*pb.Vot
 	if err != nil {
 		return nil, err
 	}
-	return resp.(*pb.VoteCommentResponse), nil
+	return resp.(*pb.VoteResponse), nil
 }

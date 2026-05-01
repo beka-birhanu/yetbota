@@ -34,7 +34,7 @@ type CommentServiceClient interface {
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
-	Vote(ctx context.Context, in *VoteCommentRequest, opts ...grpc.CallOption) (*VoteCommentResponse, error)
+	Vote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error)
 }
 
 type commentServiceClient struct {
@@ -85,9 +85,9 @@ func (c *commentServiceClient) Delete(ctx context.Context, in *DeleteRequest, op
 	return out, nil
 }
 
-func (c *commentServiceClient) Vote(ctx context.Context, in *VoteCommentRequest, opts ...grpc.CallOption) (*VoteCommentResponse, error) {
+func (c *commentServiceClient) Vote(ctx context.Context, in *VoteRequest, opts ...grpc.CallOption) (*VoteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VoteCommentResponse)
+	out := new(VoteResponse)
 	err := c.cc.Invoke(ctx, CommentService_Vote_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ type CommentServiceServer interface {
 	Read(context.Context, *ReadRequest) (*ReadResponse, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
-	Vote(context.Context, *VoteCommentRequest) (*VoteCommentResponse, error)
+	Vote(context.Context, *VoteRequest) (*VoteResponse, error)
 }
 
 // UnimplementedCommentServiceServer should be embedded to have
@@ -125,7 +125,7 @@ func (UnimplementedCommentServiceServer) List(context.Context, *ListRequest) (*L
 func (UnimplementedCommentServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedCommentServiceServer) Vote(context.Context, *VoteCommentRequest) (*VoteCommentResponse, error) {
+func (UnimplementedCommentServiceServer) Vote(context.Context, *VoteRequest) (*VoteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Vote not implemented")
 }
 func (UnimplementedCommentServiceServer) testEmbeddedByValue() {}
@@ -221,7 +221,7 @@ func _CommentService_Delete_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 func _CommentService_Vote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VoteCommentRequest)
+	in := new(VoteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -233,7 +233,7 @@ func _CommentService_Vote_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: CommentService_Vote_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommentServiceServer).Vote(ctx, req.(*VoteCommentRequest))
+		return srv.(CommentServiceServer).Vote(ctx, req.(*VoteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

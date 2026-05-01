@@ -103,7 +103,7 @@ func encodeDeleteRes(_ context.Context, resp any) (any, error) {
 
 func encodeVoteRes(_ context.Context, resp any) (any, error) {
 	if errResp, ok := resp.(*toddlerr.Error); ok {
-		return &pb.VoteCommentResponse{
+		return &pb.VoteResponse{
 			Code:    fmt.Sprintf("%d", errResp.PublicStatusCode),
 			Success: false,
 			Message: errResp.PublicMessage,
@@ -111,7 +111,7 @@ func encodeVoteRes(_ context.Context, resp any) (any, error) {
 	}
 	r, ok := resp.(*commentSvc.VoteResponse)
 	if ok {
-		return &pb.VoteCommentResponse{
+		return &pb.VoteResponse{
 			Code:     "00",
 			Success:  true,
 			Message:  "Vote recorded",
@@ -119,7 +119,7 @@ func encodeVoteRes(_ context.Context, resp any) (any, error) {
 			Downvote: int32(r.Downvote),
 		}, nil
 	}
-	return &pb.VoteCommentResponse{
+	return &pb.VoteResponse{
 		Code:    fmt.Sprintf("%d", status.ServerError),
 		Success: false,
 		Message: "something went wrong",

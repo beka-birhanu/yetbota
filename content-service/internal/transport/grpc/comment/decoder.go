@@ -40,7 +40,7 @@ func decodeDeleteReq(_ context.Context, req any) (any, error) {
 }
 
 func decodeVoteReq(_ context.Context, req any) (any, error) {
-	in := req.(*pb.VoteCommentRequest)
+	in := req.(*pb.VoteRequest)
 	return &commentSvc.VoteRequest{
 		CommentID: in.GetCommentId(),
 		VoteType:  mapCommentVoteTypeFromProto(in.GetVoteType()),

@@ -23,7 +23,7 @@ const (
 	PostService_Read_FullMethodName   = "/content.v1.PostService/Read"
 	PostService_Update_FullMethodName = "/content.v1.PostService/Update"
 	PostService_Vote_FullMethodName   = "/content.v1.PostService/Vote"
-	PostService_List_FullMethodName = "/content.v1.PostService/List"
+	PostService_List_FullMethodName   = "/content.v1.PostService/List"
 )
 
 // PostServiceClient is the client API for PostService service.

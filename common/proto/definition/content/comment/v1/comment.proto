@@ -72,12 +72,12 @@ message DeleteResponse {
   string message = 3;
 }
 
-message VoteCommentRequest {
+message VoteRequest {
   string comment_id = 1;
   CommentVoteType vote_type = 2;
 }
 
-message VoteCommentResponse {
+message VoteResponse {
   string code = 1;
   bool success = 2;
   string message = 3;
@@ -90,5 +90,5 @@ service CommentService {
   rpc Read(ReadRequest) returns (ReadResponse);
   rpc List(ListRequest) returns (ListResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
-  rpc Vote(VoteCommentRequest) returns (VoteCommentResponse);
+  rpc Vote(VoteRequest) returns (VoteResponse);
 }

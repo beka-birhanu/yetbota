@@ -1379,8 +1379,8 @@ const file_content_v1_post_proto_rawDesc = "" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12\x14\n" +
 	"\x05likes\x18\x04 \x01(\x05R\x05likes\x12\x1a\n" +
-	"\bdislikes\x18\x05 \x01(\x05R\bdislikes\"\xb2\x03\n" +
-	"\rListRequest\x12\x17\n" +
+	"\bdislikes\x18\x05 \x01(\x05R\bdislikes\"\xb0\x03\n" +
+	"\vListRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
 	"\x04tags\x18\x02 \x03(\tR\x04tags\x12;\n" +
 	"\vis_question\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\n" +
@@ -1395,8 +1395,8 @@ const file_content_v1_post_proto_rawDesc = "" +
 	" \x01(\x05R\bpageSize\x12;\n" +
 	"\n" +
 	"resolution\x18\v \x01(\x0e2\x1b.content.v1.PhotoResolutionR\n" +
-	"resolution\"\xc5\x01\n" +
-	"\x0eListResponse\x12\x12\n" +
+	"resolution\"\xc3\x01\n" +
+	"\fListResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12$\n" +
@@ -1422,13 +1422,13 @@ const file_content_v1_post_proto_rawDesc = "" +
 	"\x1cPHOTO_RESOLUTION_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19PHOTO_RESOLUTION_ORIGINAL\x10\x01\x12\x1b\n" +
 	"\x17PHOTO_RESOLUTION_MOBILE\x10\x02\x12\x18\n" +
-	"\x14PHOTO_RESOLUTION_WEB\x10\x032\xbd\x02\n" +
+	"\x14PHOTO_RESOLUTION_WEB\x10\x032\xb7\x02\n" +
 	"\vPostService\x126\n" +
 	"\x03Add\x12\x16.content.v1.AddRequest\x1a\x17.content.v1.AddResponse\x129\n" +
 	"\x04Read\x12\x17.content.v1.ReadRequest\x1a\x18.content.v1.ReadResponse\x12?\n" +
 	"\x06Update\x12\x19.content.v1.UpdateRequest\x1a\x1a.content.v1.UpdateResponse\x129\n" +
-	"\x04Vote\x12\x17.content.v1.VoteRequest\x1a\x18.content.v1.VoteResponse\x12?\n" +
-	"\x06List\x12\x19.content.v1.ListRequest\x1a\x1a.content.v1.ListResponseB\fZ\n" +
+	"\x04Vote\x12\x17.content.v1.VoteRequest\x1a\x18.content.v1.VoteResponse\x129\n" +
+	"\x04List\x12\x17.content.v1.ListRequest\x1a\x18.content.v1.ListResponseB\fZ\n" +
 	"/postpb/v1b\x06proto3"
 
 var (
@@ -1462,8 +1462,8 @@ var file_content_v1_post_proto_goTypes = []any{
 	(*UpdateResponse)(nil),        // 13: content.v1.UpdateResponse
 	(*VoteRequest)(nil),           // 14: content.v1.VoteRequest
 	(*VoteResponse)(nil),          // 15: content.v1.VoteResponse
-	(*ListRequest)(nil),         // 16: content.v1.ListRequest
-	(*ListResponse)(nil),        // 17: content.v1.ListResponse
+	(*ListRequest)(nil),           // 16: content.v1.ListRequest
+	(*ListResponse)(nil),          // 17: content.v1.ListResponse
 	(*timestamppb.Timestamp)(nil), // 18: google.protobuf.Timestamp
 	(*wrapperspb.BoolValue)(nil),  // 19: google.protobuf.BoolValue
 }

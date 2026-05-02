@@ -8,7 +8,7 @@ cors:
     - localhost:3002
 debug: ${debug}
 grpc:
-  port: 9696
+  port: ${grpcPort}
   keepalive:
     time: 20
     timeout: 20
@@ -16,7 +16,7 @@ grpc:
     permit_without_stream: true
 rest:
   idle_timeout: 60
-  port: 6699
+  port: ${restPort}
   read_timeout: 15
   write_timeout: 15
 jwt:
@@ -47,7 +47,7 @@ otp:
 aws:
   s3:
     region: us-east-1
-    bucket: profiles
+    bucket: yetbota
 neo4j:
   uri: ${neo4jURI}
   username: ${neo4jUsername}

@@ -202,13 +202,14 @@ func main() {
 
 	// User usecase
 	userService, err := usecaseUser.NewService(&usecaseUser.Config{
-		UserRepo:   userRepo,
-		PhotoRepo:  photoRepo,
-		FollowRepo: followRepo,
-		OtpStore:   otpStore,
-		Hasher:     hasher,
-		Bucket:     bucket,
-		BucketName: cfg.AWS.S3.Bucket,
+		UserRepo:     userRepo,
+		PhotoRepo:    photoRepo,
+		FollowRepo:   followRepo,
+		OtpStore:     otpStore,
+		Hasher:       hasher,
+		Bucket:       bucket,
+		BucketName:   cfg.AWS.S3.Bucket,
+		BucketRegion: cfg.AWS.S3.Region,
 	})
 	if err != nil {
 		panic(fmt.Errorf("error creating user service: %v", err))
@@ -234,9 +235,9 @@ func main() {
 	}
 
 	httpRouter, err := transportHTTP.NewRouter(&transportHTTP.Config{
-		E: endpoints,
+		E:              endpoints,
 		SessionManager: sessionManager,
-		CorsHosts: cfg.Cors.Hosts,
+		CorsHosts:      cfg.Cors.Hosts,
 	})
 	if err != nil {
 		panic(fmt.Errorf("error creating http router: %v", err))

@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/friendsofgo/errors"
 	"github.com/go-kit/kit/endpoint"
 
+	toddlerr "github.com/beka-birhanu/toddler/error"
+	"github.com/beka-birhanu/toddler/status"
 	domainAuth "github.com/beka-birhanu/yetbota/identity-service/internal/domain/auth"
 	ctxRP "github.com/beka-birhanu/yetbota/identity-service/internal/domain/context"
 )
@@ -23,6 +24,15 @@ func httpSuccess(w http.ResponseWriter, data interface{}) {
 	_ = json.NewEncoder(w).Encode(data)
 }
 
+func authMissingOrInvalid() error {
+	return &toddlerr.Error{
+		PublicStatusCode:  status.Unauthorized,
+		ServiceStatusCode: status.Unauthorized,
+		PublicMessage:     "Missing or invalid access token",
+		ServiceMessage:    "expected Authorization: Bearer <access_token>",
+	}
+}
+
 func AuthMiddleware(sessionManager domainAuth.SessionManager) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -31,25 +41,25 @@ func AuthMiddleware(sessionManager domainAuth.SessionManager) endpoint.Middlewar
 			header := ctxSess.Header.(http.Header)["Authorization"]
 			var authHeader string
 			if len(header) > 0 {
-				authHeader = header[0]
+				authHeader = strings.TrimSpace(header[0])
 			}
-			bearerToken := strings.Split(authHeader, " ")
+			fields := strings.Fields(authHeader)
+			if len(fields) < 2 || !strings.EqualFold(fields[0], "Bearer") {
+				return nil, authMissingOrInvalid()
+			}
+			normalized := "Bearer " + strings.Join(fields[1:], " ")
 
-			if len(bearerToken) == 2 {
-				userSession, errExtract := sessionManager.ExtractUserSession(ctx, &domainAuth.TokenInfo{
-					TokenType: domainAuth.AccessToken,
-					Token:     authHeader,
-				})
-				if errExtract != nil {
-					return nil, errExtract
-				}
-
-				ctxSess.UserSession = *userSession
-
-				return next(ctx, request)
+			userSession, errExtract := sessionManager.ExtractUserSession(ctx, &domainAuth.TokenInfo{
+				TokenType: domainAuth.AccessToken,
+				Token:     normalized,
+			})
+			if errExtract != nil {
+				return nil, errExtract
 			}
 
-			return nil, errors.New("Invalid token")
+			ctxSess.UserSession = *userSession
+
+			return next(ctx, request)
 		}
 	}
 }

@@ -26,6 +26,7 @@ type Config struct {
 	PhotoRepo     domainPhoto.Repository     `validate:"required"`
 	Bucket        domainStorage.Bucket       `validate:"required"`
 	BucketName    string                     `validate:"required"`
+	BucketRegion  string                     `validate:"required"`
 }
 
 func (c *Config) Validate() error {
@@ -41,6 +42,7 @@ type svc struct {
 	photoRepo     domainPhoto.Repository
 	bucket        domainStorage.Bucket
 	bucketName    string
+	bucketRegion  string
 }
 
 func NewService(cfg *Config) (Service, error) {
@@ -53,5 +55,6 @@ func NewService(cfg *Config) (Service, error) {
 		photoRepo:     cfg.PhotoRepo,
 		bucket:        cfg.Bucket,
 		bucketName:    cfg.BucketName,
+		bucketRegion:  cfg.BucketRegion,
 	}, nil
 }

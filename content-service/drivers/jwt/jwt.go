@@ -19,6 +19,8 @@ import (
 const guestTokenTTL = 365 * 24 * time.Hour
 
 var claimKeys = []string{
+	// Kept for content-service issued tokens.
+	// Validation accepts both content-service and identity-service claim schemas.
 	"session_id",
 	"email",
 	"exp",
@@ -182,16 +184,32 @@ func (s *SessionManager) ExtractUserSession(ctx context.Context, tokenInfo *auth
 	}
 
 	sessionID, ok1 := claims["session_id"].(string)
-	email, ok2 := claims["email"].(string)
 	exp, ok3 := claims["exp"].(float64)
 	userID, ok4 := claims["user_id"].(string)
-	roleID, ok5 := claims["role_id"].(string)
-	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 {
+
+	// Accept either:
+	// - content-service schema: email + role_id
+	// - identity-service schema: username + role
+	var email string
+	if v, ok := claims["email"].(string); ok {
+		email = v
+	} else if v, ok := claims["username"].(string); ok {
+		email = v
+	}
+
+	var roleID string
+	if v, ok := claims["role_id"].(string); ok {
+		roleID = v
+	} else if v, ok := claims["role"].(string); ok {
+		roleID = v
+	}
+
+	if !ok1 || !ok3 || !ok4 || email == "" || roleID == "" {
 		return nil, &toddlerErr.Error{
 			PublicStatusCode:  status.BadRequest,
 			ServiceStatusCode: status.BadRequest,
 			PublicMessage:     "Invalid token",
-			ServiceMessage:    "unexpected claim types in token",
+			ServiceMessage:    "unexpected/missing claim types in token",
 		}
 	}
 
@@ -245,6 +263,15 @@ func (s *SessionManager) parseToken(tokenStr, key string) (*jwt.Token, error) {
 		return []byte(key), nil
 	})
 	if err != nil {
+		// Treat expiration as an authentication failure (401) rather than a generic bad request.
+		if ve, ok := err.(*jwt.ValidationError); ok && (ve.Errors&jwt.ValidationErrorExpired) != 0 {
+			return nil, &toddlerErr.Error{
+				PublicStatusCode:  status.Unauthorized,
+				ServiceStatusCode: status.Unauthorized,
+				PublicMessage:     "Session expired or logged out",
+				ServiceMessage:    fmt.Sprintf("jwt.Parse expired: %v", err),
+			}
+		}
 		return nil, &toddlerErr.Error{
 			PublicStatusCode:  status.BadRequest,
 			ServiceStatusCode: status.BadRequest,
@@ -342,7 +369,8 @@ func validateToken(token *jwt.Token) (jwt.MapClaims, error) {
 		}
 	}
 
-	for _, key := range claimKeys {
+	// Validate required common claims plus either identity-service or content-service identity fields.
+	for _, key := range []string{"session_id", "user_id", "exp"} {
 		if _, ok := claims[key]; !ok {
 			return nil, &toddlerErr.Error{
 				PublicStatusCode:  status.BadRequest,
@@ -350,6 +378,28 @@ func validateToken(token *jwt.Token) (jwt.MapClaims, error) {
 				PublicMessage:     "Invalid token",
 				ServiceMessage:    fmt.Sprintf("missing claim: %s", key),
 			}
+		}
+	}
+
+	_, hasEmail := claims["email"]
+	_, hasUsername := claims["username"]
+	if !hasEmail && !hasUsername {
+		return nil, &toddlerErr.Error{
+			PublicStatusCode:  status.BadRequest,
+			ServiceStatusCode: status.BadRequest,
+			PublicMessage:     "Invalid token",
+			ServiceMessage:    "missing claim: email|username",
+		}
+	}
+
+	_, hasRoleID := claims["role_id"]
+	_, hasRole := claims["role"]
+	if !hasRoleID && !hasRole {
+		return nil, &toddlerErr.Error{
+			PublicStatusCode:  status.BadRequest,
+			ServiceStatusCode: status.BadRequest,
+			PublicMessage:     "Invalid token",
+			ServiceMessage:    "missing claim: role_id|role",
 		}
 	}
 

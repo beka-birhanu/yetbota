@@ -20,15 +20,18 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	cmdGrpc "github.com/beka-birhanu/yetbota/content-service/cmd/grpc"
+	cmdHttp "github.com/beka-birhanu/yetbota/content-service/cmd/http"
 	"github.com/beka-birhanu/yetbota/content-service/internal/services/endpoint"
+	repoComment "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/comment"
 	repoPhoto "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/photo"
 	repoPost "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/post"
-	repoComment "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/comment"
 	repoPostPhoto "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/postphoto"
 	commentSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/comment"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 	grpcComment "github.com/beka-birhanu/yetbota/content-service/internal/transport/grpc/comment"
 	grpcPost "github.com/beka-birhanu/yetbota/content-service/internal/transport/grpc/post"
+	httpTransport "github.com/beka-birhanu/yetbota/content-service/internal/transport/http"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -146,6 +149,7 @@ func main() {
 		PostPhotoRepo: postPhotoRepo,
 		Bucket:        bucket,
 		BucketName:    cfg.AWS.S3.Bucket,
+		BucketRegion:  cfg.AWS.S3.Region,
 	})
 	if err != nil {
 		panic(fmt.Errorf("error creating post service: %v", err))
@@ -181,15 +185,37 @@ func main() {
 		panic(fmt.Errorf("error creating comment handler: %v", err))
 	}
 
-	if err := cmdGrpc.RunServer(ctx, &cmdGrpc.Config{
-		Port:                cfg.Grpc.Port,
-		KeepaliveTime:       time.Duration(cfg.Grpc.Keepalive.Time) * time.Second,
-		KeepaliveTimeout:    time.Duration(cfg.Grpc.Keepalive.Timeout) * time.Second,
-		KeepaliveMinTime:    time.Duration(cfg.Grpc.Keepalive.MinTime) * time.Second,
-		PermitWithoutStream: cfg.Grpc.Keepalive.PermitWithoutStream,
-		SessionManager:      sessionManager,
-		GrpcServers:         []cmdGrpc.GrpcServer{postHandler, commentHandler},
-	}); err != nil {
-		panic(fmt.Errorf("gRPC server error: %v", err))
+	httpRouter, err := httpTransport.NewRouter(&httpTransport.Config{
+		E:              endpoints,
+		SessionManager: sessionManager,
+		CorsHosts:      cfg.Cors.Hosts,
+	})
+	if err != nil {
+		panic(fmt.Errorf("error creating HTTP router: %v", err))
+	}
+
+	eg, egCtx := errgroup.WithContext(ctx)
+	eg.Go(func() error {
+		return cmdHttp.RunServer(egCtx, &cmdHttp.Config{
+			Port:         cfg.Rest.Port,
+			Handler:      httpRouter,
+			ReadTimeout:  time.Duration(cfg.Rest.ReadTimeout) * time.Second,
+			WriteTimeout: time.Duration(cfg.Rest.WriteTimeout) * time.Second,
+			IdleTimeout:  time.Duration(cfg.Rest.IdleTimeout) * time.Second,
+		})
+	})
+	eg.Go(func() error {
+		return cmdGrpc.RunServer(egCtx, &cmdGrpc.Config{
+			Port:                cfg.Grpc.Port,
+			KeepaliveTime:       time.Duration(cfg.Grpc.Keepalive.Time) * time.Second,
+			KeepaliveTimeout:    time.Duration(cfg.Grpc.Keepalive.Timeout) * time.Second,
+			KeepaliveMinTime:    time.Duration(cfg.Grpc.Keepalive.MinTime) * time.Second,
+			PermitWithoutStream: cfg.Grpc.Keepalive.PermitWithoutStream,
+			SessionManager:      sessionManager,
+			GrpcServers:         []cmdGrpc.GrpcServer{postHandler, commentHandler},
+		})
+	})
+	if err := eg.Wait(); err != nil {
+		panic(fmt.Errorf("server error: %v", err))
 	}
 }

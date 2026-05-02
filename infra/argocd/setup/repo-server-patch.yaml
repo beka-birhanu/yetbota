@@ -1,0 +1,33 @@
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: install-ksops
+          image: viaductoss/ksops:v4.3.3
+          command: ["/bin/sh", "-c"]
+          args:
+            - cp ksops /custom-tools/ksops
+          volumeMounts:
+            - name: custom-tools
+              mountPath: /custom-tools
+      containers:
+        - name: argocd-repo-server
+          env:
+            - name: SOPS_AGE_KEY_FILE
+              value: /home/argocd/.config/sops/age/keys.txt
+            - name: XDG_CONFIG_HOME
+              value: /home/argocd/.config
+          volumeMounts:
+            - name: custom-tools
+              mountPath: /usr/local/bin/ksops
+              subPath: ksops
+            - name: age-key
+              mountPath: /home/argocd/.config/sops/age/keys.txt
+              subPath: key.txt
+              readOnly: true
+      volumes:
+        - name: custom-tools
+          emptyDir: {}
+        - name: age-key
+          secret:
+            secretName: ksops-age-key

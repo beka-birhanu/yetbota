@@ -1,0 +1,9 @@
+node_modules/
+
+# Plaintext secrets — encrypt with sops before committing as *.enc.yaml
+infra/**/secret.yaml
+*.age
+age.key
+.ss
+sshkey
+sshkey.pub

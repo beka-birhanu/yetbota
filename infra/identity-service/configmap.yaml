@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: identity-service-config
+  namespace: yetbota
+  labels:
+    app.kubernetes.io/name: identity-service
+    app.kubernetes.io/part-of: yetbota
+data:
+  config.yaml: |
+    app:
+      name: Yet Bota - Identity Service
+      version: 0.0.1
+    cors:
+      hosts:
+        - ${corsHosts}
+    debug: ${debug}
+    grpc:
+      port: 6969
+      keepalive:
+        time: 20
+        timeout: 20
+        min_time: 10
+        permit_without_stream: true
+    rest:
+      idle_timeout: 60
+      port: 6699
+      read_timeout: 15
+      write_timeout: 15
+    jwt:
+      algorithm: HS256
+      access_token:
+        expiration: ${jwtAccessTokenExpiration}
+        secret: ${jwtAccessTokenSecret}
+      refresh_token:
+        expiration: ${jwtRefreshTokenExpiration}
+        secret: ${jwtRefreshTokenSecret}
+    database:
+      db: ${postgresDB}
+      host: ${postgresHost}
+      password: ${postgresPassword}
+      port: ${postgresPort}
+      user: ${postgresUser}
+    redis:
+      address: ${redisAddress}
+      password: ${redisPassword}
+      poolTimeout: ${redisPoolTimeout}
+      idleTimeout: ${redisIdleTimeout}
+      readTimeout: ${redisReadTimeout}
+      writeTimeout: ${redisWriteTimeout}
+    otp:
+      ttl: ${otpTTL}
+      lockRequestTime: ${otpLockRequestTime}
+      lockInvalidTime: ${otpLockInvalidTime}
+    aws:
+      s3:
+        region: us-east-1
+        bucket: yetbota
+    neo4j:
+      uri: ${neo4jURI}
+      username: ${neo4jUsername}
+      password: ${neo4jPassword}

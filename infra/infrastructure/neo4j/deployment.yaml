@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo4j
+  namespace: yetbota-infra
+  labels:
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/part-of: yetbota
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: neo4j
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: neo4j
+        app.kubernetes.io/part-of: yetbota
+    spec:
+      containers:
+        - name: neo4j
+          image: neo4j:5
+          ports:
+            - name: http
+              containerPort: 7474
+              protocol: TCP
+            - name: bolt
+              containerPort: 7687
+              protocol: TCP
+          env:
+            - name: NEO4J_server_config_strict__validation_enabled
+              value: "false"
+          envFrom:
+            - secretRef:
+                name: neo4j-secret
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: neo4j-pvc

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-service
+  namespace: yetbota
+  labels:
+    app.kubernetes.io/name: content-service
+    app.kubernetes.io/part-of: yetbota
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: content-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: content-service
+        app.kubernetes.io/part-of: yetbota
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
+      containers:
+        - name: content-service
+          image: romareo/content-service:v0.0.2
+          ports:
+            - name: grpc
+              containerPort: 9696
+              protocol: TCP
+            - name: rest
+              containerPort: 9966
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: content-service-secret
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          livenessProbe:
+            tcpSocket:
+              port: grpc
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: rest
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: content-service-config

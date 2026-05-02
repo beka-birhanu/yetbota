@@ -1,0 +1,75 @@
+name: identity-service release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'identity-service/**'
+      - 'common/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'identity-service-v')
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "beka birhanu"
+          git config user.email "beka.b.atomsa@gmail.com"
+
+      - name: Get or bump version
+        id: bump
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            TAG="${{ github.event.release.tag_name }}"
+            NEXT="${TAG#identity-service-v}"
+          else
+            git fetch --tags
+            LATEST=$(git tag | grep "^identity-service-v0\.0\." | sort -t. -k3 -n | tail -1)
+            if [ -z "$LATEST" ]; then
+              X=0
+            else
+              X=$(echo "$LATEST" | sed 's/identity-service-v0\.0\.//')
+            fi
+            NEXT="0.0.$((X+1))"
+            git tag "identity-service-v${NEXT}"
+            git push origin "identity-service-v${NEXT}"
+          fi
+          echo "version=$NEXT" >> $GITHUB_OUTPUT
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: identity-service/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/identity-service:v${{ steps.bump.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/identity-service:latest
+
+      - name: Update deployment image tag
+        run: |
+          VERSION="v${{ steps.bump.outputs.version }}"
+          sed -i "s|image: .*/identity-service:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/identity-service:${VERSION}|" \
+            infra/identity-service/deployment.yaml
+          git add infra/identity-service/deployment.yaml
+          git diff --staged --quiet || git commit -m "chore(deploy): bump identity-service to ${VERSION} [skip ci]"
+          git push origin HEAD:main

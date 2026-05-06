@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package ai.v1;
+
+import "google/protobuf/wrappers.proto";
+import "ai/events/v1/events.proto";
+
+option go_package = "/screeningpb/v1";
+
+message CheckRequest {
+  string text = 1;
+  ContentKind kind = 2;
+}
+
+message CheckData {
+  bool ok = 1;
+  google.protobuf.StringValue reason = 2;
+  map<string, float> categories = 3;
+}
+
+message CheckResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  CheckData data = 4;
+}
+
+service ScreeningService {
+  rpc Check(CheckRequest) returns (CheckResponse);
+}

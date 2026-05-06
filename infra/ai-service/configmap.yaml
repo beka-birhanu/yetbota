@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-service-config
+  namespace: yetbota
+  labels:
+    app.kubernetes.io/name: ai-service
+    app.kubernetes.io/part-of: yetbota
+data:
+  APP__NAME: ai-service
+  APP__VERSION: 0.0.1
+  APP__DEBUG: "false"
+
+  HTTP__HOST: 0.0.0.0
+  HTTP__PORT: "8080"
+
+  GRPC__HOST: 0.0.0.0
+  GRPC__PORT: "9090"
+  GRPC__MAX_CONCURRENT_STREAMS: "100"
+  GRPC__KEEPALIVE_TIME_S: "60"
+  GRPC__ENABLE_REFLECTION: "false"
+
+  RABBITMQ__PREFETCH: "16"
+  RABBITMQ__INGEST_QUEUE: ai.ingest
+  RABBITMQ__RESULT_EXCHANGE: ai.results
+  RABBITMQ__RESULT_ROUTING_KEY: content.processed
+  RABBITMQ__MAX_DELIVERY_ATTEMPTS: "5"
+
+  WEAVIATE__URL: http://weaviate.yetbota.svc.cluster.local:8080
+  WEAVIATE__GRPC_HOST: weaviate.yetbota.svc.cluster.local
+  WEAVIATE__GRPC_PORT: "50051"
+  WEAVIATE__CLASS_NAME: ContentChunk
+
+  NEO4J__URI: bolt://neo4j.yetbota.svc.cluster.local:7687
+  NEO4J__USERNAME: neo4j
+  NEO4J__DATABASE: neo4j
+
+  SIMILARITY__ENABLED: "true"
+  SIMILARITY__TOP_N: "10"
+  SIMILARITY__CANDIDATE_OVERSAMPLE: "5"
+
+  GEMINI__LLM_MODEL: gemini-2.5-flash
+  GEMINI__EMBEDDING_MODEL: gemini-embedding-001
+  GEMINI__EMBEDDING_DIMENSIONS: "1536"
+  GEMINI__TIMEOUT_S: "30"
+  GEMINI__MAX_TOKENS: "1024"
+  GEMINI__TEMPERATURE: "0.2"
+
+  DEDUP__DISTANCE_THRESHOLD: "0.15"
+
+  RAG__TOP_K: "5"
+  RAG__MIN_SIMILARITY: "0.6"
+
+  SCREENING__BLOCK_THRESHOLD: "0.7"
+  SCREENING__TIMEOUT_S: "5"
+  SCREENING__CACHE_SIZE: "1024"
+  SCREENING__CACHE_TTL_S: "300"
+
+  CHUNKER__SIZE: "512"
+  CHUNKER__OVERLAP: "64"
+
+  LOGGING__LEVEL: INFO
+  LOGGING__FORMAT: json

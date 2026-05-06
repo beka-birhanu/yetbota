@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package ai.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "/aieventspb/v1";
+
+enum ContentKind {
+  CONTENT_KIND_UNSPECIFIED = 0;
+  CONTENT_KIND_POST = 1;
+  CONTENT_KIND_QUESTION = 2;
+  CONTENT_KIND_ANSWER = 3;
+}
+
+message IngestEvent {
+  string content_id = 1;
+  ContentKind kind = 2;
+  string user_id = 3;
+  string text = 4;
+  google.protobuf.StringValue parent_id = 5;
+  google.protobuf.StringValue attached_post_id = 6;
+  repeated string tags = 7;
+  google.protobuf.StringValue category = 8;
+}
+
+message ContentProcessed {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    UNIQUE = 1;
+    DUPLICATE = 2;
+    INDEXED = 3;
+    ERROR = 4;
+  }
+
+  string content_id = 1;
+  ContentKind kind = 2;
+  Status status = 3;
+  google.protobuf.StringValue duplicate_of = 4;
+  google.protobuf.StringValue error_code = 5;
+  google.protobuf.Timestamp processed_at = 6;
+}

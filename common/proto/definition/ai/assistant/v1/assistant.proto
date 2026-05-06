@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package ai.v1;
+
+import "google/protobuf/wrappers.proto";
+import "ai/events/v1/events.proto";
+
+option go_package = "/assistantpb/v1";
+
+message Citation {
+  string source_id = 1;
+  ContentKind kind = 2;
+  string text = 3;
+  float score = 4;
+}
+
+message ChatRequest {
+  string text = 1;
+  google.protobuf.StringValue user_id = 2;
+}
+
+message ChatData {
+  string answer = 1;
+  repeated Citation citations = 2;
+}
+
+message ChatResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  ChatData data = 4;
+}
+
+service AssistantService {
+  rpc Chat(ChatRequest) returns (ChatResponse);
+}

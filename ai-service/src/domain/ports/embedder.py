@@ -4,7 +4,6 @@ from domain.entities import Embedding
 
 EmbedTaskType = Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]
 
-
 @runtime_checkable
 class Embedder(Protocol):
     async def embed(

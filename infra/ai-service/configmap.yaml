@@ -26,9 +26,9 @@ data:
   RABBITMQ__RESULT_ROUTING_KEY: content.processed
   RABBITMQ__MAX_DELIVERY_ATTEMPTS: "5"
 
-  WEAVIATE__URL: http://weaviate.yetbota.svc.cluster.local:8080
-  WEAVIATE__GRPC_HOST: weaviate.yetbota.svc.cluster.local
-  WEAVIATE__GRPC_PORT: "50051"
+  WEAVIATE__URL: https://shgw7jmaqbcwnpxpfpfwvw.c0.us-west3.gcp.weaviate.cloud
+  WEAVIATE__GRPC_HOST: grpc-shgw7jmaqbcwnpxpfpfwvw.c0.us-west3.gcp.weaviate.cloud
+  WEAVIATE__GRPC_PORT: "443"
   WEAVIATE__CLASS_NAME: ContentChunk
 
   NEO4J__URI: bolt://neo4j.yetbota.svc.cluster.local:7687

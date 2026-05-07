@@ -12,12 +12,8 @@ resources:
   - neo4j/pvc.yaml
   - neo4j/deployment.yaml
   - neo4j/service.yaml
-  - weaviate/pvc.yaml
-  - weaviate/deployment.yaml
-  - weaviate/service.yaml
 
 generators:
   - postgres/secret-generator.yaml
   - redis/secret-generator.yaml
   - neo4j/secret-generator.yaml
-  - weaviate/secret-generator.yaml

@@ -11,12 +11,12 @@ from application.errors import (
     SimilaritySearchFailed,
 )
 from domain.entities import IncomingMessage, IngestRequest, IngestResult
-from infrastructure.config.settings import RabbitMQSettings
+from infrastructure.config.settings import RedisSettings
 from interfaces.workers.ingest_worker import IngestWorker, _serialize_result
 
 
-def _settings(max_attempts: int = 3) -> RabbitMQSettings:
-    return RabbitMQSettings(
+def _settings(max_attempts: int = 3) -> RedisSettings:
+    return RedisSettings(
         result_routing_key="content.processed",
         max_delivery_attempts=max_attempts,
     )
@@ -39,7 +39,7 @@ def _build(
     *,
     use_case_result: IngestResult | None = None,
     use_case_error: Exception | None = None,
-    settings: RabbitMQSettings | None = None,
+    settings: RedisSettings | None = None,
 ) -> tuple[IngestWorker, AsyncMock, AsyncMock]:
     consumer = AsyncMock()
     publisher = AsyncMock()
@@ -52,7 +52,7 @@ def _build(
         consumer=consumer,
         publisher=publisher,
         use_case=use_case,
-        rabbitmq=settings or _settings(),
+        redis=settings or _settings(),
     )
     return worker, publisher, use_case
 

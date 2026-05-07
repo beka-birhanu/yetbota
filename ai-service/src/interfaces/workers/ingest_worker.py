@@ -7,8 +7,8 @@ from application.errors import AIServiceError, MessageMalformed
 from application.ingest_content import IngestContent
 from domain.entities import IncomingMessage, IngestRequest, IngestResult
 from domain.ports.message_consumer import IngestHandler
-from infrastructure.config.settings import RabbitMQSettings
-from infrastructure.messaging import RabbitMQConsumer, RabbitMQPublisher
+from infrastructure.config.settings import RedisSettings
+from infrastructure.messaging import RedisStreamConsumer, RedisStreamPublisher
 from infrastructure.observability import (
     INGEST_DURATION,
     INGEST_TOTAL,
@@ -60,15 +60,15 @@ class IngestWorker:
     def __init__(
         self,
         *,
-        consumer: RabbitMQConsumer,
-        publisher: RabbitMQPublisher,
+        consumer: RedisStreamConsumer,
+        publisher: RedisStreamPublisher,
         use_case: IngestContent,
-        rabbitmq: RabbitMQSettings,
+        redis: RedisSettings,
     ) -> None:
         self._consumer = consumer
         self._publisher = publisher
         self._use_case = use_case
-        self._rabbitmq = rabbitmq
+        self._redis = redis
 
     async def run(self) -> None:
         handler: IngestHandler = self._handle
@@ -103,7 +103,7 @@ class IngestWorker:
         request: IngestRequest,
         exc: AIServiceError,
     ) -> None:
-        is_final = message.delivery_count >= self._rabbitmq.max_delivery_attempts
+        is_final = message.delivery_count >= self._redis.max_delivery_attempts
         if exc.transient and not is_final:
             logger.info(
                 "ingest.retrying",
@@ -134,7 +134,7 @@ class IngestWorker:
 
     async def _publish(self, result: IngestResult) -> None:
         body = _serialize_result(result)
-        await self._publisher.publish(self._rabbitmq.result_routing_key, body)
+        await self._publisher.publish(self._redis.result_routing_key, body)
         logger.info(
             "ingest.result_published",
             content_id=result.content_id,

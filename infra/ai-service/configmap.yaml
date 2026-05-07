@@ -20,12 +20,6 @@ data:
   GRPC__KEEPALIVE_TIME_S: "60"
   GRPC__ENABLE_REFLECTION: "false"
 
-  RABBITMQ__PREFETCH: "16"
-  RABBITMQ__INGEST_QUEUE: ai.ingest
-  RABBITMQ__RESULT_EXCHANGE: ai.results
-  RABBITMQ__RESULT_ROUTING_KEY: content.processed
-  RABBITMQ__MAX_DELIVERY_ATTEMPTS: "5"
-
   WEAVIATE__URL: https://shgw7jmaqbcwnpxpfpfwvw.c0.us-west3.gcp.weaviate.cloud
   WEAVIATE__GRPC_HOST: grpc-shgw7jmaqbcwnpxpfpfwvw.c0.us-west3.gcp.weaviate.cloud
   WEAVIATE__GRPC_PORT: "443"

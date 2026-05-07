@@ -24,12 +24,16 @@ class GrpcSettings(BaseModel):
     enable_reflection: bool = True
 
 
-class RabbitMQSettings(BaseModel):
-    uri: str = "amqp://guest:guest@localhost:5672/"
-    prefetch: int = 16
-    ingest_queue: str = "ai.ingest"
-    result_exchange: str = "ai.results"
+class RedisSettings(BaseModel):
+    url: str = "redis://localhost:6379/0"
+    ingest_stream: str = "ai.ingest"
+    consumer_group: str = "ai-service"
+    result_stream: str = "ai.results"
     result_routing_key: str = "content.processed"
+    prefetch: int = 16
+    block_ms: int = 5000
+    claim_idle_ms: int = 30000
+    result_maxlen: int = 10000
     max_delivery_attempts: int = 5
 
 
@@ -101,7 +105,7 @@ class Settings(BaseSettings):
     app: AppSettings = Field(default_factory=AppSettings)
     http: HttpSettings = Field(default_factory=HttpSettings)
     grpc: GrpcSettings = Field(default_factory=GrpcSettings)
-    rabbitmq: RabbitMQSettings = Field(default_factory=RabbitMQSettings)
+    redis: RedisSettings = Field(default_factory=RedisSettings)
     weaviate: WeaviateSettings = Field(default_factory=WeaviateSettings)
     neo4j: Neo4jSettings = Field(default_factory=Neo4jSettings)
     gemini: GeminiSettings = Field(default_factory=GeminiSettings)

@@ -1,4 +1,4 @@
-from infrastructure.messaging.rabbitmq_consumer import RabbitMQConsumer
-from infrastructure.messaging.rabbitmq_publisher import RabbitMQPublisher
+from infrastructure.messaging.redis_consumer import RedisStreamConsumer
+from infrastructure.messaging.redis_publisher import RedisStreamPublisher
 
-__all__ = ["RabbitMQConsumer", "RabbitMQPublisher"]
+__all__ = ["RedisStreamConsumer", "RedisStreamPublisher"]

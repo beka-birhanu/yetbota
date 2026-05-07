@@ -19,7 +19,7 @@ from infrastructure.llm import (
     GeminiLLM,
     ScreeningPromptBuilder,
 )
-from infrastructure.messaging import RabbitMQConsumer, RabbitMQPublisher
+from infrastructure.messaging import RedisStreamConsumer, RedisStreamPublisher
 from infrastructure.observability import configure_logging, get_logger
 from infrastructure.vector import WeaviateVectorStore
 from interfaces.grpc import GrpcServer
@@ -43,8 +43,8 @@ async def _serve(settings: Settings) -> None:
         similarity_graph = Neo4jSimilarityGraph(settings.neo4j)
         await similarity_graph.connect()
 
-    consumer = RabbitMQConsumer(settings.rabbitmq)
-    publisher = RabbitMQPublisher(settings.rabbitmq)
+    consumer = RedisStreamConsumer(settings.redis)
+    publisher = RedisStreamPublisher(settings.redis)
     await consumer.connect()
     await publisher.connect()
 
@@ -63,7 +63,7 @@ async def _serve(settings: Settings) -> None:
         consumer=consumer,
         publisher=publisher,
         use_case=ingest_use_case,
-        rabbitmq=settings.rabbitmq,
+        redis=settings.redis,
     )
 
     assistant_use_case = ConsultAssistant(

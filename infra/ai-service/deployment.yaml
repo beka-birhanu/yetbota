@@ -25,7 +25,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: ai-service
-          image: romareo/ai-service:v0.0.4
+          image: romareo/ai-service:v0.0.5
           ports:
             - name: rest
               containerPort: 8080

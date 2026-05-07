@@ -7,6 +7,7 @@ const (
 
 const (
 	DefaultPaginationLength = 15
+	MaxPaginationLength     = 20
 	DefaultPhoneRegion      = "ETH"
 )
 
@@ -27,11 +28,18 @@ const (
 	RoleUser  = "USER"
 )
 
+const (
+	FeedUpdateWorkflowQueue = "WF_FEED_UPDATE"
+)
+
 var SkipAuth = map[string]struct{}{}
 
 var SkipAuthGrpc = map[string]struct{}{
 	"/content.v1.PostService/List": {},
 	"/content.v1.PostService/Read": {},
+
+	"/content.comment.v1.CommentService/List": {},
+	"/content.comment.v1.CommentService/Read": {},
 }
 
 var AllowedAccessMap = map[string]struct{}{

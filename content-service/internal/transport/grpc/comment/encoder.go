@@ -76,7 +76,12 @@ func encodeListRes(_ context.Context, resp any) (any, error) {
 			Code:    "00",
 			Success: true,
 			Message: "Comments listed successfully",
-			Data:    comments,
+			Data: &pb.ListResponseData{
+				Data:     comments,
+				Total:    r.Total,
+				Page:     int32(r.Page),
+				PageSize: int32(r.PageSize),
+			},
 		}, nil
 	}
 	return &pb.ListResponse{
@@ -98,30 +103,5 @@ func encodeDeleteRes(_ context.Context, resp any) (any, error) {
 		Code:    "00",
 		Success: true,
 		Message: "Comment deleted successfully",
-	}, nil
-}
-
-func encodeVoteRes(_ context.Context, resp any) (any, error) {
-	if errResp, ok := resp.(*toddlerr.Error); ok {
-		return &pb.VoteResponse{
-			Code:    fmt.Sprintf("%d", errResp.PublicStatusCode),
-			Success: false,
-			Message: errResp.PublicMessage,
-		}, nil
-	}
-	r, ok := resp.(*commentSvc.VoteResponse)
-	if ok {
-		return &pb.VoteResponse{
-			Code:     "00",
-			Success:  true,
-			Message:  "Vote recorded",
-			Upvote:   int32(r.Upvote),
-			Downvote: int32(r.Downvote),
-		}, nil
-	}
-	return &pb.VoteResponse{
-		Code:    fmt.Sprintf("%d", status.ServerError),
-		Success: false,
-		Message: "something went wrong",
 	}, nil
 }

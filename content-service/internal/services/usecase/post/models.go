@@ -14,6 +14,7 @@ type OrderedPhotoUpload struct {
 
 type OrderedPhoto struct {
 	ID       string
+	PostID   string
 	URL      string
 	Position int
 }

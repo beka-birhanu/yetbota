@@ -16,5 +16,9 @@ func buildQueryMods(opts *postphoto.Options) []qm.QueryMod {
 		mods = append(mods, qm.Load(dbmodels.PostPhotoRels.Photo))
 	}
 
+	if len(opts.PostIDs) > 0 {
+		mods = append(mods, dbmodels.PostPhotoWhere.PostID.IN(opts.PostIDs))
+	}
+
 	return mods
 }

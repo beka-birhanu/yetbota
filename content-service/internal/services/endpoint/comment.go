@@ -117,30 +117,3 @@ func makeCommentDeleteEndpoint(svc commentSvc.Service) endpoint.Endpoint {
 		return nil, nil
 	}
 }
-
-func makeCommentVoteEndpoint(svc commentSvc.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request any) (any, error) {
-		data := ctx.Value(ctxRP.AppSession)
-		ctxSess, ok := data.(*ctxRP.Context)
-		if !ok {
-			return errors.New("error parsing AppSession"), nil
-		}
-		r, ok := request.(*commentSvc.VoteRequest)
-		if !ok {
-			err := errors.New("error parse VoteRequest")
-			ctxSess.SetErrorMessage(err.Error())
-			ctxSess.Lv4()
-			return nil, err
-		}
-		ctxSess.SetRequest(r)
-		ctxSess.Lv1("Incoming message CommentVote")
-
-		respOK, respErr := svc.Vote(ctx, ctxSess, r)
-		if respErr != nil {
-			ctxSess.Lv4()
-			return respErr, nil
-		}
-		ctxSess.Lv4()
-		return respOK, nil
-	}
-}

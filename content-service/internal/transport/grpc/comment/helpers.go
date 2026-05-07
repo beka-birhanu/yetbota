@@ -31,14 +31,3 @@ func commentToProto(c *dbmodels.Comment) *pb.Comment {
 		UpdatedAt: timestamppb.New(c.UpdatedAt),
 	}
 }
-
-func mapCommentVoteTypeFromProto(v pb.CommentVoteType) string {
-	switch v {
-	case pb.CommentVoteType_COMMENT_VOTE_TYPE_UP:
-		return dbmodels.CommentVoteTypeUpvote
-	case pb.CommentVoteType_COMMENT_VOTE_TYPE_DOWN:
-		return dbmodels.CommentVoteTypeDownvote
-	default:
-		return dbmodels.CommentVoteTypeUpvote
-	}
-}

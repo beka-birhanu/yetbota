@@ -18,7 +18,7 @@ type Repository interface {
 
 type Options struct {
 	LoadPhoto bool
-	PostID    string
+	PostIDs   []string
 }
 
 type SortOptions struct {

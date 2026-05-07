@@ -58,4 +58,3 @@ func RunServer(ctx context.Context, cfg *Config) error {
 		return err
 	}
 }
-

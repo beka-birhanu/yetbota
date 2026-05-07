@@ -1237,10 +1237,7 @@ type ListResponse struct {
 	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
 	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
 	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
-	Data          []*Post                `protobuf:"bytes,4,rep,name=data,proto3" json:"data,omitempty"`
-	Total         int64                  `protobuf:"varint,5,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,6,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,7,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Data          *ListResponseData      `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1296,28 +1293,75 @@ func (x *ListResponse) GetMessage() string {
 	return ""
 }
 
-func (x *ListResponse) GetData() []*Post {
+func (x *ListResponse) GetData() *ListResponseData {
 	if x != nil {
 		return x.Data
 	}
 	return nil
 }
 
-func (x *ListResponse) GetTotal() int64 {
+type ListResponseData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Posts         []*Post                `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListResponseData) Reset() {
+	*x = ListResponseData{}
+	mi := &file_content_post_v1_post_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListResponseData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListResponseData) ProtoMessage() {}
+
+func (x *ListResponseData) ProtoReflect() protoreflect.Message {
+	mi := &file_content_post_v1_post_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListResponseData.ProtoReflect.Descriptor instead.
+func (*ListResponseData) Descriptor() ([]byte, []int) {
+	return file_content_post_v1_post_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ListResponseData) GetPosts() []*Post {
+	if x != nil {
+		return x.Posts
+	}
+	return nil
+}
+
+func (x *ListResponseData) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListResponse) GetPage() int32 {
+func (x *ListResponseData) GetPage() int32 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListResponse) GetPageSize() int32 {
+func (x *ListResponseData) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -1422,15 +1466,17 @@ const file_content_post_v1_post_proto_rawDesc = "" +
 	" \x01(\x05R\bpageSize\x12;\n" +
 	"\n" +
 	"resolution\x18\v \x01(\x0e2\x1b.content.v1.PhotoResolutionR\n" +
-	"resolution\"\xc3\x01\n" +
+	"resolution\"\x88\x01\n" +
 	"\fListResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\x12$\n" +
-	"\x04data\x18\x04 \x03(\v2\x10.content.v1.PostR\x04data\x12\x14\n" +
-	"\x05total\x18\x05 \x01(\x03R\x05total\x12\x12\n" +
-	"\x04page\x18\x06 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\a \x01(\x05R\bpageSize*\xa7\x01\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\x120\n" +
+	"\x04data\x18\x04 \x01(\v2\x1c.content.v1.ListResponseDataR\x04data\"\x81\x01\n" +
+	"\x10ListResponseData\x12&\n" +
+	"\x05posts\x18\x01 \x03(\v2\x10.content.v1.PostR\x05posts\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize*\xa7\x01\n" +
 	"\rPostSortField\x12\x1f\n" +
 	"\x1bPOST_SORT_FIELD_UNSPECIFIED\x10\x00\x12\x1e\n" +
 	"\x1aPOST_SORT_FIELD_CREATED_AT\x10\x01\x12\x19\n" +
@@ -1471,7 +1517,7 @@ func file_content_post_v1_post_proto_rawDescGZIP() []byte {
 }
 
 var file_content_post_v1_post_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_content_post_v1_post_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_content_post_v1_post_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_content_post_v1_post_proto_goTypes = []any{
 	(PostSortField)(0),            // 0: content.v1.PostSortField
 	(SortDirection)(0),            // 1: content.v1.SortDirection
@@ -1491,14 +1537,15 @@ var file_content_post_v1_post_proto_goTypes = []any{
 	(*VoteResponse)(nil),          // 15: content.v1.VoteResponse
 	(*ListRequest)(nil),           // 16: content.v1.ListRequest
 	(*ListResponse)(nil),          // 17: content.v1.ListResponse
-	(*timestamppb.Timestamp)(nil), // 18: google.protobuf.Timestamp
-	(*wrapperspb.BoolValue)(nil),  // 19: google.protobuf.BoolValue
+	(*ListResponseData)(nil),      // 18: content.v1.ListResponseData
+	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
+	(*wrapperspb.BoolValue)(nil),  // 20: google.protobuf.BoolValue
 }
 var file_content_post_v1_post_proto_depIdxs = []int32{
 	6,  // 0: content.v1.Post.photos:type_name -> content.v1.OrderedPhoto
 	4,  // 1: content.v1.Post.location:type_name -> content.v1.Coordinate
-	18, // 2: content.v1.Post.created_at:type_name -> google.protobuf.Timestamp
-	18, // 3: content.v1.Post.updated_at:type_name -> google.protobuf.Timestamp
+	19, // 2: content.v1.Post.created_at:type_name -> google.protobuf.Timestamp
+	19, // 3: content.v1.Post.updated_at:type_name -> google.protobuf.Timestamp
 	5,  // 4: content.v1.AddRequest.photos:type_name -> content.v1.OrderedPhotoUpload
 	4,  // 5: content.v1.AddRequest.location:type_name -> content.v1.Coordinate
 	7,  // 6: content.v1.AddResponse.data:type_name -> content.v1.Post
@@ -1508,27 +1555,28 @@ var file_content_post_v1_post_proto_depIdxs = []int32{
 	4,  // 10: content.v1.UpdateRequest.location:type_name -> content.v1.Coordinate
 	7,  // 11: content.v1.UpdateResponse.data:type_name -> content.v1.Post
 	2,  // 12: content.v1.VoteRequest.vote_type:type_name -> content.v1.PostVoteType
-	19, // 13: content.v1.ListRequest.is_question:type_name -> google.protobuf.BoolValue
+	20, // 13: content.v1.ListRequest.is_question:type_name -> google.protobuf.BoolValue
 	4,  // 14: content.v1.ListRequest.near:type_name -> content.v1.Coordinate
 	0,  // 15: content.v1.ListRequest.sort_by:type_name -> content.v1.PostSortField
 	1,  // 16: content.v1.ListRequest.sort_dir:type_name -> content.v1.SortDirection
 	3,  // 17: content.v1.ListRequest.resolution:type_name -> content.v1.PhotoResolution
-	7,  // 18: content.v1.ListResponse.data:type_name -> content.v1.Post
-	8,  // 19: content.v1.PostService.Add:input_type -> content.v1.AddRequest
-	10, // 20: content.v1.PostService.Read:input_type -> content.v1.ReadRequest
-	12, // 21: content.v1.PostService.Update:input_type -> content.v1.UpdateRequest
-	14, // 22: content.v1.PostService.Vote:input_type -> content.v1.VoteRequest
-	16, // 23: content.v1.PostService.List:input_type -> content.v1.ListRequest
-	9,  // 24: content.v1.PostService.Add:output_type -> content.v1.AddResponse
-	11, // 25: content.v1.PostService.Read:output_type -> content.v1.ReadResponse
-	13, // 26: content.v1.PostService.Update:output_type -> content.v1.UpdateResponse
-	15, // 27: content.v1.PostService.Vote:output_type -> content.v1.VoteResponse
-	17, // 28: content.v1.PostService.List:output_type -> content.v1.ListResponse
-	24, // [24:29] is the sub-list for method output_type
-	19, // [19:24] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	18, // 18: content.v1.ListResponse.data:type_name -> content.v1.ListResponseData
+	7,  // 19: content.v1.ListResponseData.posts:type_name -> content.v1.Post
+	8,  // 20: content.v1.PostService.Add:input_type -> content.v1.AddRequest
+	10, // 21: content.v1.PostService.Read:input_type -> content.v1.ReadRequest
+	12, // 22: content.v1.PostService.Update:input_type -> content.v1.UpdateRequest
+	14, // 23: content.v1.PostService.Vote:input_type -> content.v1.VoteRequest
+	16, // 24: content.v1.PostService.List:input_type -> content.v1.ListRequest
+	9,  // 25: content.v1.PostService.Add:output_type -> content.v1.AddResponse
+	11, // 26: content.v1.PostService.Read:output_type -> content.v1.ReadResponse
+	13, // 27: content.v1.PostService.Update:output_type -> content.v1.UpdateResponse
+	15, // 28: content.v1.PostService.Vote:output_type -> content.v1.VoteResponse
+	17, // 29: content.v1.PostService.List:output_type -> content.v1.ListResponse
+	25, // [25:30] is the sub-list for method output_type
+	20, // [20:25] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_content_post_v1_post_proto_init() }
@@ -1542,7 +1590,7 @@ func file_content_post_v1_post_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_content_post_v1_post_proto_rawDesc), len(file_content_post_v1_post_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   14,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

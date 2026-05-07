@@ -115,6 +115,7 @@ func encodeListRes(_ context.Context, resp any) (any, error) {
 			Message: errResp.PublicMessage,
 		}, nil
 	}
+
 	r, ok := resp.(*postSvc.ListResponse)
 	if !ok {
 		return &pb.ListResponse{
@@ -124,19 +125,15 @@ func encodeListRes(_ context.Context, resp any) (any, error) {
 		}, nil
 	}
 
-	posts := make([]*pb.Post, 0, len(r.Posts))
-	for _, p := range r.Posts {
-		photos := r.Photos[p.ID]
-		posts = append(posts, postToProto(p, photos))
-	}
-
 	return &pb.ListResponse{
-		Code:     "00",
-		Success:  true,
-		Message:  "Posts retrieved successfully",
-		Data:     posts,
-		Total:    r.Total,
-		Page:     int32(r.Page),
-		PageSize: int32(r.PageSize),
+		Code:    "00",
+		Success: true,
+		Message: "Posts retrieved successfully",
+		Data: &pb.ListResponseData{
+			Posts:    bundlePostsWithPhotos(r.Posts, r.Photos),
+			Total:    r.Total,
+			Page:     int32(r.Page),
+			PageSize: int32(r.PageSize),
+		},
 	}, nil
 }

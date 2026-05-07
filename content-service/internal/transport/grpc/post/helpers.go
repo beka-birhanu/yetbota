@@ -99,3 +99,12 @@ func mapSortDirFromProto(d pb.SortDirection) domainPost.ListSortDir {
 	}
 	return domainPost.ListSortDirDesc
 }
+
+func bundlePostsWithPhotos(posts []*dbmodels.Post, photos map[string][]*postSvc.OrderedPhoto) []*pb.Post {
+	postBundles := make([]*pb.Post, 0, len(posts))
+	for _, p := range posts {
+		postPhotos := photos[p.ID]
+		postBundles = append(postBundles, postToProto(p, postPhotos))
+	}
+	return postBundles
+}

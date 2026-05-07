@@ -55,4 +55,3 @@ func hostAllowed(origin string, allowed map[string]struct{}) bool {
 	_, ok := allowed[origin]
 	return ok
 }
-

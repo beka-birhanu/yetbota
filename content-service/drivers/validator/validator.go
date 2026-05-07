@@ -7,4 +7,3 @@ var Validate *validator.Validate
 func InitValidator() {
 	Validate = validator.New()
 }
-

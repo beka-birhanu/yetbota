@@ -6,6 +6,7 @@ import (
 	domainAuth "github.com/beka-birhanu/yetbota/content-service/internal/domain/auth"
 	"github.com/beka-birhanu/yetbota/content-service/internal/services/endpoint"
 	httpComment "github.com/beka-birhanu/yetbota/content-service/internal/transport/http/comment"
+	httpFeed "github.com/beka-birhanu/yetbota/content-service/internal/transport/http/feed"
 	httpPost "github.com/beka-birhanu/yetbota/content-service/internal/transport/http/post"
 	httpShared "github.com/beka-birhanu/yetbota/content-service/internal/transport/http/shared"
 )
@@ -33,6 +34,12 @@ func NewRouter(cfg *Config) (http.Handler, error) {
 			return nil, err
 		}
 		v1.Handle("/comments/", http.StripPrefix("/comments", commentHandler))
+
+		feedHandler, err := httpFeed.NewHandler(&httpFeed.Config{E: cfg.E, SessionManager: cfg.SessionManager})
+		if err != nil {
+			return nil, err
+		}
+		v1.Handle("/feed/", http.StripPrefix("/feed", feedHandler))
 	}
 
 	if cfg != nil && cfg.BasePath != "" {
@@ -48,4 +55,3 @@ func NewRouter(cfg *Config) (http.Handler, error) {
 
 	return out, nil
 }
-

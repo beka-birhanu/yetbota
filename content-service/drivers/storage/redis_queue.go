@@ -11,7 +11,7 @@ import (
 	toddlerError "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
 	domain "github.com/beka-birhanu/yetbota/content-service/internal/domain/storage"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 const (

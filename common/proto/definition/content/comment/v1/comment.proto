@@ -53,13 +53,22 @@ message ReadResponse {
 message ListRequest {
   string post_id = 1;
   string comment_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
 message ListResponse {
   string code = 1;
   bool success = 2;
   string message = 3;
-  repeated Comment data = 4;
+  ListResponseData data = 4;
+}
+
+message ListResponseData {
+  repeated Comment data = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
 message DeleteRequest {
@@ -72,23 +81,9 @@ message DeleteResponse {
   string message = 3;
 }
 
-message VoteRequest {
-  string comment_id = 1;
-  CommentVoteType vote_type = 2;
-}
-
-message VoteResponse {
-  string code = 1;
-  bool success = 2;
-  string message = 3;
-  int32 upvote = 4;
-  int32 downvote = 5;
-}
-
 service CommentService {
   rpc Add(AddRequest) returns (AddResponse);
   rpc Read(ReadRequest) returns (ReadResponse);
   rpc List(ListRequest) returns (ListResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
-  rpc Vote(VoteRequest) returns (VoteResponse);
 }

@@ -89,6 +89,37 @@ var CommentTableColumns = struct {
 
 // Generated where
 
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) LIKE(x string) qm.QueryMod    { return qm.Where(w.field+" LIKE ?", x) }
+func (w whereHelperstring) NLIKE(x string) qm.QueryMod   { return qm.Where(w.field+" NOT LIKE ?", x) }
+func (w whereHelperstring) ILIKE(x string) qm.QueryMod   { return qm.Where(w.field+" ILIKE ?", x) }
+func (w whereHelperstring) NILIKE(x string) qm.QueryMod  { return qm.Where(w.field+" NOT ILIKE ?", x) }
+func (w whereHelperstring) SIMILAR(x string) qm.QueryMod { return qm.Where(w.field+" SIMILAR TO ?", x) }
+func (w whereHelperstring) NSIMILAR(x string) qm.QueryMod {
+	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
+}
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]any, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]any, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 type whereHelperint struct{ field string }
 
 func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -177,6 +208,27 @@ func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
 func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var CommentWhere = struct {
 	ID        whereHelperstring
 	Content   whereHelperstring
@@ -203,23 +255,20 @@ var CommentWhere = struct {
 
 // CommentRels is where relationship names are stored.
 var CommentRels = struct {
-	Comment      string
-	Post         string
-	CommentVotes string
-	Comments     string
+	Comment  string
+	Post     string
+	Comments string
 }{
-	Comment:      "Comment",
-	Post:         "Post",
-	CommentVotes: "CommentVotes",
-	Comments:     "Comments",
+	Comment:  "Comment",
+	Post:     "Post",
+	Comments: "Comments",
 }
 
 // commentR is where relationships are stored.
 type commentR struct {
-	Comment      *Comment         `boil:"Comment" json:"Comment" toml:"Comment" yaml:"Comment"`
-	Post         *Post            `boil:"Post" json:"Post" toml:"Post" yaml:"Post"`
-	CommentVotes CommentVoteSlice `boil:"CommentVotes" json:"CommentVotes" toml:"CommentVotes" yaml:"CommentVotes"`
-	Comments     CommentSlice     `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
+	Comment  *Comment     `boil:"Comment" json:"Comment" toml:"Comment" yaml:"Comment"`
+	Post     *Post        `boil:"Post" json:"Post" toml:"Post" yaml:"Post"`
+	Comments CommentSlice `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
 }
 
 // NewStruct creates a new relationship struct
@@ -257,22 +306,6 @@ func (r *commentR) GetPost() *Post {
 	}
 
 	return r.Post
-}
-
-func (o *Comment) GetCommentVotes() CommentVoteSlice {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetCommentVotes()
-}
-
-func (r *commentR) GetCommentVotes() CommentVoteSlice {
-	if r == nil {
-		return nil
-	}
-
-	return r.CommentVotes
 }
 
 func (o *Comment) GetComments() CommentSlice {
@@ -629,20 +662,6 @@ func (o *Comment) Post(mods ...qm.QueryMod) postQuery {
 	return Posts(queryMods...)
 }
 
-// CommentVotes retrieves all the comment_vote's CommentVotes with an executor.
-func (o *Comment) CommentVotes(mods ...qm.QueryMod) commentVoteQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"comment_votes\".\"comment_id\"=?", o.ID),
-	)
-
-	return CommentVotes(queryMods...)
-}
-
 // Comments retrieves all the comment's Comments with an executor.
 func (o *Comment) Comments(mods ...qm.QueryMod) commentQuery {
 	var queryMods []qm.QueryMod
@@ -901,119 +920,6 @@ func (commentL) LoadPost(ctx context.Context, e boil.ContextExecutor, singular b
 	return nil
 }
 
-// LoadCommentVotes allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (commentL) LoadCommentVotes(ctx context.Context, e boil.ContextExecutor, singular bool, maybeComment any, mods queries.Applicator) error {
-	var slice []*Comment
-	var object *Comment
-
-	if singular {
-		var ok bool
-		object, ok = maybeComment.(*Comment)
-		if !ok {
-			object = new(Comment)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeComment)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeComment))
-			}
-		}
-	} else {
-		s, ok := maybeComment.(*[]*Comment)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeComment)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeComment))
-			}
-		}
-	}
-
-	args := make(map[any]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &commentR{}
-		}
-		args[object.ID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &commentR{}
-			}
-			args[obj.ID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]any, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`comment_votes`),
-		qm.WhereIn(`comment_votes.comment_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load comment_votes")
-	}
-
-	var resultSlice []*CommentVote
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice comment_votes")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on comment_votes")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comment_votes")
-	}
-
-	if len(commentVoteAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.CommentVotes = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &commentVoteR{}
-			}
-			foreign.R.Comment = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.CommentID {
-				local.R.CommentVotes = append(local.R.CommentVotes, foreign)
-				if foreign.R == nil {
-					foreign.R = &commentVoteR{}
-				}
-				foreign.R.Comment = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // LoadComments allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (commentL) LoadComments(ctx context.Context, e boil.ContextExecutor, singular bool, maybeComment any, mods queries.Applicator) error {
@@ -1251,59 +1157,6 @@ func (o *Comment) SetPost(ctx context.Context, exec boil.ContextExecutor, insert
 		related.R.Comments = append(related.R.Comments, o)
 	}
 
-	return nil
-}
-
-// AddCommentVotes adds the given related objects to the existing relationships
-// of the comment, optionally inserting them as new records.
-// Appends related to o.R.CommentVotes.
-// Sets related.R.Comment appropriately.
-func (o *Comment) AddCommentVotes(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*CommentVote) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.CommentID = o.ID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"comment_votes\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"comment_id"}),
-				strmangle.WhereClause("\"", "\"", 2, commentVotePrimaryKeyColumns),
-			)
-			values := []any{o.ID, rel.UserID, rel.CommentID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.CommentID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &commentR{
-			CommentVotes: related,
-		}
-	} else {
-		o.R.CommentVotes = append(o.R.CommentVotes, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &commentVoteR{
-				Comment: o,
-			}
-		} else {
-			rel.R.Comment = o
-		}
-	}
 	return nil
 }
 

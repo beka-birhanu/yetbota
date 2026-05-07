@@ -439,6 +439,8 @@ type ListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	CommentId     string                 `protobuf:"bytes,2,opt,name=comment_id,json=commentId,proto3" json:"comment_id,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -487,12 +489,26 @@ func (x *ListRequest) GetCommentId() string {
 	return ""
 }
 
+func (x *ListRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type ListResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
 	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
 	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
-	Data          []*Comment             `protobuf:"bytes,4,rep,name=data,proto3" json:"data,omitempty"`
+	Data          *ListResponseData      `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -548,11 +564,79 @@ func (x *ListResponse) GetMessage() string {
 	return ""
 }
 
-func (x *ListResponse) GetData() []*Comment {
+func (x *ListResponse) GetData() *ListResponseData {
 	if x != nil {
 		return x.Data
 	}
 	return nil
+}
+
+type ListResponseData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []*Comment             `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListResponseData) Reset() {
+	*x = ListResponseData{}
+	mi := &file_content_comment_v1_comment_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListResponseData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListResponseData) ProtoMessage() {}
+
+func (x *ListResponseData) ProtoReflect() protoreflect.Message {
+	mi := &file_content_comment_v1_comment_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListResponseData.ProtoReflect.Descriptor instead.
+func (*ListResponseData) Descriptor() ([]byte, []int) {
+	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListResponseData) GetData() []*Comment {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *ListResponseData) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListResponseData) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListResponseData) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
 }
 
 type DeleteRequest struct {
@@ -564,7 +648,7 @@ type DeleteRequest struct {
 
 func (x *DeleteRequest) Reset() {
 	*x = DeleteRequest{}
-	mi := &file_content_comment_v1_comment_proto_msgTypes[7]
+	mi := &file_content_comment_v1_comment_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -576,7 +660,7 @@ func (x *DeleteRequest) String() string {
 func (*DeleteRequest) ProtoMessage() {}
 
 func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_content_comment_v1_comment_proto_msgTypes[7]
+	mi := &file_content_comment_v1_comment_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -589,7 +673,7 @@ func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{7}
+	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteRequest) GetId() string {
@@ -610,7 +694,7 @@ type DeleteResponse struct {
 
 func (x *DeleteResponse) Reset() {
 	*x = DeleteResponse{}
-	mi := &file_content_comment_v1_comment_proto_msgTypes[8]
+	mi := &file_content_comment_v1_comment_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -622,7 +706,7 @@ func (x *DeleteResponse) String() string {
 func (*DeleteResponse) ProtoMessage() {}
 
 func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_content_comment_v1_comment_proto_msgTypes[8]
+	mi := &file_content_comment_v1_comment_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -635,7 +719,7 @@ func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResponse.ProtoReflect.Descriptor instead.
 func (*DeleteResponse) Descriptor() ([]byte, []int) {
-	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{8}
+	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteResponse) GetCode() string {
@@ -657,134 +741,6 @@ func (x *DeleteResponse) GetMessage() string {
 		return x.Message
 	}
 	return ""
-}
-
-type VoteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CommentId     string                 `protobuf:"bytes,1,opt,name=comment_id,json=commentId,proto3" json:"comment_id,omitempty"`
-	VoteType      CommentVoteType        `protobuf:"varint,2,opt,name=vote_type,json=voteType,proto3,enum=content.comment.v1.CommentVoteType" json:"vote_type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *VoteRequest) Reset() {
-	*x = VoteRequest{}
-	mi := &file_content_comment_v1_comment_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *VoteRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*VoteRequest) ProtoMessage() {}
-
-func (x *VoteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_content_comment_v1_comment_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use VoteRequest.ProtoReflect.Descriptor instead.
-func (*VoteRequest) Descriptor() ([]byte, []int) {
-	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *VoteRequest) GetCommentId() string {
-	if x != nil {
-		return x.CommentId
-	}
-	return ""
-}
-
-func (x *VoteRequest) GetVoteType() CommentVoteType {
-	if x != nil {
-		return x.VoteType
-	}
-	return CommentVoteType_COMMENT_VOTE_TYPE_UNSPECIFIED
-}
-
-type VoteResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
-	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
-	Upvote        int32                  `protobuf:"varint,4,opt,name=upvote,proto3" json:"upvote,omitempty"`
-	Downvote      int32                  `protobuf:"varint,5,opt,name=downvote,proto3" json:"downvote,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *VoteResponse) Reset() {
-	*x = VoteResponse{}
-	mi := &file_content_comment_v1_comment_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *VoteResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*VoteResponse) ProtoMessage() {}
-
-func (x *VoteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_content_comment_v1_comment_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use VoteResponse.ProtoReflect.Descriptor instead.
-func (*VoteResponse) Descriptor() ([]byte, []int) {
-	return file_content_comment_v1_comment_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *VoteResponse) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
-}
-
-func (x *VoteResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *VoteResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *VoteResponse) GetUpvote() int32 {
-	if x != nil {
-		return x.Upvote
-	}
-	return 0
-}
-
-func (x *VoteResponse) GetDownvote() int32 {
-	if x != nil {
-		return x.Downvote
-	}
-	return 0
 }
 
 var File_content_comment_v1_comment_proto protoreflect.FileDescriptor
@@ -825,42 +781,38 @@ const file_content_comment_v1_comment_proto_rawDesc = "" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12/\n" +
-	"\x04data\x18\x04 \x01(\v2\x1b.content.comment.v1.CommentR\x04data\"E\n" +
+	"\x04data\x18\x04 \x01(\v2\x1b.content.comment.v1.CommentR\x04data\"v\n" +
 	"\vListRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x1d\n" +
 	"\n" +
-	"comment_id\x18\x02 \x01(\tR\tcommentId\"\x87\x01\n" +
+	"comment_id\x18\x02 \x01(\tR\tcommentId\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\x90\x01\n" +
 	"\fListResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\x12/\n" +
-	"\x04data\x18\x04 \x03(\v2\x1b.content.comment.v1.CommentR\x04data\"\x1f\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\x128\n" +
+	"\x04data\x18\x04 \x01(\v2$.content.comment.v1.ListResponseDataR\x04data\"\x8a\x01\n" +
+	"\x10ListResponseData\x12/\n" +
+	"\x04data\x18\x01 \x03(\v2\x1b.content.comment.v1.CommentR\x04data\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\x1f\n" +
 	"\rDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"X\n" +
 	"\x0eDeleteResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\"n\n" +
-	"\vVoteRequest\x12\x1d\n" +
-	"\n" +
-	"comment_id\x18\x01 \x01(\tR\tcommentId\x12@\n" +
-	"\tvote_type\x18\x02 \x01(\x0e2#.content.comment.v1.CommentVoteTypeR\bvoteType\"\x8a\x01\n" +
-	"\fVoteResponse\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\x12\x16\n" +
-	"\x06upvote\x18\x04 \x01(\x05R\x06upvote\x12\x1a\n" +
-	"\bdownvote\x18\x05 \x01(\x05R\bdownvote*j\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage*j\n" +
 	"\x0fCommentVoteType\x12!\n" +
 	"\x1dCOMMENT_VOTE_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14COMMENT_VOTE_TYPE_UP\x10\x01\x12\x1a\n" +
-	"\x16COMMENT_VOTE_TYPE_DOWN\x10\x022\x8a\x03\n" +
+	"\x16COMMENT_VOTE_TYPE_DOWN\x10\x022\xbf\x02\n" +
 	"\x0eCommentService\x12F\n" +
 	"\x03Add\x12\x1e.content.comment.v1.AddRequest\x1a\x1f.content.comment.v1.AddResponse\x12I\n" +
 	"\x04Read\x12\x1f.content.comment.v1.ReadRequest\x1a .content.comment.v1.ReadResponse\x12I\n" +
 	"\x04List\x12\x1f.content.comment.v1.ListRequest\x1a .content.comment.v1.ListResponse\x12O\n" +
-	"\x06Delete\x12!.content.comment.v1.DeleteRequest\x1a\".content.comment.v1.DeleteResponse\x12I\n" +
-	"\x04Vote\x12\x1f.content.comment.v1.VoteRequest\x1a .content.comment.v1.VoteResponseB\x0fZ\r/commentpb/v1b\x06proto3"
+	"\x06Delete\x12!.content.comment.v1.DeleteRequest\x1a\".content.comment.v1.DeleteResponseB\x0fZ\r/commentpb/v1b\x06proto3"
 
 var (
 	file_content_comment_v1_comment_proto_rawDescOnce sync.Once
@@ -875,7 +827,7 @@ func file_content_comment_v1_comment_proto_rawDescGZIP() []byte {
 }
 
 var file_content_comment_v1_comment_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_content_comment_v1_comment_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_content_comment_v1_comment_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_content_comment_v1_comment_proto_goTypes = []any{
 	(CommentVoteType)(0),          // 0: content.comment.v1.CommentVoteType
 	(*Comment)(nil),               // 1: content.comment.v1.Comment
@@ -885,31 +837,28 @@ var file_content_comment_v1_comment_proto_goTypes = []any{
 	(*ReadResponse)(nil),          // 5: content.comment.v1.ReadResponse
 	(*ListRequest)(nil),           // 6: content.comment.v1.ListRequest
 	(*ListResponse)(nil),          // 7: content.comment.v1.ListResponse
-	(*DeleteRequest)(nil),         // 8: content.comment.v1.DeleteRequest
-	(*DeleteResponse)(nil),        // 9: content.comment.v1.DeleteResponse
-	(*VoteRequest)(nil),           // 10: content.comment.v1.VoteRequest
-	(*VoteResponse)(nil),          // 11: content.comment.v1.VoteResponse
-	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
+	(*ListResponseData)(nil),      // 8: content.comment.v1.ListResponseData
+	(*DeleteRequest)(nil),         // 9: content.comment.v1.DeleteRequest
+	(*DeleteResponse)(nil),        // 10: content.comment.v1.DeleteResponse
+	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
 }
 var file_content_comment_v1_comment_proto_depIdxs = []int32{
-	12, // 0: content.comment.v1.Comment.created_at:type_name -> google.protobuf.Timestamp
-	12, // 1: content.comment.v1.Comment.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 0: content.comment.v1.Comment.created_at:type_name -> google.protobuf.Timestamp
+	11, // 1: content.comment.v1.Comment.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 2: content.comment.v1.AddResponse.data:type_name -> content.comment.v1.Comment
 	1,  // 3: content.comment.v1.ReadResponse.data:type_name -> content.comment.v1.Comment
-	1,  // 4: content.comment.v1.ListResponse.data:type_name -> content.comment.v1.Comment
-	0,  // 5: content.comment.v1.VoteRequest.vote_type:type_name -> content.comment.v1.CommentVoteType
+	8,  // 4: content.comment.v1.ListResponse.data:type_name -> content.comment.v1.ListResponseData
+	1,  // 5: content.comment.v1.ListResponseData.data:type_name -> content.comment.v1.Comment
 	2,  // 6: content.comment.v1.CommentService.Add:input_type -> content.comment.v1.AddRequest
 	4,  // 7: content.comment.v1.CommentService.Read:input_type -> content.comment.v1.ReadRequest
 	6,  // 8: content.comment.v1.CommentService.List:input_type -> content.comment.v1.ListRequest
-	8,  // 9: content.comment.v1.CommentService.Delete:input_type -> content.comment.v1.DeleteRequest
-	10, // 10: content.comment.v1.CommentService.Vote:input_type -> content.comment.v1.VoteRequest
-	3,  // 11: content.comment.v1.CommentService.Add:output_type -> content.comment.v1.AddResponse
-	5,  // 12: content.comment.v1.CommentService.Read:output_type -> content.comment.v1.ReadResponse
-	7,  // 13: content.comment.v1.CommentService.List:output_type -> content.comment.v1.ListResponse
-	9,  // 14: content.comment.v1.CommentService.Delete:output_type -> content.comment.v1.DeleteResponse
-	11, // 15: content.comment.v1.CommentService.Vote:output_type -> content.comment.v1.VoteResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
+	9,  // 9: content.comment.v1.CommentService.Delete:input_type -> content.comment.v1.DeleteRequest
+	3,  // 10: content.comment.v1.CommentService.Add:output_type -> content.comment.v1.AddResponse
+	5,  // 11: content.comment.v1.CommentService.Read:output_type -> content.comment.v1.ReadResponse
+	7,  // 12: content.comment.v1.CommentService.List:output_type -> content.comment.v1.ListResponse
+	10, // 13: content.comment.v1.CommentService.Delete:output_type -> content.comment.v1.DeleteResponse
+	10, // [10:14] is the sub-list for method output_type
+	6,  // [6:10] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -926,7 +875,7 @@ func file_content_comment_v1_comment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_content_comment_v1_comment_proto_rawDesc), len(file_content_comment_v1_comment_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   11,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

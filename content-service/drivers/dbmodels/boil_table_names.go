@@ -4,17 +4,17 @@
 package dbmodels
 
 var TableNames = struct {
-	CommentVotes string
-	Comments     string
-	Photos       string
-	PostPhotos   string
-	PostVotes    string
-	Posts        string
+	Comments      string
+	Photos        string
+	PostPhotos    string
+	PostVotes     string
+	Posts         string
+	UserSeenPosts string
 }{
-	CommentVotes: "comment_votes",
-	Comments:     "comments",
-	Photos:       "photos",
-	PostPhotos:   "post_photos",
-	PostVotes:    "post_votes",
-	Posts:        "posts",
+	Comments:      "comments",
+	Photos:        "photos",
+	PostPhotos:    "post_photos",
+	PostVotes:     "post_votes",
+	Posts:         "posts",
+	UserSeenPosts: "user_seen_posts",
 }

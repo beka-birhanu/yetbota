@@ -17,7 +17,6 @@ type Handler struct {
 	read   gkgrpc.Handler
 	list   gkgrpc.Handler
 	delete gkgrpc.Handler
-	vote   gkgrpc.Handler
 }
 
 type Config struct {
@@ -40,7 +39,6 @@ func NewHandler(c *Config) (*Handler, error) {
 		read:   gkgrpc.NewServer(c.E.CommentRead, decodeReadReq, encodeReadRes),
 		list:   gkgrpc.NewServer(c.E.CommentList, decodeListReq, encodeListRes),
 		delete: gkgrpc.NewServer(c.E.CommentDelete, decodeDeleteReq, encodeDeleteRes),
-		vote:   gkgrpc.NewServer(c.E.CommentVote, decodeVoteReq, encodeVoteRes),
 	}, nil
 }
 
@@ -90,15 +88,4 @@ func (h *Handler) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.Delete
 		return nil, err
 	}
 	return resp.(*pb.DeleteResponse), nil
-}
-
-func (h *Handler) Vote(ctx context.Context, req *pb.VoteRequest) (*pb.VoteResponse, error) {
-	if err := deadlineExceeded(ctx); err != nil {
-		return nil, err
-	}
-	_, resp, err := h.vote.ServeGRPC(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return resp.(*pb.VoteResponse), nil
 }

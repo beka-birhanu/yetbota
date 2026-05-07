@@ -36,10 +36,18 @@ database:
 redis:
   address: ${redisAddress}
   password: ${redisPassword}
-  poolTimeout: ${redisPoolTimeout}
-  idleTimeout: ${redisIdleTimeout}
-  readTimeout: ${redisReadTimeout}
-  writeTimeout: ${redisWriteTimeout}
+  db: 0
+  pool_size: 10
+  min_idle_conns: 2
+  max_idle_conns: 5
+  max_retries: 3
+  dial_timeout: 5
+  read_timeout: 3
+  write_timeout: 3
+  pool_timeout: 5
+  conn_max_idle_time: 300
+  conn_max_lifetime: 3600
+  tls: false
 otp:
   ttl: ${otpTTL}
   lockRequestTime: ${otpLockRequestTime}
@@ -52,3 +60,24 @@ neo4j:
   uri: ${neo4jURI}
   username: ${neo4jUsername}
   password: ${neo4jPassword}
+temporal:
+  host: ${temporalHost}
+  namespace: ${temporalNamespace}
+feed:
+  half_life_hours: 72
+  feed_size: 200
+  cold_start_n: 50
+  score_change_delta: 0.05
+  new_post_seed_score: 0.05
+  seed_bonus: 1.0
+  q_scale: 100.0
+  epoch: 1735689600
+  min_feed_score: -10.0
+  task_queue: feed-tasks
+  score_ttl_hours: 18
+  stale_limit: 50
+  refill_threshold: 50
+  max_follower_depth: 2
+  max_sim_depth: 2
+  fan_out_limit: 1000
+  seen_cache_ttl: 86400

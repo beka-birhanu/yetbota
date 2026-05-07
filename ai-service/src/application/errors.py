@@ -10,7 +10,6 @@ class AIServiceError(Exception):
         self.message = message
         self.__cause__ = cause
 
-
 class ConfigError(AIServiceError):
     code = "CONFIG_ERROR"
 

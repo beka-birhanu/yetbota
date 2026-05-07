@@ -6,7 +6,8 @@ WORKDIR /repo
 RUN apt-get update \
  && apt-get install -y --no-install-recommends make \
  && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir grpcio-tools
+COPY ai-service/requirements-build.txt ./ai-service/
+RUN pip install --no-cache-dir -r ai-service/requirements-build.txt
 COPY common/ ./common/
 RUN make -C common genpy-ai
 

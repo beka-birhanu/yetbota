@@ -21,8 +21,6 @@ data:
   GRPC__ENABLE_REFLECTION: "false"
 
   WEAVIATE__URL: https://shgw7jmaqbcwnpxpfpfwvw.c0.us-west3.gcp.weaviate.cloud
-  WEAVIATE__GRPC_HOST: grpc-shgw7jmaqbcwnpxpfpfwvw.c0.us-west3.gcp.weaviate.cloud
-  WEAVIATE__GRPC_PORT: "443"
   WEAVIATE__CLASS_NAME: ContentChunk
 
   NEO4J__URI: bolt://neo4j.yetbota-infra.svc.cluster.local:7687

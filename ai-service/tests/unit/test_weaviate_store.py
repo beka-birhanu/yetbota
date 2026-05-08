@@ -18,7 +18,6 @@ from infrastructure.vector.weaviate_store import (
 def _settings() -> WeaviateSettings:
     return WeaviateSettings(
         url="http://localhost:8081",
-        grpc_port=50051,
         api_key="",
         class_name="ContentChunk",
     )

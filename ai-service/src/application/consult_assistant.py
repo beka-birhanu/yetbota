@@ -12,7 +12,6 @@ _NO_INFO_ANSWER = "I do not have verified information on that topic in YetBota."
 
 PromptBuilder = Callable[[list[ScoredChunk], str], str]
 
-
 def _citations_from(hits: list[ScoredChunk]) -> list[Citation]:
     return [
         Citation(
@@ -23,7 +22,6 @@ def _citations_from(hits: list[ScoredChunk]) -> list[Citation]:
         )
         for h in hits
     ]
-
 
 class ConsultAssistant:
     def __init__(

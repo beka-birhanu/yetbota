@@ -39,8 +39,6 @@ class RedisSettings(BaseModel):
 
 class WeaviateSettings(BaseModel):
     url: str = "http://localhost:8081"
-    grpc_host: str = ""
-    grpc_port: int = 50051
     api_key: str = ""
     class_name: str = "ContentChunk"
 

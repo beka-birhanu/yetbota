@@ -1,10 +1,9 @@
 import uuid as uuid_lib
 from typing import Any
-from urllib.parse import urlparse
 
 import weaviate
 from weaviate.classes.data import DataObject
-from weaviate.classes.init import Auth
+from weaviate.classes.init import AdditionalConfig, Auth, Timeout
 from weaviate.classes.query import Filter, MetadataQuery
 from weaviate.client import WeaviateAsyncClient
 from weaviate.exceptions import WeaviateBaseError
@@ -74,25 +73,25 @@ class WeaviateVectorStore:
         self._client: WeaviateAsyncClient | None = None
 
     async def connect(self) -> None:
-        parsed = urlparse(self._settings.url)
-        if not parsed.hostname:
-            raise ValueError(f"invalid weaviate url: {self._settings.url}")
-        http_secure = parsed.scheme == "https"
-        http_port = parsed.port or (443 if http_secure else 80)
-        grpc_host = self._settings.grpc_host or parsed.hostname
-
         auth = Auth.api_key(self._settings.api_key) if self._settings.api_key else None
-        self._client = weaviate.use_async_with_custom(
-            http_host=parsed.hostname,
-            http_port=http_port,
-            http_secure=http_secure,
-            grpc_host=grpc_host,
-            grpc_port=self._settings.grpc_port,
-            grpc_secure=http_secure,
+        client = weaviate.use_async_with_weaviate_cloud(
+            cluster_url=self._settings.url,
             auth_credentials=auth,
+            additional_config=AdditionalConfig(
+                timeout=Timeout(init=30, query=60, insert=120),
+            ),
         )
-        await self._client.connect()
-        await self._ensure_class()
+        try:
+            await client.connect()
+            self._client = client
+            await self._ensure_class()
+        except BaseException:
+            try:
+                await client.close()
+            except Exception:
+                pass
+            self._client = None
+            raise
 
     async def close(self) -> None:
         if self._client is not None:

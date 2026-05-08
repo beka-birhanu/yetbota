@@ -3,13 +3,13 @@ uvicorn[standard]>=0.32,<1.0
 pydantic>=2.9,<3.0
 pydantic-settings>=2.6,<3.0
 redis>=5.0,<6.0
-weaviate-client>=4.9,<5.0
+weaviate-client>=4.21,<5.0
 neo4j>=5.25,<6.0
 google-genai>=0.3
 structlog>=24.4
 tenacity>=9.0
-grpcio==1.80.0
-grpcio-reflection==1.80.0
+grpcio==1.78.0
+grpcio-reflection==1.78.0
 protobuf>=5.28
 prometheus-client>=0.21
 jinja2>=3.1

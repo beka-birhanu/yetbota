@@ -99,6 +99,7 @@ async def _serve(settings: Settings) -> None:
         log_config=None,
         access_log=False,
         lifespan="on",
+        ws="none",
     )
     uv_server = uvicorn.Server(uv_config)
 

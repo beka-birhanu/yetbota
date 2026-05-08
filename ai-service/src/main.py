@@ -1,5 +1,6 @@
 import asyncio
 import signal
+from contextlib import AsyncExitStack
 from typing import Any
 
 import uvicorn
@@ -33,130 +34,135 @@ async def _serve(settings: Settings) -> None:
     log = get_logger(__name__)
     log.info("service.starting", version=settings.app.version)
 
-    embedder = GeminiEmbedder(settings.gemini)
-    llm = GeminiLLM(settings.gemini)
-    vector_store = WeaviateVectorStore(settings.weaviate)
-    await vector_store.connect()
+    async with AsyncExitStack() as stack:
+        embedder = GeminiEmbedder(settings.gemini)
+        llm = GeminiLLM(settings.gemini)
 
-    similarity_graph: Neo4jSimilarityGraph | None = None
-    if settings.similarity.enabled:
-        similarity_graph = Neo4jSimilarityGraph(settings.neo4j)
-        await similarity_graph.connect()
+        vector_store = WeaviateVectorStore(settings.weaviate)
+        await vector_store.connect()
+        stack.push_async_callback(vector_store.close)
 
-    consumer = RedisStreamConsumer(settings.redis)
-    publisher = RedisStreamPublisher(settings.redis)
-    await consumer.connect()
-    await publisher.connect()
+        similarity_graph: Neo4jSimilarityGraph | None = None
+        if settings.similarity.enabled:
+            similarity_graph = Neo4jSimilarityGraph(settings.neo4j)
+            await similarity_graph.connect()
+            stack.push_async_callback(similarity_graph.close)
 
-    chunker = RuneWindowChunker(settings.chunker)
-    ingest_use_case = IngestContent(
-        chunker=chunker,
-        embedder=embedder,
-        vector_store=vector_store,
-        distance_threshold=settings.dedup.distance_threshold,
-        similarity_graph=similarity_graph,
-        similarity_top_n=settings.similarity.top_n,
-        similarity_oversample=settings.similarity.candidate_oversample,
-        logger=log,
-    )
-    worker = IngestWorker(
-        consumer=consumer,
-        publisher=publisher,
-        use_case=ingest_use_case,
-        redis=settings.redis,
-    )
+        consumer = RedisStreamConsumer(settings.redis)
+        await consumer.connect()
+        stack.push_async_callback(consumer.close)
 
-    assistant_use_case = ConsultAssistant(
-        embedder=embedder,
-        vector_store=vector_store,
-        llm=llm,
-        prompt_builder=AssistantPromptBuilder(),
-        top_k=settings.rag.top_k,
-        min_similarity=settings.rag.min_similarity,
-        max_tokens=settings.gemini.max_tokens,
-        temperature=settings.gemini.temperature,
-    )
+        publisher = RedisStreamPublisher(settings.redis)
+        await publisher.connect()
+        stack.push_async_callback(publisher.close)
 
-    screening_use_case = ScreenText(
-        llm=llm,
-        prompt_builder=ScreeningPromptBuilder(),
-        response_schema=SCREENING_RESPONSE_SCHEMA,
-        block_threshold=settings.screening.block_threshold,
-        timeout_s=settings.screening.timeout_s,
-        cache_size=settings.screening.cache_size,
-        cache_ttl_s=settings.screening.cache_ttl_s,
-    )
-
-    app = create_app(settings)
-    app.state.settings = settings
-    app.state.assistant = assistant_use_case
-    app.state.screening = screening_use_case
-
-    uv_config = uvicorn.Config(
-        app,
-        host=settings.http.host,
-        port=settings.http.port,
-        log_config=None,
-        access_log=False,
-        lifespan="on",
-    )
-    uv_server = uvicorn.Server(uv_config)
-
-    grpc_server = GrpcServer(settings)
-    grpc_server.register_servicer(
-        assistant_pb2_grpc.add_AssistantServiceServicer_to_server,
-        AssistantHandler(assistant_use_case),
-        service_name="ai.v1.AssistantService",
-    )
-    grpc_server.register_servicer(
-        screening_pb2_grpc.add_ScreeningServiceServicer_to_server,
-        ScreeningHandler(screening_use_case),
-        service_name="ai.v1.ScreeningService",
-    )
-    await grpc_server.start()
-
-    stop_event = asyncio.Event()
-
-    def _request_shutdown(*_: Any) -> None:
-        if not stop_event.is_set():
-            log.info("service.shutdown_requested")
-            stop_event.set()
-
-    loop = asyncio.get_running_loop()
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        try:
-            loop.add_signal_handler(sig, _request_shutdown)
-        except NotImplementedError:
-            signal.signal(sig, _request_shutdown)
-
-    async def _watch_stop() -> None:
-        await stop_event.wait()
-        uv_server.should_exit = True
-        await consumer.close()
-        await publisher.close()
-        if similarity_graph is not None:
-            await similarity_graph.close()
-        await vector_store.close()
-        await grpc_server.stop(grace_seconds=5.0)
-
-    log.info(
-        "service.started",
-        http_port=settings.http.port,
-        grpc_port=settings.grpc.port,
-    )
-
-    try:
-        await asyncio.gather(
-            uv_server.serve(),
-            grpc_server.wait_for_termination(),
-            worker.run(),
-            _watch_stop(),
-            return_exceptions=False,
+        chunker = RuneWindowChunker(settings.chunker)
+        ingest_use_case = IngestContent(
+            chunker=chunker,
+            embedder=embedder,
+            vector_store=vector_store,
+            distance_threshold=settings.dedup.distance_threshold,
+            similarity_graph=similarity_graph,
+            similarity_top_n=settings.similarity.top_n,
+            similarity_oversample=settings.similarity.candidate_oversample,
+            logger=log,
         )
-    except asyncio.CancelledError:
-        pass
-    finally:
-        log.info("service.stopped")
+        worker = IngestWorker(
+            consumer=consumer,
+            publisher=publisher,
+            use_case=ingest_use_case,
+            redis=settings.redis,
+        )
+
+        assistant_use_case = ConsultAssistant(
+            embedder=embedder,
+            vector_store=vector_store,
+            llm=llm,
+            prompt_builder=AssistantPromptBuilder(),
+            top_k=settings.rag.top_k,
+            min_similarity=settings.rag.min_similarity,
+            max_tokens=settings.gemini.max_tokens,
+            temperature=settings.gemini.temperature,
+        )
+
+        screening_use_case = ScreenText(
+            llm=llm,
+            prompt_builder=ScreeningPromptBuilder(),
+            response_schema=SCREENING_RESPONSE_SCHEMA,
+            block_threshold=settings.screening.block_threshold,
+            timeout_s=settings.screening.timeout_s,
+            cache_size=settings.screening.cache_size,
+            cache_ttl_s=settings.screening.cache_ttl_s,
+        )
+
+        app = create_app(settings)
+        app.state.settings = settings
+        app.state.assistant = assistant_use_case
+        app.state.screening = screening_use_case
+
+        uv_config = uvicorn.Config(
+            app,
+            host=settings.http.host,
+            port=settings.http.port,
+            log_config=None,
+            access_log=False,
+            lifespan="on",
+            ws="none",
+        )
+        uv_server = uvicorn.Server(uv_config)
+
+        grpc_server = GrpcServer(settings)
+        grpc_server.register_servicer(
+            assistant_pb2_grpc.add_AssistantServiceServicer_to_server,
+            AssistantHandler(assistant_use_case),
+            service_name="ai.v1.AssistantService",
+        )
+        grpc_server.register_servicer(
+            screening_pb2_grpc.add_ScreeningServiceServicer_to_server,
+            ScreeningHandler(screening_use_case),
+            service_name="ai.v1.ScreeningService",
+        )
+        await grpc_server.start()
+        stack.push_async_callback(grpc_server.stop, grace_seconds=5.0)
+
+        stop_event = asyncio.Event()
+
+        def _request_shutdown(*_: Any) -> None:
+            if not stop_event.is_set():
+                log.info("service.shutdown_requested")
+                stop_event.set()
+
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            try:
+                loop.add_signal_handler(sig, _request_shutdown)
+            except NotImplementedError:
+                signal.signal(sig, _request_shutdown)
+
+        async def _watch_stop() -> None:
+            await stop_event.wait()
+            uv_server.should_exit = True
+            await consumer.close()
+            await grpc_server.stop(grace_seconds=5.0)
+
+        log.info(
+            "service.started",
+            http_port=settings.http.port,
+            grpc_port=settings.grpc.port,
+        )
+
+        try:
+            await asyncio.gather(
+                uv_server.serve(),
+                grpc_server.wait_for_termination(),
+                worker.run(),
+                _watch_stop(),
+                return_exceptions=False,
+            )
+        except asyncio.CancelledError:
+            pass
+        finally:
+            log.info("service.stopped")
 
 
 def run() -> None:

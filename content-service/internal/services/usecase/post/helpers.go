@@ -76,14 +76,14 @@ func (s *svc) uploadPhotos(ctx context.Context, postID string, photos []*Ordered
 				return err
 			}
 
-			processed, mime, err := utils.ProcessImage(photo.Photo)
+			mime, err := utils.ImageMimeType(photo.Photo)
 			if err != nil {
 				return err
 			}
 
 			uploadResp, err := s.bucket.UploadFile(ctx, &storage.UploadRequest{
 				BucketName:  s.bucketName,
-				FileInByte:  processed,
+				FileInByte:  photo.Photo,
 				ContentType: mime,
 			})
 			if err != nil {

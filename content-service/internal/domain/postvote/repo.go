@@ -13,4 +13,6 @@ type Repository interface {
 	Add(ctx context.Context, tx *sql.Tx, entity *dbmodels.PostVote) error
 	Update(ctx context.Context, tx *sql.Tx, entity *dbmodels.PostVote) error
 	UpdateCounts(ctx context.Context, tx *sql.Tx, id string, likesDelta, dislikesDelta, expectedLikes, expectedDislikes int) error
+	// ListVotersByPostIDs returns a map of postID → []userID for all votes on the given posts.
+	ListVotersByPostIDs(ctx context.Context, postIDs []string) (map[string][]string, error)
 }

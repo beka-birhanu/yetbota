@@ -419,9 +419,9 @@ func (s *svc) Vote(ctx context.Context, ctxSess *ctxRP.Context, req *PostVoteReq
 	}
 
 	if err = s.executor.TriggerFeedUpdateWorkflow(ctx, processors.FeedUpdateWorkflowInput{
-		PostID:          post.ID,
-		InteractorID:    ctxSess.UserSession.UserID,
-		InteractionType: req.VoteType,
+		PostID:           post.ID,
+		InteractorID:     ctxSess.UserSession.UserID,
+		TriggerEventType: req.VoteType,
 	}); err != nil {
 		fmt.Printf("Unable to trigger feed update workflow: %s\n", err)
 	}

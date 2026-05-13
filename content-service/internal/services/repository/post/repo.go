@@ -80,10 +80,13 @@ func (r *repo) Update(ctx context.Context, tx *sql.Tx, entity *dbmodels.Post) er
 
 func (r *repo) List(ctx context.Context, opts *domainPost.ListOptions) ([]*dbmodels.Post, error) {
 	filterMods := FilterMods(opts)
-	allMods := append(filterMods,
-		PaginationMods(opts)...,
-	)
-	allMods = append(allMods, SortMods(opts))
+	paginationMods := PaginationMods(opts)
+	sortMods := SortMods(opts)
+
+	allMods := append(filterMods, paginationMods...)
+	if sortMods != nil {
+		allMods = append(allMods, sortMods)
+	}
 
 	posts, err := dbmodels.Posts(allMods...).All(ctx, r.db)
 	if err != nil {

@@ -9,7 +9,15 @@ import (
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/constants"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
+	domainFeed "github.com/beka-birhanu/yetbota/content-service/internal/domain/feed"
+	domainFollower "github.com/beka-birhanu/yetbota/content-service/internal/domain/follower"
+	domainPhoto "github.com/beka-birhanu/yetbota/content-service/internal/domain/photo"
+	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
+	domainPostphoto "github.com/beka-birhanu/yetbota/content-service/internal/domain/postphoto"
+	domainPostSim "github.com/beka-birhanu/yetbota/content-service/internal/domain/postsimilarity"
+	domainPostvote "github.com/beka-birhanu/yetbota/content-service/internal/domain/postvote"
 	"github.com/beka-birhanu/yetbota/content-service/internal/domain/processors"
+	domainStorage "github.com/beka-birhanu/yetbota/content-service/internal/domain/storage"
 	"go.temporal.io/api/enums/v1"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -22,7 +30,23 @@ type Executor struct {
 }
 
 type Config struct {
-	Client client.Client `validate:"required"`
+	Client        client.Client              `validate:"required"`
+	PostPhotoRepo domainPostphoto.Repository `validate:"required"`
+	PhotoRepo     domainPhoto.Repository     `validate:"required"`
+	Bucket        domainStorage.Bucket       `validate:"required"`
+	BucketName    string                     `validate:"required"`
+	BucketRegion  string                     `validate:"required"`
+	FollowerRepo  domainFollower.Repository  `validate:"required"`
+	PostSimRepo   domainPostSim.Repository   `validate:"required"`
+	FeedRepo      domainFeed.Repository      `validate:"required"`
+	PostRepo      domainPost.Repository      `validate:"required"`
+	PostvoteRepo  domainPostvote.Repository  `validate:"required"`
+	BatchStore    domainStorage.Set          `validate:"required"`
+	SeedBonus     float64                    `validate:"required"`
+	QScale        float64                    `validate:"required"`
+	Epoch         int64                      `validate:"required"`
+	HalfLifeHours float64                    `validate:"required"`
+	MinFeedScore  float64                    `validate:"required"`
 }
 
 func (c *Config) Validate() error {
@@ -36,11 +60,29 @@ func NewExecutor(cfg *Config) (*Executor, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
-	newPostAct, err := newNewPostActivity(&newPostActConfig{})
+	newPostAct, err := newNewPostActivity(&newPostActConfig{
+		PostPhotoRepo: cfg.PostPhotoRepo,
+		PhotoRepo:     cfg.PhotoRepo,
+		Bucket:        cfg.Bucket,
+		BucketName:    cfg.BucketName,
+		BucketRegion:  cfg.BucketRegion,
+	})
 	if err != nil {
 		return nil, err
 	}
-	feedUpdateAct, err := newFeedUpdateAct(&feedUpdateActConfig{})
+	feedUpdateAct, err := newFeedUpdateAct(&feedUpdateActConfig{
+		FollowerRepo:  cfg.FollowerRepo,
+		PostSimRepo:   cfg.PostSimRepo,
+		FeedRepo:      cfg.FeedRepo,
+		PostRepo:      cfg.PostRepo,
+		PostvoteRepo:  cfg.PostvoteRepo,
+		BatchStore:    cfg.BatchStore,
+		SeedBonus:     cfg.SeedBonus,
+		QScale:        cfg.QScale,
+		Epoch:         cfg.Epoch,
+		HalfLifeHours: cfg.HalfLifeHours,
+		MinFeedScore:  cfg.MinFeedScore,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +93,7 @@ func NewExecutor(cfg *Config) (*Executor, error) {
 	}, nil
 }
 
-// RegisterWorkflowsAndActivity registers the workflow and all activities on the worker.
+// RegisterWorkflowsAndActivity registers all workflows and activities on the worker.
 func (e *Executor) RegisterWorkflowsAndActivity(w worker.Worker) {
 	w.RegisterActivity(e.newPostActivity)
 	w.RegisterActivity(e.feedUpdateActivity)
@@ -74,7 +116,7 @@ func (e *Executor) TriggerFeedUpdateWorkflow(ctx context.Context, input processo
 			PublicStatusCode:  http.StatusInternalServerError,
 			ServiceStatusCode: http.StatusInternalServerError,
 			PublicMessage:     "Something went wrong.",
-			ServiceMessage:    fmt.Sprintf("Error starting order workflow: %v", err),
+			ServiceMessage:    fmt.Sprintf("Error starting feed update workflow: %v", err),
 		}
 	}
 
@@ -85,7 +127,7 @@ func (e *Executor) TriggerFeedUpdateWorkflow(ctx context.Context, input processo
 func (e *Executor) TriggerNewPostWorkflow(ctx context.Context, input processors.NewPostWorkflowInput) error {
 	workflowOptions := client.StartWorkflowOptions{
 		ID:                    fmt.Sprintf("NEW-POST-%s-%s", input.PostID, time.Now().Format(time.RFC3339)),
-		TaskQueue:             constants.FeedUpdateWorkflowQueue,
+		TaskQueue:             constants.NewPostWorkflowQueue,
 		WorkflowTaskTimeout:   10 * time.Second,
 		WorkflowIDReusePolicy: enums.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE,
 	}
@@ -96,7 +138,7 @@ func (e *Executor) TriggerNewPostWorkflow(ctx context.Context, input processors.
 			PublicStatusCode:  http.StatusInternalServerError,
 			ServiceStatusCode: http.StatusInternalServerError,
 			PublicMessage:     "Something went wrong.",
-			ServiceMessage:    fmt.Sprintf("Error starting order workflow: %v", err),
+			ServiceMessage:    fmt.Sprintf("Error starting new post workflow: %v", err),
 		}
 	}
 	return nil

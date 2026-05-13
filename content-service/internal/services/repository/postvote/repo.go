@@ -3,6 +3,8 @@ package postvote
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	toddlerr "github.com/beka-birhanu/toddler/error"
@@ -109,6 +111,38 @@ func (r *repository) UpdateCounts(ctx context.Context, tx *sql.Tx, id string, li
 	}
 
 	return nil
+}
+
+// ListVotersByPostIDs implements [postvote.Repository].
+func (r *repository) ListVotersByPostIDs(ctx context.Context, postIDs []string) (map[string][]string, error) {
+	if len(postIDs) == 0 {
+		return nil, nil
+	}
+	placeholders := make([]string, len(postIDs))
+	args := make([]any, len(postIDs))
+	for i, id := range postIDs {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+	rows, err := r.db.QueryContext(ctx,
+		fmt.Sprintf("SELECT post_id, user_id FROM post_votes WHERE post_id IN (%s)",
+			strings.Join(placeholders, ", ")),
+		args...,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("list voters by post IDs: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	result := make(map[string][]string)
+	for rows.Next() {
+		var postID, userID string
+		if err := rows.Scan(&postID, &userID); err != nil {
+			return nil, fmt.Errorf("scan voter row: %w", err)
+		}
+		result[postID] = append(result[postID], userID)
+	}
+	return result, rows.Err()
 }
 
 // Update implements [postvote.Repository].

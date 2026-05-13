@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
@@ -19,6 +22,7 @@ import (
 	temporalDriver "github.com/beka-birhanu/yetbota/content-service/drivers/temporal"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
 	"github.com/pressly/goose"
+	"go.temporal.io/sdk/worker"
 	"go.uber.org/zap/zapcore"
 
 	cmdGrpc "github.com/beka-birhanu/yetbota/content-service/cmd/grpc"
@@ -27,9 +31,11 @@ import (
 	"github.com/beka-birhanu/yetbota/content-service/internal/services/endpoint"
 	repoComment "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/comment"
 	repoFeed "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/feed"
+	repoFollower "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/follower"
 	repoPhoto "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/photo"
 	repoPost "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/post"
 	repoPostPhoto "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/postphoto"
+	repoPostSim "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/postsimilarity"
 	repoPostVote "github.com/beka-birhanu/yetbota/content-service/internal/services/repository/postvote"
 	commentSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/comment"
 	feedSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/feed"
@@ -198,7 +204,40 @@ func main() {
 		panic(fmt.Errorf("error creating postvote repo: %v", err))
 	}
 
-	executor, err := processors.NewExecutor(&processors.Config{Client: temporalClient})
+	followerRepo, err := repoFollower.NewRepo(&repoFollower.Config{Driver: neo4jConn})
+	if err != nil {
+		panic(fmt.Errorf("error creating user repo: %v", err))
+	}
+
+	postSimRepo, err := repoPostSim.NewRepo(&repoPostSim.Config{Driver: neo4jConn})
+	if err != nil {
+		panic(fmt.Errorf("error creating postsimilarity repo: %v", err))
+	}
+
+	fanOutBatchStore, err := storage.NewSet(&storage.Config{RDB: redisConn, Prefix: "FANOUT_BATCH"})
+	if err != nil {
+		panic(fmt.Errorf("error creating fanout batch store: %v", err))
+	}
+
+	executor, err := processors.NewExecutor(&processors.Config{
+		Client:        temporalClient,
+		PostPhotoRepo: postPhotoRepo,
+		PhotoRepo:     photoRepo,
+		Bucket:        bucket,
+		BucketName:    cfg.AWS.S3.Bucket,
+		BucketRegion:  cfg.AWS.S3.Region,
+		FollowerRepo:  followerRepo,
+		PostSimRepo:   postSimRepo,
+		FeedRepo:      feedRepo,
+		PostRepo:      postRepo,
+		PostvoteRepo:  postVoteRepo,
+		BatchStore:    fanOutBatchStore,
+		SeedBonus:     cfg.Feed.SeedBonus,
+		QScale:        cfg.Feed.QScale,
+		Epoch:         cfg.Feed.Epoch,
+		HalfLifeHours: cfg.Feed.HalfLifeHours,
+		MinFeedScore:  cfg.Feed.MinFeedScore,
+	})
 	if err != nil {
 		panic(fmt.Errorf("error creating executor: %v", err))
 	}
@@ -285,7 +324,28 @@ func main() {
 		panic(fmt.Errorf("error creating HTTP router: %v", err))
 	}
 
-	eg, egCtx := errgroup.WithContext(ctx)
+	sigCtx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	newPostWorker := worker.New(temporalClient, constants.NewPostWorkflowQueue, worker.Options{})
+	feedUpdateWorker := worker.New(temporalClient, constants.FeedUpdateWorkflowQueue, worker.Options{})
+	executor.RegisterWorkflowsAndActivity(newPostWorker)
+	executor.RegisterWorkflowsAndActivity(feedUpdateWorker)
+
+	if err := newPostWorker.Start(); err != nil {
+		panic(fmt.Errorf("error starting new post worker: %v", err))
+	}
+	if err := feedUpdateWorker.Start(); err != nil {
+		panic(fmt.Errorf("error starting feed update worker: %v", err))
+	}
+
+	eg, egCtx := errgroup.WithContext(sigCtx)
+	eg.Go(func() error {
+		<-egCtx.Done()
+		newPostWorker.Stop()
+		feedUpdateWorker.Stop()
+		return nil
+	})
 	eg.Go(func() error {
 		return cmdHttp.RunServer(egCtx, &cmdHttp.Config{
 			Port:         cfg.Rest.Port,

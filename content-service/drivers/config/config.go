@@ -108,15 +108,16 @@ type Feed struct {
 	FeedSize         int     `yaml:"feed_size"          mapstructure:"feed_size"`
 	ColdStartN       int     `yaml:"cold_start_n"       mapstructure:"cold_start_n"`
 	ScoreChangeDelta float64 `yaml:"score_change_delta" mapstructure:"score_change_delta"`
-	NewPostSeedScore float64 `yaml:"new_post_seed_score" mapstructure:"new_post_seed_score"`
+	SeedBonus        float64 `yaml:"seed_bonus"          mapstructure:"seed_bonus"`
+	QScale           float64 `yaml:"q_scale"             mapstructure:"q_scale"`
+	Epoch            int64   `yaml:"epoch"               mapstructure:"epoch"`
 	TaskQueue        string  `yaml:"task_queue"         mapstructure:"task_queue"`
 	ScoreTTLHours    float64 `yaml:"score_ttl_hours"    mapstructure:"score_ttl_hours"`
 	StaleLimit       int     `yaml:"stale_limit"        mapstructure:"stale_limit"`
 	RefillThreshold  int     `yaml:"refill_threshold"   mapstructure:"refill_threshold"`
-	MaxFollowerDepth int     `yaml:"max_follower_depth" mapstructure:"max_follower_depth"`
-	MaxSimDepth      int     `yaml:"max_sim_depth"      mapstructure:"max_sim_depth"`
 	FanOutLimit      int     `yaml:"fan_out_limit"      mapstructure:"fan_out_limit"`
 	SeenCacheTTL     int64   `yaml:"seen_cache_ttl"     mapstructure:"seen_cache_ttl"`
+	MinFeedScore     float64 `yaml:"min_feed_score"     mapstructure:"min_feed_score"`
 }
 
 type Neo4j struct {

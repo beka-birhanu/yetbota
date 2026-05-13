@@ -36,6 +36,13 @@ func InitDefault(opt ...Option) {
 	})
 }
 
+func Default() Logger {
+	if defaultLogger == nil {
+		return NewLogger()
+	}
+	return defaultLogger
+}
+
 func NewLogger(opts ...Option) Logger {
 	logger := &logger{
 		writers:     make([]io.Writer, 0),

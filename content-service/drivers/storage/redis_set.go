@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
@@ -85,6 +86,53 @@ func (s *set) Exists(ctx context.Context, keys []string) (map[string]bool, error
 
 	for i, key := range keys {
 		result[key] = cmds[i].Val() > 0
+	}
+	return result, nil
+}
+
+func (s *set) StoreBatch(ctx context.Context, key string, data map[string]float64, ttlSeconds int64) error {
+	key = s.cookKey(key)
+	args := make([]any, 0, len(data)*2)
+	for k, v := range data {
+		args = append(args, k, v)
+	}
+	pipe := s.rdb.Pipeline()
+	pipe.HSet(ctx, key, args...)
+	pipe.Expire(ctx, key, time.Duration(ttlSeconds)*time.Second)
+	if _, err := pipe.Exec(ctx); err != nil {
+		return &toddlerr.Error{
+			PublicStatusCode:  status.ServerError,
+			ServiceStatusCode: status.ServerError,
+			PublicMessage:     "something went wrong",
+			ServiceMessage:    fmt.Sprintf("redis set: store batch failed: %v", err),
+		}
+	}
+	return nil
+}
+
+func (s *set) ReadBatch(ctx context.Context, key string) (map[string]float64, error) {
+	key = s.cookKey(key)
+	raw, err := s.rdb.HGetAll(ctx, key).Result()
+	if err != nil && err != redis.Nil {
+		return nil, &toddlerr.Error{
+			PublicStatusCode:  status.ServerError,
+			ServiceStatusCode: status.ServerError,
+			PublicMessage:     "something went wrong",
+			ServiceMessage:    fmt.Sprintf("redis set: read batch failed: %v", err),
+		}
+	}
+	result := make(map[string]float64, len(raw))
+	for k, v := range raw {
+		f, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return nil, &toddlerr.Error{
+				PublicStatusCode:  status.ServerError,
+				ServiceStatusCode: status.ServerError,
+				PublicMessage:     "something went wrong",
+				ServiceMessage:    fmt.Sprintf("redis set: parse batch score for key %q: %v", k, err),
+			}
+		}
+		result[k] = f
 	}
 	return result, nil
 }

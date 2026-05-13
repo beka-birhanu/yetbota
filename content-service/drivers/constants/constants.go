@@ -12,11 +12,12 @@ const (
 )
 
 const (
-	MB                 = 1 << (10 * 2)
-	MaxUploadSize      = 10 * MB
-	URLExpiration      = 30
-	MaxImageResolution = 480
-	MaxImageSize       = MaxImageResolution * MaxImageResolution * 3
+	MB                    = 1 << (10 * 2)
+	MaxUploadSize         = 20 * MB
+	URLExpiration         = 30
+	MaxImageResolution    = 3840 // 4K cap for stored original
+	WebImageResolution    = 1080
+	MobileImageResolution = 750
 )
 
 const (
@@ -29,7 +30,16 @@ const (
 )
 
 const (
-	FeedUpdateWorkflowQueue = "WF_FEED_UPDATE"
+	FeedUpdateWorkflowQueue    = "WF_FEED_UPDATE_QUEUE"
+	NewPostWorkflowQueue       = "WF_NEW_POST_QUEUE"
+	PostEmbeddingWorkflowQueue = "WF_POST_EMBEDDING_QUEUE"
+
+	PostEmbeddingWorkflowName = "POST_EMBEDDING"
+)
+
+const (
+	FeedFanOutBatchSize   = 500
+	FanOutBatchTTLSeconds = 3600
 )
 
 var SkipAuth = map[string]struct{}{}

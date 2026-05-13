@@ -17,7 +17,6 @@ require (
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-kit/kit v0.13.0
 	github.com/go-playground/validator/v10 v10.26.0
-	github.com/redis/go-redis/v9 v9.19.0 // indirect
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
@@ -27,6 +26,7 @@ require (
 	github.com/oklog/ulid v1.3.1
 	github.com/orcaman/concurrent-map v1.0.0
 	github.com/pressly/goose v2.7.0+incompatible
+	github.com/redis/go-redis/v9 v9.19.0 // indirect
 	github.com/segmentio/encoding v0.5.3
 	github.com/spf13/cast v1.10.0
 	github.com/spf13/viper v1.21.0
@@ -72,6 +72,7 @@ require (
 	github.com/cncf/xds/go v0.0.0-20251210132809-ee656c7534f5 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.36.0 // indirect
@@ -134,6 +135,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect

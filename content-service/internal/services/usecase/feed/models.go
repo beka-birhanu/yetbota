@@ -1,20 +1,35 @@
 package feed
 
 import (
+	"net/http"
+	"regexp"
+
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 )
 
+var cursorRegex = regexp.MustCompile(`^cursor:[0-9]+(?:\.[0-9]+)?$`)
+
 type ListFeedRequest struct {
-	Cursor   string `validate:"omitempty,regexp=^cursor:[0-9]+(\\.[0-9]+)?,[a-f0-9-]+$"`
+	Cursor   string `validate:"omitempty"`
 	PageSize int    `validate:"required,min=1,max=100"`
 }
 
 func (r *ListFeedRequest) Validate() error {
 	if err := validator.Validate.Struct(r); err != nil {
 		return toddlerr.FromValidationErrors(err)
+	}
+	if r.Cursor != "" {
+		if !cursorRegex.MatchString(r.Cursor) {
+			return &toddlerr.Error{
+				PublicStatusCode:  http.StatusBadRequest,
+				ServiceStatusCode: http.StatusBadRequest,
+				PublicMessage:     "invalid cursor",
+				ServiceMessage:    "invalid cursor",
+			}
+		}
 	}
 	return nil
 }

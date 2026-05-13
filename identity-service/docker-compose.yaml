@@ -50,7 +50,6 @@ services:
     container_name: yetbota-temporal
     ports:
       - "${temporalGrpcPort}:7233"
-      - "8233:8233"
     environment:
       - DB=postgres12
       - DB_PORT=5432
@@ -64,6 +63,16 @@ services:
         condition: service_healthy
     volumes:
       - temporal_data:/var/lib/temporal
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    container_name: yetbota-temporal-ui
+    ports:
+      - "8233:8080"
+    environment:
+      - TEMPORAL_ADDRESS=yetbota-temporal:7233
+    depends_on:
+      - temporal
 
 volumes:
   db_data:

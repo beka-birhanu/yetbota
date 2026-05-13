@@ -69,6 +69,19 @@ func (r *repository) Read(ctx context.Context, id string) (*dbmodels.Photo, erro
 	return u, nil
 }
 
+func (r *repository) Update(ctx context.Context, tx *sql.Tx, u *dbmodels.Photo) error {
+	var exec boil.ContextExecutor = r.db
+	if tx != nil {
+		exec = tx
+	}
+
+	_, err := u.Update(ctx, exec, boil.Infer())
+	if err != nil {
+		return toddlerr.FromDBError(err, dbmodels.TableNames.Photos)
+	}
+	return nil
+}
+
 func (r *repository) Delete(ctx context.Context, tx *sql.Tx, id string) error {
 	var exec boil.ContextExecutor = r.db
 	if tx != nil {

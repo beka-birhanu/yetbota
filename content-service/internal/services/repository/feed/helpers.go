@@ -13,6 +13,10 @@ func (r *RedisRepository) key(userID string) string {
 	return fmt.Sprintf("%s:%s", r.prefix, userID)
 }
 
+func (r *RedisRepository) recipientsKey(postID string) string {
+	return fmt.Sprintf("%s:RECIPIENTS:%s", r.prefix, postID)
+}
+
 func (r *RedisRepository) mapListOptions(opts *feedDomain.ListOptions) *redis.ZRangeBy {
 	minScore := "-inf"
 	maxScore := "+inf"

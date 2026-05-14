@@ -24,7 +24,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: content-service
-          image: romareo/content-service:v0.0.10
+          image: romareo/content-service:v0.0.11
           ports:
             - name: grpc
               containerPort: 9696

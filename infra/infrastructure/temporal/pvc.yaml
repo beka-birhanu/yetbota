@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: temporal-pvc
+  namespace: yetbota-infra
+  labels:
+    app.kubernetes.io/name: temporal
+    app.kubernetes.io/part-of: yetbota
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

@@ -24,7 +24,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: identity-service
-          image: romareo/identity-service:v0.0.1
+          image: romareo/identity-service:v0.0.9
           ports:
             - name: grpc
               containerPort: 6969

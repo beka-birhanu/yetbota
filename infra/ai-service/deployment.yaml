@@ -37,8 +37,6 @@ spec:
               containerPort: 9090
               protocol: TCP
           envFrom:
-            - configMapRef:
-                name: ai-service-config
             - secretRef:
                 name: ai-service-secret
           livenessProbe:

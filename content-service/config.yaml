@@ -3,9 +3,7 @@ app:
   version: 0.0.1
 cors:
   hosts:
-    - localhost:3000
-    - localhost:3001
-    - localhost:3002
+    - ${corsHosts}
 debug: ${debug}
 grpc:
   port: 9696
@@ -61,8 +59,8 @@ neo4j:
   username: ${neo4jUsername}
   password: ${neo4jPassword}
 temporal:
-  host: ${temporalHost}
-  namespace: ${temporalNamespace}
+  host: temporal.yetbota-infra.svc.cluster.local:7233
+  namespace: default
 feed:
   half_life_hours: 72
   feed_size: 200

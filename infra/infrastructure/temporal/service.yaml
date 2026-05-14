@@ -29,6 +29,6 @@ spec:
     app.kubernetes.io/name: temporal-ui
   ports:
     - name: http
-      port: 8080
+      port: 8233
       targetPort: http
       protocol: TCP

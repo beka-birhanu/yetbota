@@ -8,7 +8,7 @@ import (
 
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
 	"github.com/beka-birhanu/yetbota/content-service/internal/domain/auth"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 
 	toddlerErr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"

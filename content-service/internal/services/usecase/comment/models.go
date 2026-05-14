@@ -3,6 +3,7 @@ package comment
 import (
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
+	"github.com/beka-birhanu/yetbota/content-service/drivers/constants"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
 )
@@ -41,8 +42,10 @@ type ReadResponse struct {
 }
 
 type ListRequest struct {
-	PostID    string
-	CommentID string
+	PostID    string `validate:"omitempty,uuid4"`
+	CommentID string `validate:"omitempty,uuid4"`
+	Page      int    `validate:"omitempty,min=0"`
+	PageSize  int    `validate:"omitempty,min=1"`
 }
 
 func (r *ListRequest) Validate() error {
@@ -54,11 +57,23 @@ func (r *ListRequest) Validate() error {
 			ServiceMessage:    "post_id or comment_id required",
 		}
 	}
+	if r.Page <= 0 {
+		r.Page = 1
+	}
+	if r.PageSize <= 0 {
+		r.PageSize = constants.DefaultPaginationLength
+	}
+	if r.PageSize > constants.MaxPaginationLength {
+		r.PageSize = constants.MaxPaginationLength
+	}
 	return nil
 }
 
 type ListResponse struct {
 	Comments dbmodels.CommentSlice
+	Total    int64
+	Page     int
+	PageSize int
 }
 
 type DeleteRequest struct {
@@ -70,22 +85,4 @@ func (r *DeleteRequest) Validate() error {
 		return toddlerr.FromValidationErrors(err)
 	}
 	return nil
-}
-
-type VoteRequest struct {
-	CommentID string `validate:"required"`
-	VoteType  string `validate:"required" oneof:"upvote downvote"`
-}
-
-func (r *VoteRequest) Validate() error {
-	if err := validator.Validate.Struct(r); err != nil {
-		return toddlerr.FromValidationErrors(err)
-	}
-
-	return nil
-}
-
-type VoteResponse struct {
-	Upvote   int
-	Downvote int
 }

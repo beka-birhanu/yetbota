@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package content.feed.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/beka-birhanu/yetbota/common/proto/generated/go/content/feed/v1;v1";
+
+enum PhotoResolution {
+  PHOTO_RESOLUTION_UNSPECIFIED = 0;
+  PHOTO_RESOLUTION_ORIGINAL = 1;
+  PHOTO_RESOLUTION_MOBILE = 2;
+  PHOTO_RESOLUTION_WEB = 3;
+}
+
+message OrderedPhoto {
+  string photo = 1;
+  string id = 2;
+  int32 position = 3;
+}
+
+message Coordinate {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message Post {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  int32 likes = 4;
+  int32 dislikes = 5;
+  int32 comments = 6;
+  string user_id = 7;
+  repeated string tags = 8;
+  bool is_question = 9;
+  repeated OrderedPhoto photos = 10;
+  Coordinate location = 11;
+  string address = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
+
+message ListRequest {
+  string cursor = 1;
+  PhotoResolution resolution = 2;
+  int32 limit = 3;
+}
+
+message ListResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+  ListResponseData data = 4;
+}
+
+message ListResponseData {
+  repeated Post posts = 1;
+  string cursor = 2;
+}
+
+message MarkAsSeenRequest {
+  repeated string post_ids = 1;
+}
+
+message MarkAsSeenResponse {
+  string code = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+service FeedService {
+  rpc List(ListRequest) returns (ListResponse);
+  rpc MarkAsSeen(MarkAsSeenRequest) returns (MarkAsSeenResponse);
+}

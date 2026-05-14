@@ -26,9 +26,12 @@ func decodeReadReq(_ context.Context, req any) (any, error) {
 
 func decodeListReq(_ context.Context, req any) (any, error) {
 	in := req.(*pb.ListRequest)
+
 	return &commentSvc.ListRequest{
 		PostID:    in.GetPostId(),
 		CommentID: in.GetCommentId(),
+		Page:      int(in.GetPage()),
+		PageSize:  int(in.GetPageSize()),
 	}, nil
 }
 
@@ -36,13 +39,5 @@ func decodeDeleteReq(_ context.Context, req any) (any, error) {
 	in := req.(*pb.DeleteRequest)
 	return &commentSvc.DeleteRequest{
 		ID: in.GetId(),
-	}, nil
-}
-
-func decodeVoteReq(_ context.Context, req any) (any, error) {
-	in := req.(*pb.VoteRequest)
-	return &commentSvc.VoteRequest{
-		CommentID: in.GetCommentId(),
-		VoteType:  mapCommentVoteTypeFromProto(in.GetVoteType()),
 	}, nil
 }

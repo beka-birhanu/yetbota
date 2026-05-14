@@ -13,7 +13,6 @@ import (
 	domainComment "github.com/beka-birhanu/yetbota/content-service/internal/domain/comment"
 )
 
-
 type repository struct {
 	db *sql.DB
 }
@@ -56,24 +55,55 @@ func (r *repository) Read(ctx context.Context, id string) (*dbmodels.Comment, er
 }
 
 func (r *repository) List(ctx context.Context, opts *domainComment.Options) (dbmodels.CommentSlice, error) {
-	mods := []qm.QueryMod{}
-
-	if opts != nil {
-		if opts.PostID != "" {
-			mods = append(mods, dbmodels.CommentWhere.PostID.EQ(opts.PostID))
-		}
-		if opts.CommentID != "" {
-			mods = append(mods, dbmodels.CommentWhere.CommentID.EQ(null.StringFrom(opts.CommentID)))
-		}
-	}
-
+	mods := filterMods(opts)
 	mods = append(mods, qm.OrderBy(dbmodels.CommentColumns.CreatedAt+" DESC"))
+	mods = append(mods, paginationMods(opts)...)
 
 	result, err := dbmodels.Comments(mods...).All(ctx, r.db)
 	if err != nil {
 		return nil, toddlerr.FromDBError(err, dbmodels.TableNames.Comments)
 	}
 	return result, nil
+}
+
+func (r *repository) Count(ctx context.Context, opts *domainComment.Options) (int64, error) {
+	count, err := dbmodels.Comments(filterMods(opts)...).Count(ctx, r.db)
+	if err != nil {
+		return 0, toddlerr.FromDBError(err, dbmodels.TableNames.Comments)
+	}
+	return count, nil
+}
+
+func filterMods(opts *domainComment.Options) []qm.QueryMod {
+	var mods []qm.QueryMod
+	if opts == nil {
+		return mods
+	}
+	if opts.PostID != "" {
+		mods = append(mods, dbmodels.CommentWhere.PostID.EQ(opts.PostID))
+	}
+	if opts.CommentID != "" {
+		mods = append(mods, dbmodels.CommentWhere.CommentID.EQ(null.StringFrom(opts.CommentID)))
+	}
+	return mods
+}
+
+func paginationMods(opts *domainComment.Options) []qm.QueryMod {
+	if opts == nil {
+		return nil
+	}
+	pageSize := opts.PageSize
+	if pageSize <= 0 || pageSize > 100 {
+		pageSize = 20
+	}
+	page := opts.Page
+	if page <= 0 {
+		page = 1
+	}
+	return []qm.QueryMod{
+		qm.Limit(pageSize),
+		qm.Offset((page - 1) * pageSize),
+	}
 }
 
 func (r *repository) Delete(ctx context.Context, tx *sql.Tx, id string) error {
@@ -85,70 +115,6 @@ func (r *repository) Delete(ctx context.Context, tx *sql.Tx, id string) error {
 	_, err := c.Delete(ctx, exec)
 	if err != nil {
 		return toddlerr.FromDBError(err, dbmodels.TableNames.Comments)
-	}
-	return nil
-}
-
-func (r *repository) GetVote(ctx context.Context, userID, commentID string) (*dbmodels.CommentVote, error) {
-	var v dbmodels.CommentVote
-	err := r.db.QueryRowContext(ctx,
-		`SELECT user_id, comment_id, vote_type, created_at FROM comment_votes WHERE user_id = $1 AND comment_id = $2`,
-		userID, commentID,
-	).Scan(&v.UserID, &v.CommentID, &v.VoteType, &v.CreatedAt)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, toddlerr.FromDBError(err, dbmodels.TableNames.CommentVotes)
-	}
-	return &v, nil
-}
-
-func (r *repository) AddVote(ctx context.Context, tx *sql.Tx, entity *dbmodels.CommentVote) error {
-	var exec boil.ContextExecutor = r.db
-	if tx != nil {
-		exec = tx
-	}
-	_, err := exec.ExecContext(ctx,
-		`INSERT INTO comment_votes (user_id, comment_id, vote_type) VALUES ($1, $2, $3)`,
-		entity.UserID, entity.CommentID, entity.VoteType,
-	)
-	if err != nil {
-		return toddlerr.FromDBError(err, dbmodels.TableNames.CommentVotes)
-	}
-	return nil
-}
-
-func (r *repository) UpdateVote(ctx context.Context, tx *sql.Tx, entity *dbmodels.CommentVote) error {
-	var exec boil.ContextExecutor = r.db
-	if tx != nil {
-		exec = tx
-	}
-	_, err := exec.ExecContext(ctx,
-		`UPDATE comment_votes SET vote_type = $1 WHERE user_id = $2 AND comment_id = $3`,
-		entity.VoteType, entity.UserID, entity.CommentID,
-	)
-	if err != nil {
-		return toddlerr.FromDBError(err, dbmodels.TableNames.CommentVotes)
-	}
-	return nil
-}
-
-func (r *repository) UpdateCounts(ctx context.Context, tx *sql.Tx, id string, upvoteDelta, downvoteDelta, expectedUpvote, expectedDownvote int) error {
-	var exec boil.ContextExecutor = r.db
-	if tx != nil {
-		exec = tx
-	}
-	result, err := exec.ExecContext(ctx,
-		`UPDATE comments SET upvote = upvote + $1, downvote = downvote + $2 WHERE id = $3 AND upvote = $4 AND downvote = $5`,
-		upvoteDelta, downvoteDelta, id, expectedUpvote, expectedDownvote,
-	)
-	if err != nil {
-		return toddlerr.FromDBError(err, dbmodels.TableNames.Comments)
-	}
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
-		return domainComment.ErrConflict
 	}
 	return nil
 }

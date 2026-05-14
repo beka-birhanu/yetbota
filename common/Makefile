@@ -29,6 +29,7 @@ CONTENT_COMMENT_PROTO_DIR := $(PROTO_DIR)/content/comment/$(VERSION)
 AI_ASSISTANT_PROTO_DIR := $(PROTO_DIR)/ai/assistant/$(VERSION)
 AI_SCREENING_PROTO_DIR := $(PROTO_DIR)/ai/screening/$(VERSION)
 AI_EVENTS_PROTO_DIR := $(PROTO_DIR)/ai/events/$(VERSION)
+CONTENT_FEED_PROTO_DIR := $(PROTO_DIR)/content/feed/$(VERSION)
 
 .PHONY: gengo-identity-auth gengo-identity-user gengo-identity \
         gengo-content-post gengo-content-comment gengo-content \
@@ -142,6 +143,17 @@ gengo-identity: gengo-identity-auth gengo-identity-user
 gengo-content: gengo-content-post gengo-content-comment
 gengo-ai: gengo-ai-events gengo-ai-assistant gengo-ai-screening
 genpy-ai: genpy-ai-events genpy-ai-assistant genpy-ai-screening
+gengo-content: gengo-content-post gengo-content-comment
+gengo-content-feed:
+	@echo " > Generate content/feed/$(VERSION)/feed.proto"
+	@mkdir -p $(OUT_DIR)
+	@protoc --proto_path=$(PROTO_DIR) \
+		--go_out=$(OUT_DIR) \
+		--go-grpc_out=$(OUT_DIR) \
+		$(PROTOC_GO_OPTS) $(PROTOC_GRPC_OPTS) \
+		$(CONTENT_FEED_PROTO_DIR)/feed.proto
+
+gengo-content: gengo-content-post gengo-content-comment gengo-content-feed
 
 gengo-all: gengo-identity gengo-content gengo-ai
 genpy-all: genpy-ai

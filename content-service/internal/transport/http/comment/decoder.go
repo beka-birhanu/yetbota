@@ -66,23 +66,6 @@ func decodeCommentDeleteHTTP(ctx context.Context, r *http.Request) (any, error) 
 	return req, nil
 }
 
-func decodeCommentVoteHTTP(ctx context.Context, r *http.Request) (any, error) {
-	var in struct {
-		VoteType string `json:"vote_type"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-		return nil, badRequest("invalid json", err)
-	}
-	req := &commentSvc.VoteRequest{
-		CommentID: r.PathValue("id"),
-		VoteType:  strings.ToLower(strings.TrimSpace(in.VoteType)),
-	}
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	setCtxRequest(ctx, req)
-	return req, nil
-}
 
 func setCtxRequest(ctx context.Context, req any) {
 	data := ctx.Value(ctxYB.AppSession)
@@ -101,4 +84,3 @@ func badRequest(publicMsg string, err error) error {
 		ServiceMessage:    err.Error(),
 	}
 }
-

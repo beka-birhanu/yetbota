@@ -2,7 +2,6 @@ package comment
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/aarondl/null/v8"
@@ -14,9 +13,8 @@ import (
 	ctxRP "github.com/beka-birhanu/yetbota/content-service/internal/domain/context"
 	repository "github.com/beka-birhanu/yetbota/content-service/internal/services/repository"
 	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
 )
-
-const maxOptLockRetries = 3
 
 func (s *svc) Add(ctx context.Context, ctxSess *ctxRP.Context, req *AddRequest) (*AddResponse, error) {
 	if err := req.Validate(); err != nil {
@@ -25,6 +23,12 @@ func (s *svc) Add(ctx context.Context, ctxSess *ctxRP.Context, req *AddRequest) 
 	}
 
 	if err := utils.AllowAccess(ctxSess); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	post, err := s.postRepo.Read(ctx, req.PostID)
+	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
@@ -38,7 +42,28 @@ func (s *svc) Add(ctx context.Context, ctxSess *ctxRP.Context, req *AddRequest) 
 		IsAnswer:  req.IsAnswer,
 	}
 
-	if err := s.commentRepo.Add(ctx, nil, comment); err != nil {
+	tx, err := repository.BeginNewTx(ctx)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if err = s.commentRepo.Add(ctx, tx, comment); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err = s.postRepo.UpdateCommentCount(ctx, tx, req.PostID, 1, post.CommentCount); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err = repository.CommitTx(tx); err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
@@ -77,16 +102,39 @@ func (s *svc) List(ctx context.Context, ctxSess *ctxRP.Context, req *ListRequest
 		return nil, err
 	}
 
-	comments, err := s.commentRepo.List(ctx, &domainComment.Options{
+	opts := &domainComment.Options{
 		PostID:    req.PostID,
 		CommentID: req.CommentID,
+		Page:      req.Page,
+		PageSize:  req.PageSize,
+	}
+
+	errGrp, egCtx := errgroup.WithContext(ctx)
+	var comments dbmodels.CommentSlice
+	var total int64
+
+	errGrp.Go(func() error {
+		var err error
+		comments, err = s.commentRepo.List(egCtx, opts)
+		return err
 	})
-	if err != nil {
+	errGrp.Go(func() error {
+		var err error
+		total, err = s.commentRepo.Count(egCtx, opts)
+		return err
+	})
+
+	if err := errGrp.Wait(); err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
 
-	return &ListResponse{Comments: comments}, nil
+	return &ListResponse{
+		Comments: comments,
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, nil
 }
 
 func (s *svc) Delete(ctx context.Context, ctxSess *ctxRP.Context, req *DeleteRequest) error {
@@ -117,109 +165,32 @@ func (s *svc) Delete(ctx context.Context, ctxSess *ctxRP.Context, req *DeleteReq
 		return err
 	}
 
-	if err := s.commentRepo.Delete(ctx, nil, req.ID); err != nil {
+	post, err := s.postRepo.Read(ctx, comment.PostID)
+	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return err
 	}
 
-	return nil
-}
-
-func (s *svc) Vote(ctx context.Context, ctxSess *ctxRP.Context, req *VoteRequest) (*VoteResponse, error) {
-	if err := req.Validate(); err != nil {
-		ctxSess.SetErrorMessage(err.Error())
-		return nil, err
-	}
-
-	if err := utils.AllowAccess(ctxSess); err != nil {
-		ctxSess.SetErrorMessage(err.Error())
-		return nil, err
-	}
-
-	existingVote, err := s.commentRepo.GetVote(ctx, ctxSess.UserSession.UserID, req.CommentID)
+	tx, err := repository.BeginNewTx(ctx)
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
-		return nil, err
+		return err
 	}
-
-	if existingVote != nil && existingVote.VoteType == req.VoteType {
-		comment, err := s.commentRepo.Read(ctx, req.CommentID)
-		if err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-		return &VoteResponse{Upvote: comment.Upvote, Downvote: comment.Downvote}, nil
-	}
-
-	voteEntity := &dbmodels.CommentVote{
-		UserID:    ctxSess.UserSession.UserID,
-		CommentID: req.CommentID,
-		VoteType:  req.VoteType,
-	}
-
-	for range maxOptLockRetries {
-		comment, err := s.commentRepo.Read(ctx, req.CommentID)
-		if err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		var upvoteDelta, downvoteDelta int
-		switch req.VoteType {
-		case dbmodels.CommentVoteTypeUpvote:
-			upvoteDelta = 1
-			if existingVote != nil {
-				downvoteDelta = -1
-			}
-		case dbmodels.CommentVoteTypeDownvote:
-			downvoteDelta = 1
-			if existingVote != nil {
-				upvoteDelta = -1
-			}
-		}
-
-		tx, err := repository.BeginNewTx(ctx)
-		if err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		if existingVote == nil {
-			err = s.commentRepo.AddVote(ctx, tx, voteEntity)
-		} else {
-			err = s.commentRepo.UpdateVote(ctx, tx, voteEntity)
-		}
+	defer func() {
 		if err != nil {
 			_ = tx.Rollback()
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
 		}
+	}()
 
-		err = s.commentRepo.UpdateCounts(ctx, tx, req.CommentID, upvoteDelta, downvoteDelta, comment.Upvote, comment.Downvote)
-		if errors.Is(err, domainComment.ErrConflict) {
-			_ = tx.Rollback()
-			continue
-		}
-		if err != nil {
-			_ = tx.Rollback()
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		if err = repository.CommitTx(tx); err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		return &VoteResponse{Upvote: comment.Upvote + upvoteDelta, Downvote: comment.Downvote + downvoteDelta}, nil
+	if err = s.commentRepo.Delete(ctx, tx, req.ID); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return err
 	}
 
-	err = &toddlerr.Error{
-		PublicStatusCode:  status.Conflict,
-		ServiceStatusCode: status.Conflict,
-		PublicMessage:     "too many concurrent updates, please try again",
-		ServiceMessage:    "max vote retries exceeded for comment " + req.CommentID,
+	if err = s.postRepo.UpdateCommentCount(ctx, tx, comment.PostID, -1, post.CommentCount); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return err
 	}
-	ctxSess.SetErrorMessage(err.Error())
-	return nil, err
+
+	return repository.CommitTx(tx)
 }

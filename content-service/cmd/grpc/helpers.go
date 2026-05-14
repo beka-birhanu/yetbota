@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -10,6 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/beka-birhanu/yetbota/content-service/drivers/constants"
+	logger "github.com/beka-birhanu/yetbota/content-service/drivers/logger"
 	domainAuth "github.com/beka-birhanu/yetbota/content-service/internal/domain/auth"
 	ctxYB "github.com/beka-birhanu/yetbota/content-service/internal/domain/context"
 	"github.com/google/uuid"
@@ -84,6 +86,41 @@ func makeStreamServerInterceptor(sessionManager domainAuth.SessionManager) grpc.
 		wrapped := newStreamContextWrapper(stream)
 		wrapped.SetContext(newCtx)
 		return handler(srv, wrapped)
+	}
+}
+
+func makeLoggingInterceptor() grpc.UnaryServerInterceptor {
+	log := logger.Default()
+	return func(
+		ctx context.Context,
+		req any,
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (any, error) {
+		start := time.Now()
+		logCtx := logger.ExtractCtx(ctx)
+		logCtx.ReqMethod = info.FullMethod
+		ctx = logger.InjectCtx(ctx, logCtx)
+
+		log.Info(ctx, "grpc request")
+
+		resp, err := handler(ctx, req)
+
+		elapsed := time.Since(start)
+		if err != nil {
+			st, _ := status.FromError(err)
+			log.Error(ctx, "grpc response",
+				logger.Field{Key: "grpc_code", Val: st.Code().String()},
+				logger.Field{Key: "duration_ms", Val: elapsed.Milliseconds()},
+				logger.Field{Key: "error", Val: err.Error()},
+			)
+		} else {
+			log.Info(ctx, "grpc response",
+				logger.Field{Key: "grpc_code", Val: codes.OK.String()},
+				logger.Field{Key: "duration_ms", Val: elapsed.Milliseconds()},
+			)
+		}
+		return resp, err
 	}
 }
 

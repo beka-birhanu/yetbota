@@ -51,19 +51,6 @@ func makeCacheKey(cols boil.Columns, nzDefaults []string) string {
 	return str
 }
 
-// Enum values for CommentVoteType
-const (
-	CommentVoteTypeUpvote   string = "upvote"
-	CommentVoteTypeDownvote string = "downvote"
-)
-
-func AllCommentVoteType() []string {
-	return []string{
-		CommentVoteTypeUpvote,
-		CommentVoteTypeDownvote,
-	}
-}
-
 // Enum values for PhotoBucket
 const (
 	PhotoBucketS3  string = "S3"

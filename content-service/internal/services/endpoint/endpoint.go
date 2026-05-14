@@ -6,6 +6,7 @@ import (
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/validator"
 	commentSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/comment"
+	feedSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/feed"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 )
 
@@ -14,18 +15,21 @@ type Endpoints struct {
 	PostRead   endpoint.Endpoint
 	PostUpdate endpoint.Endpoint
 	PostVote   endpoint.Endpoint
-	PostList endpoint.Endpoint
+	PostList   endpoint.Endpoint
 
 	CommentAdd    endpoint.Endpoint
 	CommentRead   endpoint.Endpoint
 	CommentList   endpoint.Endpoint
 	CommentDelete endpoint.Endpoint
-	CommentVote   endpoint.Endpoint
+
+	FeedGet        endpoint.Endpoint
+	FeedMarkViewed endpoint.Endpoint
 }
 
 type Config struct {
 	PostService    postSvc.Service    `validate:"required"`
 	CommentService commentSvc.Service `validate:"required"`
+	FeedService    feedSvc.Service    `validate:"required"`
 }
 
 func (c *Config) Validate() error {
@@ -44,12 +48,14 @@ func NewEndpoints(c *Config) (*Endpoints, error) {
 		PostRead:   makePostReadEndpoint(c.PostService),
 		PostUpdate: makePostUpdateEndpoint(c.PostService),
 		PostVote:   makePostVoteEndpoint(c.PostService),
-		PostList: makePostListEndpoint(c.PostService),
+		PostList:   makePostListEndpoint(c.PostService),
 
 		CommentAdd:    makeCommentAddEndpoint(c.CommentService),
 		CommentRead:   makeCommentReadEndpoint(c.CommentService),
 		CommentList:   makeCommentListEndpoint(c.CommentService),
 		CommentDelete: makeCommentDeleteEndpoint(c.CommentService),
-		CommentVote:   makeCommentVoteEndpoint(c.CommentService),
+
+		FeedGet:        makeFeedGetEndpoint(c.FeedService),
+		FeedMarkViewed: makeFeedMarkViewedEndpoint(c.FeedService),
 	}, nil
 }

@@ -11,6 +11,14 @@ type Configs struct {
 	Otp      *Otp      `yaml:"otp" mapstructure:"otp" validate:"required"`
 	Jwt      *Jwt      `yaml:"jwt" mapstructure:"jwt" validate:"required"`
 	AWS      *AWS      `yaml:"aws" mapstructure:"aws" validate:"required"`
+	Temporal *Temporal `yaml:"temporal" mapstructure:"temporal" validate:"required"`
+	Feed     *Feed     `yaml:"feed" mapstructure:"feed" validate:"required"`
+	Neo4j    *Neo4j    `yaml:"neo4j" mapstructure:"neo4j" validate:"required"`
+}
+
+type Temporal struct {
+	Host      string `yaml:"host"      mapstructure:"host"      validate:"required"`
+	Namespace string `yaml:"namespace" mapstructure:"namespace" validate:"required"`
 }
 
 type AWS struct {
@@ -59,12 +67,23 @@ type Postgres struct {
 }
 
 type Redis struct {
-	Address      string `yaml:"address" mapstructure:"address" validate:"required"`
-	Password     string `yaml:"password" mapstructure:"password" validate:"required"`
-	PoolTimeout  string `yaml:"poolTimeout" mapstructure:"poolTimeout" validate:"required"`
-	IdleTimeout  string `yaml:"idleTimeout" mapstructure:"idleTimeout" validate:"required"`
-	ReadTimeout  string `yaml:"readTimeout" mapstructure:"readTimeout" validate:"required"`
-	WriteTimeout string `yaml:"writeTimeout" mapstructure:"writeTimeout" validate:"required"`
+	Address  string `yaml:"address"  mapstructure:"address"  validate:"required"`
+	Password string `yaml:"password" mapstructure:"password" validate:"required"`
+
+	DB           int `yaml:"db"            mapstructure:"db"`
+	PoolSize     int `yaml:"pool_size"     mapstructure:"pool_size"     validate:"required"`
+	MinIdleConns int `yaml:"min_idle_conns" mapstructure:"min_idle_conns"`
+	MaxIdleConns int `yaml:"max_idle_conns" mapstructure:"max_idle_conns" validate:"required"`
+	MaxRetries   int `yaml:"max_retries"   mapstructure:"max_retries"   validate:"required"`
+
+	DialTimeout     int `yaml:"dial_timeout"      mapstructure:"dial_timeout"      validate:"required"`
+	ReadTimeout     int `yaml:"read_timeout"      mapstructure:"read_timeout"      validate:"required"`
+	WriteTimeout    int `yaml:"write_timeout"     mapstructure:"write_timeout"     validate:"required"`
+	PoolTimeout     int `yaml:"pool_timeout"      mapstructure:"pool_timeout"      validate:"required"`
+	ConnMaxIdleTime int `yaml:"conn_max_idle_time" mapstructure:"conn_max_idle_time" validate:"required"`
+	ConnMaxLifetime int `yaml:"conn_max_lifetime" mapstructure:"conn_max_lifetime" validate:"required"`
+
+	TLS bool `yaml:"tls" mapstructure:"tls"`
 }
 
 type Otp struct {
@@ -82,4 +101,27 @@ type Jwt struct {
 type JwtToken struct {
 	Expiration int    `yaml:"expiration" mapstructure:"expiration" validate:"required"`
 	Secret     string `yaml:"secret" mapstructure:"secret" validate:"required"`
+}
+
+type Feed struct {
+	HalfLifeHours    float64 `yaml:"half_life_hours"    mapstructure:"half_life_hours"`
+	FeedSize         int     `yaml:"feed_size"          mapstructure:"feed_size"`
+	ColdStartN       int     `yaml:"cold_start_n"       mapstructure:"cold_start_n"`
+	ScoreChangeDelta float64 `yaml:"score_change_delta" mapstructure:"score_change_delta"`
+	SeedBonus        float64 `yaml:"seed_bonus"          mapstructure:"seed_bonus"`
+	QScale           float64 `yaml:"q_scale"             mapstructure:"q_scale"`
+	Epoch            int64   `yaml:"epoch"               mapstructure:"epoch"`
+	TaskQueue        string  `yaml:"task_queue"         mapstructure:"task_queue"`
+	ScoreTTLHours    float64 `yaml:"score_ttl_hours"    mapstructure:"score_ttl_hours"`
+	StaleLimit       int     `yaml:"stale_limit"        mapstructure:"stale_limit"`
+	RefillThreshold  int     `yaml:"refill_threshold"   mapstructure:"refill_threshold"`
+	FanOutLimit      int     `yaml:"fan_out_limit"      mapstructure:"fan_out_limit"`
+	SeenCacheTTL     int64   `yaml:"seen_cache_ttl"     mapstructure:"seen_cache_ttl"`
+	MinFeedScore     float64 `yaml:"min_feed_score"     mapstructure:"min_feed_score"`
+}
+
+type Neo4j struct {
+	URI      string `yaml:"uri"      mapstructure:"uri"`
+	Username string `yaml:"username" mapstructure:"username"`
+	Password string `yaml:"password" mapstructure:"password"`
 }

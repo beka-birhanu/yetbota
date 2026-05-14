@@ -9,6 +9,8 @@ import (
 	domainPhoto "github.com/beka-birhanu/yetbota/content-service/internal/domain/photo"
 	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	domainPostphoto "github.com/beka-birhanu/yetbota/content-service/internal/domain/postphoto"
+	domainPostvote "github.com/beka-birhanu/yetbota/content-service/internal/domain/postvote"
+	"github.com/beka-birhanu/yetbota/content-service/internal/domain/processors"
 	domainStorage "github.com/beka-birhanu/yetbota/content-service/internal/domain/storage"
 )
 
@@ -22,11 +24,13 @@ type Service interface {
 
 type Config struct {
 	PostRepo      domainPost.Repository      `validate:"required"`
+	PostVoteRepo  domainPostvote.Repository  `validate:"required"`
 	PostPhotoRepo domainPostphoto.Repository `validate:"required"`
 	PhotoRepo     domainPhoto.Repository     `validate:"required"`
 	Bucket        domainStorage.Bucket       `validate:"required"`
 	BucketName    string                     `validate:"required"`
 	BucketRegion  string                     `validate:"required"`
+	Executor      processors.Executor        `validate:"required"`
 }
 
 func (c *Config) Validate() error {
@@ -38,23 +42,28 @@ func (c *Config) Validate() error {
 
 type svc struct {
 	postRepo      domainPost.Repository
+	postVoteRepo  domainPostvote.Repository
 	postPhotoRepo domainPostphoto.Repository
 	photoRepo     domainPhoto.Repository
 	bucket        domainStorage.Bucket
 	bucketName    string
 	bucketRegion  string
+	executor      processors.Executor
 }
 
 func NewService(cfg *Config) (Service, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
+
 	return &svc{
 		postRepo:      cfg.PostRepo,
+		postVoteRepo:  cfg.PostVoteRepo,
 		postPhotoRepo: cfg.PostPhotoRepo,
 		photoRepo:     cfg.PhotoRepo,
 		bucket:        cfg.Bucket,
 		bucketName:    cfg.BucketName,
 		bucketRegion:  cfg.BucketRegion,
+		executor:      cfg.Executor,
 	}, nil
 }

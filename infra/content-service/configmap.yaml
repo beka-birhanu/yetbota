@@ -60,3 +60,6 @@ data:
       uri: ${neo4jURI}
       username: ${neo4jUsername}
       password: ${neo4jPassword}
+    temporal:
+      host: temporal.yetbota-infra.svc.cluster.local:7233
+      namespace: default

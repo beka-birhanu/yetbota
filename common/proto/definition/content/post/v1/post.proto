@@ -144,10 +144,14 @@ message ListResponse {
   string code = 1;
   bool success = 2;
   string message = 3;
-  repeated Post data = 4;
-  int64 total = 5;
-  int32 page = 6;
-  int32 page_size = 7;
+  ListResponseData data = 4;
+}
+
+message ListResponseData {
+  repeated Post posts = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
 service PostService {

@@ -49,7 +49,7 @@ func RunServer(ctx context.Context, cfg *Config) error {
 			MinTime:             cfg.KeepaliveMinTime,
 			PermitWithoutStream: cfg.PermitWithoutStream,
 		}),
-		grpc.UnaryInterceptor(makeUnaryServerInterceptor(cfg.SessionManager)),
+		grpc.ChainUnaryInterceptor(makeLoggingInterceptor(), makeUnaryServerInterceptor(cfg.SessionManager)),
 		grpc.StreamInterceptor(makeStreamServerInterceptor(cfg.SessionManager)),
 	)
 

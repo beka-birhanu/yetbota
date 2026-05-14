@@ -50,10 +50,6 @@ func (r *repository) AddBulk(ctx context.Context, tx *sql.Tx, entities dbmodels.
 func (r *repository) List(ctx context.Context, opts *postphoto.Options, sort *postphoto.SortOptions) (dbmodels.PostPhotoSlice, error) {
 	mods := buildQueryMods(opts)
 
-	if opts != nil && opts.PostID != "" {
-		mods = append(mods, dbmodels.PostPhotoWhere.PostID.EQ(opts.PostID))
-	}
-
 	if sort != nil {
 		mods = append(mods, qm.OrderBy(fmt.Sprintf("%s %s", string(sort.Field), string(sort.Direction))))
 	}

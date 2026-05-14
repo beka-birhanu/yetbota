@@ -21,16 +21,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func buildPublicS3URL(bucketName, region, key string) string {
-	if key == "" {
-		return ""
-	}
-	escaped := url.PathEscape(key)
-	// Keep path separators if keys ever include them.
-	escaped = strings.ReplaceAll(escaped, "%2F", "/")
-	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, escaped)
-}
-
 func objectKeyFromURL(keyOrURL string) string {
 	if keyOrURL == "" {
 		return ""
@@ -40,7 +30,6 @@ func objectKeyFromURL(keyOrURL string) string {
 	}
 	u, err := url.Parse(keyOrURL)
 	if err != nil {
-		// Best-effort fallback: treat as key.
 		return keyOrURL
 	}
 	return strings.TrimPrefix(u.Path, "/")
@@ -87,14 +76,14 @@ func (s *svc) uploadPhotos(ctx context.Context, postID string, photos []*Ordered
 				return err
 			}
 
-			processed, mime, err := utils.ProcessImage(photo.Photo)
+			mime, err := utils.ImageMimeType(photo.Photo)
 			if err != nil {
 				return err
 			}
 
 			uploadResp, err := s.bucket.UploadFile(ctx, &storage.UploadRequest{
 				BucketName:  s.bucketName,
-				FileInByte:  processed,
+				FileInByte:  photo.Photo,
 				ContentType: mime,
 			})
 			if err != nil {
@@ -106,7 +95,7 @@ func (s *svc) uploadPhotos(ctx context.Context, postID string, photos []*Ordered
 				ID:             id,
 				BucketProvider: dbmodels.PhotoBucketS3,
 				MimeType:       uploadResp.ContentType,
-				URL:            buildPublicS3URL(s.bucketName, s.bucketRegion, uploadResp.FileName),
+				URL:            fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.bucketName, s.bucketRegion, uploadResp.FileName),
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
 			}
@@ -162,16 +151,10 @@ func (s *svc) assembleOrderedPhoto(ctx context.Context, postPhotos dbmodels.Post
 			}
 		}
 
-		keyOrURL := pickPhotoURL(photo, resolution)
-		url := keyOrURL
-		if url != "" && !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-			// Backwards compatible: if the DB contains a raw object key, return a public S3 URL.
-			url = buildPublicS3URL(s.bucketName, s.bucketRegion, url)
-		}
-
 		orderedPhotos[i] = &OrderedPhoto{
 			ID:       photo.ID,
-			URL:      url,
+			PostID:   postPhoto.PostID,
+			URL:      pickPhotoURL(photo, resolution),
 			Position: postPhoto.Position,
 		}
 	}

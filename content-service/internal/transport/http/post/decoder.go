@@ -10,8 +10,8 @@ import (
 
 	toddlerr "github.com/beka-birhanu/toddler/error"
 	"github.com/beka-birhanu/toddler/status"
-	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	ctxYB "github.com/beka-birhanu/yetbota/content-service/internal/domain/context"
+	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	postSvc "github.com/beka-birhanu/yetbota/content-service/internal/services/usecase/post"
 )
 

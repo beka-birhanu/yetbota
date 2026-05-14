@@ -127,24 +127,3 @@ func encodeCommentDeleteHTTP(ctx context.Context, w http.ResponseWriter, resp an
 	return json.NewEncoder(w).Encode(env)
 }
 
-type voteData struct {
-	Upvote   int `json:"upvote"`
-	Downvote int `json:"downvote"`
-}
-
-func encodeCommentVoteHTTP(ctx context.Context, w http.ResponseWriter, resp any) error {
-	if te, ok := resp.(*toddlerr.Error); ok {
-		return te
-	}
-	out, ok := resp.(*commentSvc.VoteResponse)
-	if !ok || out == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return json.NewEncoder(w).Encode(shared.Envelope{Success: false, Message: "something went wrong"})
-	}
-	env := shared.Envelope{Success: true, Data: voteData{Upvote: out.Upvote, Downvote: out.Downvote}}
-	setCtxResponse(ctx, env)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	return json.NewEncoder(w).Encode(env)
-}
-

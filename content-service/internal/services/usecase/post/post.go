@@ -2,18 +2,15 @@ package post
 
 import (
 	"context"
-	"errors"
-	"sync"
+	"fmt"
 
 	"github.com/aarondl/null/v8"
-	toddlerr "github.com/beka-birhanu/toddler/error"
-	"github.com/beka-birhanu/toddler/status"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/dbmodels"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/geotypes"
 	"github.com/beka-birhanu/yetbota/content-service/drivers/utils"
 	ctxRP "github.com/beka-birhanu/yetbota/content-service/internal/domain/context"
-	domainPost "github.com/beka-birhanu/yetbota/content-service/internal/domain/post"
 	domainPostphoto "github.com/beka-birhanu/yetbota/content-service/internal/domain/postphoto"
+	"github.com/beka-birhanu/yetbota/content-service/internal/domain/processors"
 	repository "github.com/beka-birhanu/yetbota/content-service/internal/services/repository"
 	"github.com/twpayne/go-geom"
 	"golang.org/x/sync/errgroup"
@@ -87,6 +84,12 @@ func (s *svc) Add(ctx context.Context, ctxSess *ctxRP.Context, req *AddRequest) 
 		return nil, err
 	}
 
+	if err = s.executor.TriggerNewPostWorkflow(ctx, processors.NewPostWorkflowInput{
+		PostID: post.ID,
+	}); err != nil {
+		fmt.Printf("Unable to trigger new post workflow: %s\n", err)
+	}
+
 	return &AddResponse{Post: post, Photos: orderedPhotos}, nil
 }
 
@@ -103,7 +106,7 @@ func (s *svc) Read(ctx context.Context, ctxSess *ctxRP.Context, req *ReadRequest
 	}
 
 	photos, err := s.postPhotoRepo.List(ctx, &domainPostphoto.Options{
-		PostID:    post.ID,
+		PostIDs:   []string{post.ID},
 		LoadPhoto: true,
 	}, &domainPostphoto.SortOptions{
 		Field:     domainPostphoto.SortFieldPosition,
@@ -157,7 +160,7 @@ func (s *svc) Update(ctx context.Context, ctxSess *ctxRP.Context, req *UpdateReq
 		}()
 
 		existing, listErr := s.postPhotoRepo.List(ctx, &domainPostphoto.Options{
-			PostID:    post.ID,
+			PostIDs:   []string{post.ID},
 			LoadPhoto: true,
 		}, nil)
 		if listErr != nil {
@@ -256,7 +259,10 @@ func (s *svc) Update(ctx context.Context, ctxSess *ctxRP.Context, req *UpdateReq
 		for _, url := range oldPhotoURLs {
 			oldPhotos = append(oldPhotos, &dbmodels.Photo{URL: url})
 		}
-		_ = s.deleteUploads(ctx, oldPhotos)
+		err = s.deleteUploads(ctx, oldPhotos)
+		if err != nil {
+			ctxSess.SetErrorMessage(err.Error())
+		}
 	}
 
 	return &UpdateResponse{Post: post}, nil
@@ -268,43 +274,51 @@ func (s *svc) List(ctx context.Context, ctxSess *ctxRP.Context, req *ListRequest
 		return nil, err
 	}
 
-	posts, total, err := s.postRepo.List(ctx, &req.ListOptions)
+	errGrp, egCtx := errgroup.WithContext(ctx)
+	var posts []*dbmodels.Post
+	var total int64
+
+	errGrp.Go(func() error {
+		var err error
+		posts, err = s.postRepo.List(egCtx, &req.ListOptions)
+		return err
+	})
+
+	errGrp.Go(func() error {
+		var err error
+		total, err = s.postRepo.Count(egCtx, &req.ListOptions)
+		return err
+	})
+
+	if err := errGrp.Wait(); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+	postIDs := make([]string, len(posts))
+	for i, post := range posts {
+		postIDs[i] = post.ID
+	}
+
+	photos, err := s.postPhotoRepo.List(ctx, &domainPostphoto.Options{
+		LoadPhoto: true,
+		PostIDs:   postIDs,
+	}, &domainPostphoto.SortOptions{
+		Field:     domainPostphoto.SortFieldPosition,
+		Direction: domainPostphoto.SortDirectionAsc,
+	})
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
 
-	photosByPost := make(map[string][]*OrderedPhoto, len(posts))
-	eg, egCtx := errgroup.WithContext(ctx)
-	var mu sync.Mutex
-
-	for _, p := range posts {
-		postID := p.ID
-		eg.Go(func() error {
-			ppList, err := s.postPhotoRepo.List(egCtx, &domainPostphoto.Options{
-				PostID:    postID,
-				LoadPhoto: true,
-			}, &domainPostphoto.SortOptions{
-				Field:     domainPostphoto.SortFieldPosition,
-				Direction: domainPostphoto.SortDirectionAsc,
-			})
-			if err != nil {
-				return err
-			}
-			ordered, err := s.assembleOrderedPhoto(egCtx, ppList, req.PhotoResolution)
-			if err != nil {
-				return err
-			}
-			mu.Lock()
-			photosByPost[postID] = ordered
-			mu.Unlock()
-			return nil
-		})
-	}
-
-	if err := eg.Wait(); err != nil {
+	ordered, err := s.assembleOrderedPhoto(ctx, photos, req.PhotoResolution)
+	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
+	}
+	photosByPost := make(map[string][]*OrderedPhoto, len(posts))
+	for _, op := range ordered {
+		photosByPost[op.PostID] = ordered
 	}
 
 	return &ListResponse{
@@ -327,91 +341,90 @@ func (s *svc) Vote(ctx context.Context, ctxSess *ctxRP.Context, req *PostVoteReq
 		return nil, err
 	}
 
-	existingVote, err := s.postRepo.GetVote(ctx, ctxSess.UserSession.UserID, req.PostID)
+	post, err := s.postRepo.Read(ctx, req.PostID)
 	if err != nil {
 		ctxSess.SetErrorMessage(err.Error())
 		return nil, err
 	}
 
-	if existingVote != nil && existingVote.VoteType == req.VoteType {
-		post, err := s.postRepo.Read(ctx, req.PostID)
+	exists, err := s.postVoteRepo.Exists(ctx, ctxSess.UserSession.UserID, req.PostID)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+	var vote *dbmodels.PostVote
+	if exists {
+		vote, err = s.postVoteRepo.Get(ctx, ctxSess.UserSession.UserID, req.PostID)
 		if err != nil {
 			ctxSess.SetErrorMessage(err.Error())
 			return nil, err
 		}
+	}
+
+	if exists && vote.VoteType == req.VoteType {
 		return &PostVoteResponse{Likes: post.Likes, Dislikes: post.Dislikes}, nil
 	}
 
-	voteEntity := &dbmodels.PostVote{
-		UserID:   ctxSess.UserSession.UserID,
-		PostID:   req.PostID,
-		VoteType: req.VoteType,
+	var likesDelta, dislikesDelta int
+	switch req.VoteType {
+	case dbmodels.PostVoteTypeLike:
+		likesDelta = 1
+		if exists {
+			vote.VoteType = dbmodels.PostVoteTypeDislike
+			dislikesDelta = -1
+		}
+	case dbmodels.PostVoteTypeDislike:
+		dislikesDelta = 1
+		if exists {
+			vote.VoteType = dbmodels.PostVoteTypeDislike
+			likesDelta = -1
+		}
 	}
 
-	const maxRetries = 3
-	for range maxRetries {
-		post, err := s.postRepo.Read(ctx, req.PostID)
-		if err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		var likesDelta, dislikesDelta int
-		switch req.VoteType {
-		case dbmodels.PostVoteTypeLike:
-			likesDelta = 1
-			if existingVote != nil {
-				dislikesDelta = -1
-			}
-		case dbmodels.PostVoteTypeDislike:
-			dislikesDelta = 1
-			if existingVote != nil {
-				likesDelta = -1
-			}
-		}
-
-		tx, err := repository.BeginNewTx(ctx)
-		if err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		if existingVote == nil {
-			err = s.postRepo.AddVote(ctx, tx, voteEntity)
-		} else {
-			err = s.postRepo.UpdateVote(ctx, tx, voteEntity)
-		}
-		if err != nil {
-			_ = tx.Rollback()
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		err = s.postRepo.UpdateCounts(ctx, tx, req.PostID, likesDelta, dislikesDelta, post.Likes, post.Dislikes)
-		if errors.Is(err, domainPost.ErrConflict) {
-			_ = tx.Rollback()
-			continue
-		}
-		if err != nil {
-			_ = tx.Rollback()
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		if err = repository.CommitTx(tx); err != nil {
-			ctxSess.SetErrorMessage(err.Error())
-			return nil, err
-		}
-
-		return &PostVoteResponse{Likes: post.Likes + likesDelta, Dislikes: post.Dislikes + dislikesDelta}, nil
+	tx, err := repository.BeginNewTx(ctx)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
 	}
 
-	err = &toddlerr.Error{
-		PublicStatusCode:  status.Conflict,
-		ServiceStatusCode: status.Conflict,
-		PublicMessage:     "too many concurrent updates, please try again",
-		ServiceMessage:    "max vote retries exceeded for post " + req.PostID,
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if exists {
+		err = s.postVoteRepo.Update(ctx, tx, vote)
+	} else {
+		err = s.postVoteRepo.Add(ctx, tx, &dbmodels.PostVote{
+			UserID:   ctxSess.UserSession.UserID,
+			PostID:   req.PostID,
+			VoteType: req.VoteType,
+		})
 	}
-	ctxSess.SetErrorMessage(err.Error())
-	return nil, err
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	err = s.postVoteRepo.UpdateCounts(ctx, tx, req.PostID, likesDelta, dislikesDelta, post.Likes, post.Dislikes)
+	if err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err = repository.CommitTx(tx); err != nil {
+		ctxSess.SetErrorMessage(err.Error())
+		return nil, err
+	}
+
+	if err = s.executor.TriggerFeedUpdateWorkflow(ctx, processors.FeedUpdateWorkflowInput{
+		PostID:           post.ID,
+		InteractorID:     ctxSess.UserSession.UserID,
+		TriggerEventType: req.VoteType,
+	}); err != nil {
+		fmt.Printf("Unable to trigger feed update workflow: %s\n", err)
+	}
+
+	return &PostVoteResponse{Likes: post.Likes + likesDelta, Dislikes: post.Dislikes + dislikesDelta}, nil
 }

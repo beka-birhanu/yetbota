@@ -16,8 +16,8 @@ psql:
     - "post_photos"
     - "photos"
     - "comments"
-    - "comment_votes"
     - "post_votes"
+    - "user_seen_posts"
 
 aliases:
   tables:

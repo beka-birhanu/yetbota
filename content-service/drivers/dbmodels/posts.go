@@ -111,18 +111,23 @@ type whereHelpertypes_StringArray struct{ field string }
 func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.EQ, x)
 }
+
 func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
+
 func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
+
 func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
+
 func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
+
 func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
@@ -132,18 +137,23 @@ type whereHelpergeotypes_NullPoint struct{ field string }
 func (w whereHelpergeotypes_NullPoint) EQ(x geotypes.NullPoint) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, false, x)
 }
+
 func (w whereHelpergeotypes_NullPoint) NEQ(x geotypes.NullPoint) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, true, x)
 }
+
 func (w whereHelpergeotypes_NullPoint) LT(x geotypes.NullPoint) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
+
 func (w whereHelpergeotypes_NullPoint) LTE(x geotypes.NullPoint) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
+
 func (w whereHelpergeotypes_NullPoint) GT(x geotypes.NullPoint) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
+
 func (w whereHelpergeotypes_NullPoint) GTE(x geotypes.NullPoint) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
@@ -298,28 +308,38 @@ var (
 	_ = qmhelper.Where
 )
 
-var postAfterSelectMu sync.Mutex
-var postAfterSelectHooks []PostHook
+var (
+	postAfterSelectMu    sync.Mutex
+	postAfterSelectHooks []PostHook
+)
 
-var postBeforeInsertMu sync.Mutex
-var postBeforeInsertHooks []PostHook
-var postAfterInsertMu sync.Mutex
-var postAfterInsertHooks []PostHook
+var (
+	postBeforeInsertMu    sync.Mutex
+	postBeforeInsertHooks []PostHook
+	postAfterInsertMu     sync.Mutex
+	postAfterInsertHooks  []PostHook
+)
 
-var postBeforeUpdateMu sync.Mutex
-var postBeforeUpdateHooks []PostHook
-var postAfterUpdateMu sync.Mutex
-var postAfterUpdateHooks []PostHook
+var (
+	postBeforeUpdateMu    sync.Mutex
+	postBeforeUpdateHooks []PostHook
+	postAfterUpdateMu     sync.Mutex
+	postAfterUpdateHooks  []PostHook
+)
 
-var postBeforeDeleteMu sync.Mutex
-var postBeforeDeleteHooks []PostHook
-var postAfterDeleteMu sync.Mutex
-var postAfterDeleteHooks []PostHook
+var (
+	postBeforeDeleteMu    sync.Mutex
+	postBeforeDeleteHooks []PostHook
+	postAfterDeleteMu     sync.Mutex
+	postAfterDeleteHooks  []PostHook
+)
 
-var postBeforeUpsertMu sync.Mutex
-var postBeforeUpsertHooks []PostHook
-var postAfterUpsertMu sync.Mutex
-var postAfterUpsertHooks []PostHook
+var (
+	postBeforeUpsertMu    sync.Mutex
+	postBeforeUpsertHooks []PostHook
+	postAfterUpsertMu     sync.Mutex
+	postAfterUpsertHooks  []PostHook
+)
 
 // doAfterSelectHooks executes all "after Select" hooks.
 func (o *Post) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {

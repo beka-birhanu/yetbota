@@ -18,8 +18,9 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: write
-    outputs:
-      version: ${{ steps.bump.outputs.version }}
+    concurrency:
+      group: deploy-manifest-update
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,6 +69,8 @@ jobs:
       - name: Update deployment image tag
         run: |
           VERSION="v${{ steps.bump.outputs.version }}"
+          git checkout main
+          git pull --rebase origin main
           sed -i "s|image: .*/ai-service:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/ai-service:${VERSION}|" \
             infra/ai-service/deployment.yaml
           git add infra/ai-service/deployment.yaml

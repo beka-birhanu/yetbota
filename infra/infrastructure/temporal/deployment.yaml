@@ -52,7 +52,7 @@ spec:
             periodSeconds: 10
           resources:
             requests:
-              cpu: 200m
+              cpu: 100m
               memory: 256Mi
             limits:
               cpu: 1000m
@@ -84,6 +84,7 @@ spec:
         app.kubernetes.io/name: temporal-ui
         app.kubernetes.io/part-of: yetbota
     spec:
+      enableServiceLinks: false
       containers:
         - name: temporal-ui
           image: temporalio/ui:latest

@@ -8,6 +8,8 @@ metadata:
     app.kubernetes.io/part-of: yetbota
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: ai-service
@@ -21,6 +23,7 @@ spec:
         prometheus.io/port: "8080"
         prometheus.io/path: /metrics
     spec:
+      enableServiceLinks: false
       imagePullSecrets:
         - name: dockerhub-secret
       containers:
@@ -50,7 +53,7 @@ spec:
             periodSeconds: 10
           resources:
             requests:
-              cpu: 100m
+              cpu: 150m
               memory: 256Mi
             limits:
               cpu: 1000m
